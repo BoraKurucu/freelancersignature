@@ -36,13 +36,10 @@ function UserMenu({ onSignInClick }) {
         className="user-menu-trigger"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
       >
-        {photoURL ? (
-          <img src={photoURL} alt={displayName} className="user-avatar" />
-        ) : (
-          <div className="user-avatar-placeholder">
-            {displayName.charAt(0).toUpperCase()}
-          </div>
-        )}
+        {/* Always use placeholder to avoid broken/unloaded image issues */}
+        <div className="user-avatar-placeholder">
+          {displayName.charAt(0).toUpperCase()}
+        </div>
         <span className="user-name">{displayName}</span>
         {isPremium() && <span className="premium-badge">PRO</span>}
         <svg 

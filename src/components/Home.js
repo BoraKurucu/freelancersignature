@@ -68,7 +68,7 @@ function Home() {
                 <div key={sample.key} className="sample-card">
                   <div className="sample-label">{sample.icon} {sample.label}</div>
                   <div className="sample-preview">
-                    <SignaturePreview signatureData={profile} />
+                    <SignaturePreview signatureData={profile} showWatermark={false} />
                   </div>
                   <Link 
                     to="/builder" 
@@ -218,6 +218,8 @@ function Home() {
             <Link to="/terms">Terms of Service</Link>
             <span className="footer-dot">•</span>
             <Link to="/privacy">Privacy Policy</Link>
+            <span className="footer-dot">•</span>
+            <Link to="/cookies">Cookie Policy</Link>
           </div>
           <p className="footer-copyright">© 2025 FreelancerSignature. All rights reserved.</p>
         </div>
