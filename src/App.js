@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import Home from './components/Home';
 import SignatureBuilder from './components/SignatureBuilder';
 import MySignatures from './components/MySignatures';
+import PremiumUpgrade from './components/PremiumUpgrade';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import './App.css';
@@ -17,6 +18,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/builder" element={<SignatureBuilder />} />
             <Route path="/my-signatures" element={<MySignatures />} />
+            <Route path="/premium" element={<PremiumUpgrade />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
           </Routes>

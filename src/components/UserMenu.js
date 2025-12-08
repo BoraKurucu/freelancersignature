@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './UserMenu.css';
 
 function UserMenu({ onSignInClick }) {
   const { currentUser, logout, isFullyAuthenticated, isPremium } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
     setIsDropdownOpen(false);
+  };
+
+  const handleUpgradeClick = () => {
+    setIsDropdownOpen(false);
+    navigate('/premium');
   };
 
   if (!currentUser) {
@@ -74,7 +80,7 @@ function UserMenu({ onSignInClick }) {
             </Link>
             
             {!isPremium() && (
-              <button className="dropdown-item upgrade">
+              <button className="dropdown-item upgrade" onClick={handleUpgradeClick}>
                 🚀 Upgrade to Premium
               </button>
             )}

@@ -1,0 +1,379 @@
+.premium-upgrade-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40px 20px;
+}
+
+.premium-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Hero Section */
+.premium-hero {
+  text-align: center;
+  margin-bottom: 60px;
+  color: white;
+}
+
+.hero-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.hero-title {
+  font-size: 48px;
+  font-weight: 800;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 20px;
+  opacity: 0.9;
+  margin: 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Pricing Card */
+.pricing-card {
+  background: white;
+  border-radius: 24px;
+  padding: 48px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  margin-bottom: 60px;
+}
+
+.pricing-header {
+  margin-bottom: 32px;
+}
+
+.price {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.currency {
+  font-size: 32px;
+  font-weight: 600;
+  color: #667eea;
+}
+
+.amount {
+  font-size: 72px;
+  font-weight: 800;
+  color: #667eea;
+  line-height: 1;
+}
+
+.period {
+  font-size: 24px;
+  color: #666;
+  font-weight: 500;
+}
+
+.pricing-subtitle {
+  color: #666;
+  font-size: 16px;
+  margin: 0;
+}
+
+.btn-upgrade {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 18px 48px;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  width: 100%;
+  max-width: 400px;
+}
+
+.btn-upgrade:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.btn-upgrade:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-required {
+  margin-top: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+.auth-required a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-required a:hover {
+  text-decoration: underline;
+}
+
+/* Features Section */
+.features-section {
+  margin-bottom: 60px;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 40px;
+}
+
+.premium-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.feature-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.feature-card.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.feature-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.feature-card h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: #333;
+}
+
+.feature-card.active h3 {
+  color: white;
+}
+
+.feature-card p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.feature-card.active p {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Comparison Section */
+.comparison-section {
+  background: white;
+  border-radius: 24px;
+  padding: 48px;
+  margin-bottom: 60px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.comparison-section .section-title {
+  color: #333;
+  margin-bottom: 32px;
+}
+
+.comparison-table {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 1px;
+  background: #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.comparison-header {
+  display: contents;
+}
+
+.comparison-row {
+  display: contents;
+}
+
+.comparison-cell {
+  background: white;
+  padding: 20px;
+  font-size: 16px;
+}
+
+.comparison-header .comparison-cell {
+  background: #f5f5f5;
+  font-weight: 700;
+  text-align: center;
+}
+
+.comparison-cell.feature-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.comparison-cell.free-plan {
+  text-align: center;
+  color: #666;
+}
+
+.comparison-cell.premium-plan {
+  text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+}
+
+/* FAQ Section */
+.faq-section {
+  background: white;
+  border-radius: 24px;
+  padding: 48px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.faq-section .section-title {
+  color: #333;
+  margin-bottom: 32px;
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.faq-item {
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.faq-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.faq-item h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+.faq-item p {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Premium Success State */
+.premium-success {
+  background: white;
+  border-radius: 24px;
+  padding: 60px 48px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.success-icon {
+  font-size: 80px;
+  margin-bottom: 24px;
+}
+
+.premium-success h1 {
+  font-size: 36px;
+  font-weight: 800;
+  color: #333;
+  margin: 0 0 16px 0;
+}
+
+.premium-success > p {
+  font-size: 18px;
+  color: #666;
+  margin: 0 0 40px 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 32px;
+  }
+
+  .hero-subtitle {
+    font-size: 18px;
+  }
+
+  .amount {
+    font-size: 56px;
+  }
+
+  .pricing-card {
+    padding: 32px 24px;
+  }
+
+  .premium-features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-table {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-cell {
+    text-align: left !important;
+  }
+
+  .comparison-header {
+    display: none;
+  }
+
+  .comparison-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+}
