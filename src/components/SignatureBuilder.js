@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import SignaturePreview from './SignaturePreview';
 import UserMenu from './UserMenu';
 import AuthModal from './AuthModal';
 import { saveSignature } from '../services/signatureService';
 import { generateHTMLSignature } from '../utils/signatureGenerator';
+import { downloadSignatureAsPNG, downloadSignatureWithWatermark } from '../utils/signatureDownloader';
 import { templates, sampleProfiles } from '../utils/templates';
 import { useAuth } from '../context/AuthContext';
 import './SignatureBuilder.css';
@@ -52,8 +53,10 @@ function SignatureBuilder() {
   const [signatureData, setSignatureData] = useState(defaultSignatureData);
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authAction, setAuthAction] = useState('save');
+  const previewRef = useRef(null);
 
   // Load profile from navigation state (when coming from Home page)
   useEffect(() => {
@@ -175,6 +178,40 @@ function SignatureBuilder() {
       handleCopy();
     } else if (authAction === 'save') {
       handleSave();
+    } else if (authAction === 'download') {
+      handleDownload();
+    }
+  };
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      // Find the signature preview element
+      const previewContainer = previewRef.current;
+      if (!previewContainer) {
+        throw new Error('Preview container not found');
+      }
+      
+      const signatureElement = previewContainer.querySelector('.signature-preview');
+      if (!signatureElement) {
+        throw new Error('Signature preview element not found');
+      }
+
+      const filename = `${signatureData?.name || 'signature'}.png`;
+      const isUserPremium = isPremium();
+
+      if (isUserPremium) {
+        // Premium users: download PNG without watermark
+        await downloadSignatureAsPNG(signatureElement, filename);
+      } else {
+        // Free/non-logged-in users: download PNG with watermark
+        await downloadSignatureWithWatermark(signatureElement, filename);
+      }
+    } catch (error) {
+      console.error('Error downloading signature:', error);
+      alert('Failed to download signature. Please try again.');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -473,6 +510,17 @@ function SignatureBuilder() {
             <button onClick={handleSave} className="btn btn-secondary">
               {saved ? '✓ Saved!' : '💾 Save'}
             </button>
+            <button 
+              onClick={handleDownload} 
+              className="btn btn-secondary"
+              disabled={downloading}
+            >
+              {downloading 
+                ? '⏳ Downloading...' 
+                : isPremium() 
+                  ? '📥 Download PNG' 
+                  : '📥 Download PNG (Premium to remove watermark)'}
+            </button>
             {!isPremium() && (
               <p className="watermark-notice">
                 ✨ Free signatures include a small "Created with FreelancerSignature" link. 
@@ -487,7 +535,7 @@ function SignatureBuilder() {
             <h2>Live Preview</h2>
             <p>This is how your signature will look</p>
           </div>
-          <div className="preview-container">
+          <div className="preview-container" ref={previewRef}>
             <SignaturePreview signatureData={signatureData} showWatermark={!isPremium()} />
           </div>
         </div>
