@@ -160,12 +160,20 @@ function MySignatures() {
                 />
               </div>
               <div className="signature-card-actions">
-                {isPremium() && (
+                {isPremium() ? (
                   <button
                     onClick={() => handleCopy(signature.data, signature.id)}
                     className="btn-action btn-copy"
                   >
                     {copied === signature.id ? '✓ Copied!' : '📋 Copy HTML'}
+                  </button>
+                ) : (
+                  <button
+                    disabled
+                    className="btn-action btn-copy btn-locked"
+                    title="Premium feature - Upgrade to unlock"
+                  >
+                    🔒 Copy HTML (Premium Only)
                   </button>
                 )}
                 <button
@@ -173,7 +181,11 @@ function MySignatures() {
                   className="btn-action btn-download"
                   disabled={downloading === signature.id}
                 >
-                  {downloading === signature.id ? '⏳ Downloading...' : '📥 Download PNG'}
+                  {downloading === signature.id 
+                    ? '⏳ Downloading...' 
+                    : isPremium() 
+                      ? '📥 Download PNG' 
+                      : '📥 Download PNG with Watermark'}
                 </button>
                 <button
                   onClick={() => handleEdit(signature.data)}

@@ -457,9 +457,19 @@ function SignatureBuilder() {
 
           {/* Actions */}
           <div className="form-actions">
-            <button onClick={handleCopy} className="btn btn-primary">
-              {copied ? '✓ Copied!' : '📋 Copy HTML'}
-            </button>
+            {isPremium() ? (
+              <button onClick={handleCopy} className="btn btn-primary">
+                {copied ? '✓ Copied!' : '📋 Copy HTML'}
+              </button>
+            ) : (
+              <button 
+                disabled 
+                className="btn btn-primary btn-locked"
+                title="Premium feature - Upgrade to unlock"
+              >
+                🔒 Copy HTML (Premium Only)
+              </button>
+            )}
             <button onClick={handleSave} className="btn btn-secondary">
               {saved ? '✓ Saved!' : '💾 Save'}
             </button>
