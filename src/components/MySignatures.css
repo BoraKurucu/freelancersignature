@@ -183,6 +183,18 @@
   background: #5146e5;
 }
 
+.btn-locked {
+  background: #e0e0e0 !important;
+  color: #999999 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+.btn-locked:hover {
+  background: #e0e0e0 !important;
+  transform: none !important;
+}
+
 .btn-download {
   background: #10b981;
   color: white;

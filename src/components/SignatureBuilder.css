@@ -397,6 +397,19 @@
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
+.btn-locked {
+  background: #e0e0e0 !important;
+  color: #999999 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  position: relative;
+}
+
+.btn-locked:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
 .btn-secondary {
   background: #f0f0f0;
   color: #1a1a1a;
