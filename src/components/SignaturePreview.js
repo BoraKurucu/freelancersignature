@@ -2,7 +2,7 @@ import React from 'react';
 import { templates, socialIcons } from '../utils/templates';
 import './SignaturePreview.css';
 
-function SignaturePreview({ signatureData }) {
+function SignaturePreview({ signatureData, showWatermark = true }) {
   const {
     name, email, phone, mobile, website, specialty,
     company, companyScript, tagline, address, photoUrl, logoUrl,
@@ -10,6 +10,16 @@ function SignaturePreview({ signatureData }) {
     socialLinks = {},
     color, template
   } = signatureData;
+  
+  // Watermark component
+  const renderWatermark = () => {
+    if (!showWatermark) return null;
+    return (
+      <div className="signature-watermark">
+        ✨ Created with <a href="https://freelancersignature.web.app" target="_blank" rel="noopener noreferrer">FreelancerSignature</a>
+      </div>
+    );
+  };
 
   const templateConfig = templates[template] || templates.gradientSidebar;
   const layout = templateConfig.layout || 'gradientSidebar';
@@ -85,6 +95,7 @@ function SignaturePreview({ signatureData }) {
             </div>
             {renderSocialIcons('gradient', 24)}
             {renderFreelancerCTA()}
+            {renderWatermark()}
           </div>
         </div>
       </div>
@@ -117,6 +128,7 @@ function SignaturePreview({ signatureData }) {
               {logoUrl && <img src={logoUrl} alt="logo" className="sig-logo-small" />}
             </div>
             {renderFreelancerCTA()}
+            {renderWatermark()}
           </div>
         </div>
       </div>
@@ -143,6 +155,7 @@ function SignaturePreview({ signatureData }) {
               {address && <div>{address.replace(/\n/g, ', ')}</div>}
             </div>
             {renderFreelancerCTA()}
+            {renderWatermark()}
           </div>
         </div>
       </div>
@@ -166,6 +179,7 @@ function SignaturePreview({ signatureData }) {
             </div>
             {renderSocialIcons('simple', 22)}
             {renderFreelancerCTA()}
+            {renderWatermark()}
           </div>
         </div>
       </div>
@@ -196,6 +210,7 @@ function SignaturePreview({ signatureData }) {
           </div>
         </div>
         {renderFreelancerCTA()}
+        {renderWatermark()}
       </div>
     );
   }
@@ -224,6 +239,7 @@ function SignaturePreview({ signatureData }) {
           </div>
         </div>
         {renderFreelancerCTA()}
+        {renderWatermark()}
       </div>
     );
   }
@@ -252,6 +268,7 @@ function SignaturePreview({ signatureData }) {
           {website && <a href={`https://${website}`} style={{ color: accentColor }}>{website}</a>}
         </div>
         {renderFreelancerCTA()}
+        {renderWatermark()}
       </div>
     );
   }
@@ -273,6 +290,7 @@ function SignaturePreview({ signatureData }) {
           </div>
         </div>
         {renderFreelancerCTA()}
+        {renderWatermark()}
       </div>
     );
   }
@@ -287,6 +305,7 @@ function SignaturePreview({ signatureData }) {
       {website && <div>🌐 {website}</div>}
       {renderSocialIcons()}
       {renderFreelancerCTA()}
+      {renderWatermark()}
     </div>
   );
 }

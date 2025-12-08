@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import SignaturePreview from './SignaturePreview';
+import UserMenu from './UserMenu';
+import AuthModal from './AuthModal';
 import { saveSignature } from '../services/signatureService';
 import { generateHTMLSignature } from '../utils/signatureGenerator';
 import { templates, sampleProfiles } from '../utils/templates';
+import { useAuth } from '../context/AuthContext';
 import './SignatureBuilder.css';
 
 // Default empty state
@@ -42,11 +45,15 @@ const defaultSignatureData = {
 
 function SignatureBuilder() {
   const location = useLocation();
+  const { currentUser, isFullyAuthenticated, isPremium } = useAuth();
+  
   const [selectedTemplate, setSelectedTemplate] = useState('gradientSidebar');
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [signatureData, setSignatureData] = useState(defaultSignatureData);
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authAction, setAuthAction] = useState('save');
 
   // Load profile from navigation state (when coming from Home page)
   useEffect(() => {
@@ -114,7 +121,17 @@ function SignatureBuilder() {
   };
 
   const handleCopy = async () => {
-    const htmlContent = generateHTMLSignature(signatureData);
+    // Check if user is authenticated
+    if (!currentUser || !isFullyAuthenticated()) {
+      setAuthAction('copy');
+      setShowAuthModal(true);
+      return;
+    }
+
+    // Generate HTML with watermark (unless premium)
+    const showWatermark = !isPremium();
+    const htmlContent = generateHTMLSignature(signatureData, { showWatermark });
+    
     try {
       await navigator.clipboard.writeText(htmlContent);
       setCopied(true);
@@ -132,13 +149,32 @@ function SignatureBuilder() {
   };
 
   const handleSave = async () => {
+    // Check if user is authenticated
+    if (!currentUser || !isFullyAuthenticated()) {
+      setAuthAction('save');
+      setShowAuthModal(true);
+      return;
+    }
+
     try {
-      await saveSignature(signatureData);
+      await saveSignature({
+        ...signatureData,
+        userId: currentUser.uid,
+      });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (error) {
       console.error('Error saving signature:', error);
       alert('Failed to save signature. Please try again.');
+    }
+  };
+
+  const handleAuthSuccess = () => {
+    // After successful auth, retry the action
+    if (authAction === 'copy') {
+      handleCopy();
+    } else if (authAction === 'save') {
+      handleSave();
     }
   };
 
@@ -166,7 +202,10 @@ function SignatureBuilder() {
   return (
     <div className="builder-container">
       <div className="builder-header">
-        <Link to="/" className="back-link">← Back to Home</Link>
+        <div className="header-top">
+          <Link to="/" className="back-link">← Back to Home</Link>
+          <UserMenu onSignInClick={() => setShowAuthModal(true)} />
+        </div>
         <h1>Build Your Freelancer Signature</h1>
         <p className="header-subtitle" style={{color: '#555555'}}>Stand out from competitors with a professional signature</p>
       </div>
@@ -424,6 +463,12 @@ function SignatureBuilder() {
             <button onClick={handleSave} className="btn btn-secondary">
               {saved ? '✓ Saved!' : '💾 Save'}
             </button>
+            {!isPremium() && (
+              <p className="watermark-notice">
+                ✨ Free signatures include a small "Created with FreelancerSignature" link. 
+                <span className="upgrade-link"> Upgrade to remove →</span>
+              </p>
+            )}
           </div>
         </div>
 
@@ -433,10 +478,18 @@ function SignatureBuilder() {
             <p>This is how your signature will look</p>
           </div>
           <div className="preview-container">
-            <SignaturePreview signatureData={signatureData} />
+            <SignaturePreview signatureData={signatureData} showWatermark={!isPremium()} />
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+        requiredAction={authAction}
+      />
     </div>
   );
 }
