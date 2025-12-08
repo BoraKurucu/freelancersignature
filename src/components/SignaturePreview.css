@@ -92,6 +92,27 @@
   color: #333333;
 }
 
+/* Watermark */
+.signature-watermark {
+  width: 100%;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e8e8e8;
+  font-size: 10px;
+  color: #999999;
+  text-align: center;
+}
+
+.signature-watermark a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.signature-watermark a:hover {
+  text-decoration: underline;
+}
+
 /* ===========================================
    LAYOUT: Gradient Sidebar (Jasmine style)
    =========================================== */

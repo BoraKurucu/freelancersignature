@@ -210,6 +210,18 @@ function Home() {
           </Link>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="site-footer">
+        <div className="footer-inner">
+          <div className="footer-top">
+            <Link to="/terms">Terms of Service</Link>
+            <span className="footer-dot">•</span>
+            <Link to="/privacy">Privacy Policy</Link>
+          </div>
+          <p className="footer-copyright">© 2025 FreelancerSignature. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }

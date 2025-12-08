@@ -21,6 +21,13 @@
   color: #1a1a1a;
 }
 
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
 .builder-header h1 {
   font-size: 1.8rem;
   font-weight: 700;
@@ -341,6 +348,7 @@
 /* Form Actions */
 .form-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   padding: 18px;
   background: #fff;
@@ -348,6 +356,24 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   position: sticky;
   bottom: 16px;
+}
+
+.watermark-notice {
+  width: 100%;
+  font-size: 0.8rem;
+  color: #666;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.watermark-notice .upgrade-link {
+  color: #667eea;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.watermark-notice .upgrade-link:hover {
+  text-decoration: underline;
 }
 
 .btn {

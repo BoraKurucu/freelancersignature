@@ -1,6 +1,27 @@
 import { templates, socialIcons } from './templates';
 
-export const generateHTMLSignature = (signatureData) => {
+// Generate watermark HTML - embedded to be hard to remove
+const generateWatermark = (showWatermark) => {
+  if (!showWatermark) return '';
+  
+  // Watermark is styled to be part of the signature, not easily removed
+  // Uses inline styles and table structure to integrate with email clients
+  return `<tr><td style="padding-top:12px;border-top:1px solid #e0e0e0;margin-top:10px;">
+    <table cellpadding="0" cellspacing="0" border="0" style="width:100%;">
+      <tr>
+        <td style="font-family:Arial,sans-serif;font-size:10px;color:#999999;text-align:center;padding:8px 0;">
+          <span style="display:inline-block;">✨ Created with </span>
+          <a href="https://freelancersignature.web.app" target="_blank" style="color:#667eea;text-decoration:none;font-weight:600;">FreelancerSignature</a>
+          <span style="display:inline-block;"> - Free Email Signatures for Freelancers</span>
+        </td>
+      </tr>
+    </table>
+  </td></tr>`;
+};
+
+export const generateHTMLSignature = (signatureData, options = {}) => {
+  const { showWatermark = true } = options;
+  
   const {
     name, email, phone, mobile, website, specialty,
     company, tagline, address, photoUrl, logoUrl,
@@ -63,6 +84,7 @@ export const generateHTMLSignature = (signatureData) => {
       </table>
     </td>
   </tr>
+  ${generateWatermark(showWatermark)}
 </table>`;
   }
 
@@ -85,6 +107,7 @@ export const generateHTMLSignature = (signatureData) => {
         ${website ? `<tr><td style="padding:5px 0;"><img src="${socialIcons.website}" width="16" height="16" style="vertical-align:middle;margin-right:12px;"/>${website}</td></tr>` : ''}
         ${email ? `<tr><td style="padding:5px 0;"><img src="${socialIcons.emailOutline}" width="16" height="16" style="vertical-align:middle;margin-right:12px;"/>${email}</td></tr>` : ''}
         ${address ? `<tr><td style="padding:5px 0;"><img src="${socialIcons.locationPin}" width="16" height="16" style="vertical-align:middle;margin-right:12px;"/>${address}</td></tr>` : ''}
+        ${generateWatermark(showWatermark)}
       </table>
     </td>
   </tr>
@@ -119,6 +142,7 @@ export const generateHTMLSignature = (signatureData) => {
       </table>
     </td>
   </tr>
+  ${generateWatermark(showWatermark)}
 </table>`;
   }
 
@@ -136,6 +160,7 @@ export const generateHTMLSignature = (signatureData) => {
         ${email ? `<tr><td style="padding:6px 0;"><img src="${socialIcons.emailOutline}" width="24" height="24" style="vertical-align:middle;margin-right:12px;"/>${email}</td></tr>` : ''}
         ${address ? `<tr><td style="padding:6px 0;"><img src="${socialIcons.locationPin}" width="24" height="24" style="vertical-align:middle;margin-right:12px;"/>${address}</td></tr>` : ''}
         ${website ? `<tr><td style="padding:6px 0;"><img src="${socialIcons.websiteGlobe}" width="24" height="24" style="vertical-align:middle;margin-right:12px;"/>${website}</td></tr>` : ''}
+        ${generateWatermark(showWatermark)}
       </table>
     </td>
   </tr>
@@ -164,5 +189,6 @@ export const generateHTMLSignature = (signatureData) => {
     </td>
   </tr>
   ${Object.keys(socialLinks || {}).length > 0 ? `<tr><td style="padding-top:12px;">${generateSocialIconsHTML()}</td></tr>` : ''}
+  ${generateWatermark(showWatermark)}
 </table>`;
 };
