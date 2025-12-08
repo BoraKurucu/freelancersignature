@@ -183,6 +183,20 @@
   background: #5146e5;
 }
 
+.btn-download {
+  background: #10b981;
+  color: white;
+}
+
+.btn-download:hover:not(:disabled) {
+  background: #059669;
+}
+
+.btn-download:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .btn-edit {
   background: #f0f0f0;
   color: #333;

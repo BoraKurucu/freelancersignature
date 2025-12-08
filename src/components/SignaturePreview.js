@@ -16,7 +16,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
     if (!showWatermark) return null;
     return (
       <div className="signature-watermark">
-        ✨ Created with <a href="https://freelancersignature.web.app" target="_blank" rel="noopener noreferrer">FreelancerSignature</a>
+        ✨ Created with <a href="https://freelancersignature.com" target="_blank" rel="noopener noreferrer">freelancersignature.com</a>
       </div>
     );
   };
