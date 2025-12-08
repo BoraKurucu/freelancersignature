@@ -1,0 +1,58 @@
+.signature-preview {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.signature-name {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.signature-title {
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.signature-contact {
+  margin-bottom: 10px;
+}
+
+.contact-item {
+  margin-bottom: 5px;
+}
+
+.contact-item a {
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.contact-item a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.signature-social {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.signature-social a {
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.signature-social a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.signature-bio {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e0e0e0;
+  color: #666;
+  font-style: italic;
+}
+
