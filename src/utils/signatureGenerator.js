@@ -9,7 +9,7 @@ const generateWatermark = (showWatermark) => {
   return `<tr><td style="padding-top:12px;border-top:1px solid #e0e0e0;margin-top:10px;">
     <table cellpadding="0" cellspacing="0" border="0" style="width:100%;">
       <tr>
-        <td style="font-family:Arial,sans-serif;font-size:10px;color:#999999;text-align:center;padding:8px 0;">
+        <td style="font-family:Arial,sans-serif;font-size:11px;color:#888888;text-align:center;padding:8px 0;">
           <span style="display:inline-block;">✨ Created with </span>
           <a href="https://freelancersignature.com" target="_blank" style="color:#667eea;text-decoration:none;font-weight:600;">freelancersignature.com</a>
         </td>
