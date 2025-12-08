@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getSignatures, deleteSignature } from '../services/signatureService';
 import { generateHTMLSignature } from '../utils/signatureGenerator';
+import { downloadSignatureAsPNG, downloadSignatureWithWatermark } from '../utils/signatureDownloader';
 import SignaturePreview from './SignaturePreview';
 import { useAuth } from '../context/AuthContext';
 import './MySignatures.css';
@@ -13,6 +14,8 @@ function MySignatures() {
   const [signatures, setSignatures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(null);
+  const [downloading, setDownloading] = useState(null);
+  const signatureRefs = useRef({});
 
   useEffect(() => {
     if (!authLoading) {
@@ -74,6 +77,38 @@ function MySignatures() {
     navigate('/builder', { state: { editSignature: signatureData } });
   };
 
+  const handleDownload = async (signatureId, signatureData) => {
+    setDownloading(signatureId);
+    try {
+      // Find the signature preview element using the data attribute
+      const wrapperElement = document.querySelector(`[data-signature-id="${signatureId}"]`);
+      if (!wrapperElement) {
+        throw new Error('Signature wrapper not found');
+      }
+      
+      const signatureElement = wrapperElement.querySelector('.signature-preview');
+      if (!signatureElement) {
+        throw new Error('Signature preview element not found');
+      }
+
+      const filename = `${signatureData?.name || 'signature'}.png`;
+      const isUserPremium = isPremium();
+
+      if (isUserPremium) {
+        // Premium users: download PNG without watermark
+        await downloadSignatureAsPNG(signatureElement, filename, false);
+      } else {
+        // Free users: download PNG with watermark
+        await downloadSignatureWithWatermark(signatureElement, filename);
+      }
+    } catch (error) {
+      console.error('Error downloading signature:', error);
+      alert('Failed to download signature. Please try again.');
+    } finally {
+      setDownloading(null);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="my-signatures-container">
@@ -115,15 +150,30 @@ function MySignatures() {
                   {signature.data?.createdAt ? new Date(signature.data.createdAt).toLocaleDateString() : ''}
                 </span>
               </div>
-              <div className="signature-preview-wrapper">
-                <SignaturePreview signatureData={signature.data} showWatermark={!isPremium()} />
+              <div 
+                className="signature-preview-wrapper"
+                data-signature-id={signature.id}
+              >
+                <SignaturePreview 
+                  signatureData={signature.data} 
+                  showWatermark={!isPremium()}
+                />
               </div>
               <div className="signature-card-actions">
+                {isPremium() && (
+                  <button
+                    onClick={() => handleCopy(signature.data, signature.id)}
+                    className="btn-action btn-copy"
+                  >
+                    {copied === signature.id ? '✓ Copied!' : '📋 Copy HTML'}
+                  </button>
+                )}
                 <button
-                  onClick={() => handleCopy(signature.data, signature.id)}
-                  className="btn-action btn-copy"
+                  onClick={() => handleDownload(signature.id, signature.data)}
+                  className="btn-action btn-download"
+                  disabled={downloading === signature.id}
                 >
-                  {copied === signature.id ? '✓ Copied!' : '📋 Copy HTML'}
+                  {downloading === signature.id ? '⏳ Downloading...' : '📥 Download PNG'}
                 </button>
                 <button
                   onClick={() => handleEdit(signature.data)}

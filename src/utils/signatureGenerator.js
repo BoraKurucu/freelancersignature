@@ -11,8 +11,7 @@ const generateWatermark = (showWatermark) => {
       <tr>
         <td style="font-family:Arial,sans-serif;font-size:10px;color:#999999;text-align:center;padding:8px 0;">
           <span style="display:inline-block;">✨ Created with </span>
-          <a href="https://freelancersignature.web.app" target="_blank" style="color:#667eea;text-decoration:none;font-weight:600;">FreelancerSignature</a>
-          <span style="display:inline-block;"> - Free Email Signatures for Freelancers</span>
+          <a href="https://freelancersignature.com" target="_blank" style="color:#667eea;text-decoration:none;font-weight:600;">freelancersignature.com</a>
         </td>
       </tr>
     </table>
