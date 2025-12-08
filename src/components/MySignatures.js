@@ -185,7 +185,7 @@ function MySignatures() {
                     ? '⏳ Downloading...' 
                     : isPremium() 
                       ? '📥 Download PNG' 
-                      : '📥 Download PNG with Watermark'}
+                      : '📥 Download PNG (Premium to remove watermark)'}
                 </button>
                 <button
                   onClick={() => handleEdit(signature.data)}

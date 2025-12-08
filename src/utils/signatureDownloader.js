@@ -58,42 +58,37 @@ export const downloadSignatureAsPNG = async (element, filename = 'signature.png'
 };
 
 /**
- * Adds watermark overlay to a canvas element
+ * Adds a subtle diagonal watermark overlay across the canvas
  * @param {HTMLCanvasElement} canvas - The canvas to add watermark to
- * @param {string} text - Watermark text
  */
-export const addWatermarkToCanvas = (canvas, text = 'Created with FreelancerSignature') => {
+export const addDiagonalWatermark = (canvas) => {
   const ctx = canvas.getContext('2d');
   const width = canvas.width;
   const height = canvas.height;
 
-  // Set watermark style - make it visible but not intrusive
   ctx.save();
   
-  // Add white background for better visibility
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-  const watermarkHeight = 40;
-  ctx.fillRect(0, height - watermarkHeight, width, watermarkHeight);
-  
-  // Add border at top of watermark area
-  ctx.strokeStyle = '#e0e0e0';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(0, height - watermarkHeight);
-  ctx.lineTo(width, height - watermarkHeight);
-  ctx.stroke();
-  
-  // Watermark text - centered at bottom
-  ctx.globalAlpha = 1.0;
-  ctx.fillStyle = '#999999';
-  ctx.font = '10px Arial, sans-serif';
+  // Set watermark style - subtle but visible
+  ctx.globalAlpha = 0.15; // Very subtle
+  ctx.fillStyle = '#888888';
+  ctx.font = 'bold 24px Arial, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-
-  // Add only the watermark text at bottom center (no URL)
-  const watermarkY = height - 20;
-  ctx.fillText(`✨ ${text}`, width / 2, watermarkY);
-
+  
+  // Rotate canvas for diagonal text
+  ctx.translate(width / 2, height / 2);
+  ctx.rotate(-Math.PI / 6); // -30 degrees
+  
+  // Calculate text position for diagonal placement
+  const text = 'freelancersignature.com';
+  const textWidth = ctx.measureText(text).width;
+  
+  // Draw watermark multiple times across the canvas
+  const spacing = 200;
+  for (let y = -height; y < height * 2; y += spacing) {
+    ctx.fillText(text, 0, y);
+  }
+  
   ctx.restore();
 };
 
@@ -153,7 +148,8 @@ export const downloadSignatureWithWatermark = async (element, filename = 'signat
       },
     });
 
-    // No overlay watermark - only the HTML watermark at the bottom is used
+    // Add subtle diagonal watermark overlay to make it harder to remove/crop
+    addDiagonalWatermark(canvas);
 
     // Convert to blob and download
     canvas.toBlob((blob) => {
