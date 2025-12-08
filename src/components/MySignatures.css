@@ -1,65 +1,74 @@
-.signatures-container {
+.my-signatures-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--bg-primary);
   padding: 2rem;
 }
 
-.signatures-header {
+.my-signatures-header {
   max-width: 1400px;
-  margin: 0 auto 2rem;
-  color: white;
+  margin: 0 auto 3rem;
+  color: var(--text-white);
+  text-align: center;
+}
+
+.my-signatures-header h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  margin: 1rem 0 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.header-subtitle {
+  font-size: 1.125rem;
+  color: #555555;
+  margin-bottom: 2rem;
+}
+
+.loading-spinner {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
+  justify-content: center;
+  min-height: 60vh;
+  color: var(--text-white);
 }
 
-.signatures-header h1 {
-  font-size: 2.5rem;
-  margin: 0;
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--bg-secondary);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
 }
 
-.back-link {
-  color: white;
-  text-decoration: none;
-  opacity: 0.9;
-  transition: opacity 0.3s ease;
-}
-
-.back-link:hover {
-  opacity: 1;
-}
-
-.new-signature-btn {
-  background: white;
-  color: #667eea;
-  padding: 0.75rem 1.5rem;
-  border-radius: 50px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-.new-signature-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .empty-state {
   max-width: 600px;
-  margin: 4rem auto;
+  margin: 0 auto;
   text-align: center;
-  color: white;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  padding: 3rem;
+  padding: 4rem 2rem;
+  color: var(--text-white);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+.empty-state h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
 }
 
 .empty-state p {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
+  color: var(--text-light);
   margin-bottom: 2rem;
 }
 
@@ -72,82 +81,74 @@
 }
 
 .signature-card {
-  background: white;
-  border-radius: 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
   padding: 1.5rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+  transition: var(--transition);
 }
 
 .signature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
 }
 
 .signature-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border);
 }
 
 .signature-card-header h3 {
-  margin: 0;
-  color: #333;
   font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
-.signature-actions {
+.signature-card-actions {
   display: flex;
   gap: 0.5rem;
 }
 
 .btn-icon {
-  background: none;
-  border: none;
-  font-size: 1.25rem;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: white;
   cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  font-size: 1rem;
 }
 
 .btn-icon:hover {
-  background-color: #f0f0f0;
+  background: var(--bg-primary);
+  border-color: var(--primary);
+  transform: scale(1.1);
 }
 
-.btn-icon.delete:hover {
-  background-color: #fee;
-}
-
-.signature-card-preview {
-  background: #f5f5f5;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-}
-
-.loading {
-  text-align: center;
+.btn-icon.btn-danger:hover {
+  background: var(--error);
+  border-color: var(--error);
   color: white;
-  font-size: 1.5rem;
-  margin-top: 4rem;
+}
+
+.signature-preview-wrapper {
+  background: var(--bg-primary);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-dark);
 }
 
 @media (max-width: 768px) {
-  .signatures-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .signatures-header h1 {
-    font-size: 2rem;
-  }
-  
   .signatures-grid {
     grid-template-columns: 1fr;
   }
 }
-

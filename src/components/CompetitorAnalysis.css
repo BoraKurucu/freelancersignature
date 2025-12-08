@@ -1,0 +1,150 @@
+.competitor-analysis {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.competitor-analysis h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.analysis-score {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.score-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.score-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.score-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-top: 0.25rem;
+}
+
+.score-description {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.features-comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.comparison-section h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.features-list.good li {
+  color: #166534;
+  padding: 0.5rem;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.features-list.bad li {
+  color: #991b1b;
+  padding: 0.5rem;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.no-features {
+  color: #666;
+  font-style: italic;
+  padding: 1rem;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.no-features.success {
+  color: #166534;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.top-freelancer-checklist {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 8px;
+}
+
+.top-freelancer-checklist h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.75rem;
+}
+
+.checklist-item {
+  padding: 0.75rem;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.checklist-item.checked {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: #22c55e;
+  color: #166534;
+  font-weight: 600;
+}
+
+.improvement-suggestion {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  border-left: 4px solid #3b82f6;
+  border-radius: 4px;
+  color: #1e40af;
+}
+
+@media (max-width: 768px) {
+  .features-comparison {
+    grid-template-columns: 1fr;
+  }
+  
+  .checklist-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

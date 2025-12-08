@@ -1,0 +1,93 @@
+.signature-health-score {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.health-score-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.score-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.score-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.score-label {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  opacity: 0.9;
+}
+
+.score-info h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: var(--text-white);
+}
+
+.score-info p {
+  font-size: 0.875rem;
+  color: var(--text-light);
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.progress-bar {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.health-checks {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.health-check {
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.health-check.good {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.health-check.bad {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+@media (max-width: 768px) {
+  .health-checks {
+    grid-template-columns: 1fr;
+  }
+}

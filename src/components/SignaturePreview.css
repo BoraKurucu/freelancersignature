@@ -1,58 +1,996 @@
+/* Google Font Import */
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Playfair+Display:wght@400;700&display=swap');
+
+/* Base Styles */
 .signature-preview {
-  font-size: 14px;
-  line-height: 1.6;
+  font-family: Arial, sans-serif;
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 4px;
+  max-width: 100%;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #333333;
+  overflow-x: auto;
 }
 
-.signature-name {
+/* Ensure all text is visible on white background */
+.signature-preview,
+.signature-preview * {
+  color: inherit;
+}
+
+.signature-preview a {
+  color: #333333;
+  text-decoration: none;
+}
+
+/* Social Icons */
+.social-icons-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.social-icon {
+  display: inline-flex;
+  transition: transform 0.2s;
+}
+
+.social-icon:hover {
+  transform: scale(1.1);
+}
+
+.social-icon img {
+  border-radius: 50%;
+}
+
+/* Freelancer CTA Section */
+.freelancer-cta {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.rate-badge {
+  font-weight: 700;
+  font-size: 14px;
+  color: #333333;
+}
+
+.availability-badge {
+  font-size: 12px;
+  color: #16a34a;
+  background: #f0fdf4;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.booking-btn {
+  display: inline-block;
+  padding: 8px 14px;
+  color: #fff !important;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.booking-btn:hover {
+  opacity: 0.9;
+}
+
+.portfolio-link {
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  color: #333333;
+}
+
+/* ===========================================
+   LAYOUT: Gradient Sidebar (Jasmine style)
+   =========================================== */
+.gradient-sidebar {
+  padding: 0;
+  overflow: hidden;
+}
+
+.gradient-sidebar .sig-row {
+  display: flex;
+  min-height: 140px;
+}
+
+.gradient-sidebar .sig-gradient-left {
+  width: 90px;
+  min-width: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gradient-sidebar .sig-photo-gradient {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  object-fit: cover;
+}
+
+.gradient-sidebar .sig-content-right {
+  flex: 1;
+  padding: 14px;
+  color: #333333;
+}
+
+.gradient-sidebar .sig-name-bold {
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 700;
+  font-style: italic;
+  text-transform: uppercase;
+}
+
+.gradient-sidebar .sig-title-italic {
+  font-size: 12px;
+  font-style: italic;
+  color: #555555;
+}
+
+.gradient-sidebar .sig-company-italic {
+  font-size: 11px;
+  font-style: italic;
+  color: #666666;
+  margin-top: 4px;
+}
+
+.gradient-sidebar .sig-contact-list {
+  margin-top: 10px;
+  font-size: 11px;
+  color: #333333;
+}
+
+.gradient-sidebar .contact-item {
+  margin-bottom: 3px;
+  color: #333333;
+}
+
+.gradient-sidebar .contact-item strong {
+  color: #333333;
+}
+
+/* ===========================================
+   LAYOUT: Script Elegant (Melissa style)
+   =========================================== */
+.script-elegant {
+  padding: 14px;
+}
+
+.script-elegant .sig-row {
+  display: flex;
+  gap: 20px;
+}
+
+.script-elegant .sig-photo-section-large {
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.script-elegant .sig-photo-elegant {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3px solid #e0e0e0;
+  object-fit: cover;
+}
+
+.script-elegant .sig-company-script {
+  font-family: 'Dancing Script', cursive;
+  font-size: 14px;
+  color: #555555;
+  margin-top: 6px;
+}
+
+.script-elegant .sig-content-elegant {
+  flex: 1;
+  color: #333333;
+}
+
+.script-elegant .sig-name-script {
+  font-size: 28px;
+  line-height: 1.2;
+  color: #333333;
+}
+
+.script-elegant .sig-title-spaced {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #666666;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.script-elegant .sig-contact-icons {
+  font-size: 12px;
+  color: #333333;
+}
+
+.script-elegant .contact-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  color: #333333;
+}
+
+.script-elegant .contact-row span {
+  color: #333333;
+}
+
+.script-elegant .contact-row small {
+  color: #666666;
+  font-size: 10px;
+}
+
+.script-elegant .sig-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.script-elegant .sig-logo-small {
+  height: 36px;
+}
+
+/* ===========================================
+   LAYOUT: Red Circle (Jenny style)
+   =========================================== */
+.red-circle {
+  padding: 14px;
+}
+
+.red-circle .sig-row {
+  display: flex;
+  gap: 20px;
+}
+
+.red-circle .sig-photo-col {
+  text-align: center;
+  flex-shrink: 0;
+  width: 100px;
+}
+
+.red-circle .sig-photo-bordered {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid;
+  object-fit: cover;
+}
+
+.red-circle .sig-name-script {
+  font-size: 16px;
+  margin-top: 6px;
+}
+
+.red-circle .sig-info-col {
+  flex: 1;
+  color: #333333;
+}
+
+.red-circle .sig-name-caps {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.red-circle .sig-title-company {
+  font-size: 11px;
+  color: #555555;
   margin-bottom: 8px;
 }
 
-.signature-title {
-  color: #666;
+.red-circle .sig-contact-labeled {
+  font-size: 11px;
+  color: #333333;
+  line-height: 1.6;
+}
+
+.red-circle .sig-contact-labeled div {
+  color: #333333;
+}
+
+/* ===========================================
+   LAYOUT: Simple Photo (Kelly style)
+   =========================================== */
+.simple-photo {
+  padding: 14px;
+}
+
+.simple-photo .sig-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.simple-photo .sig-photo-simple {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.simple-photo .sig-info-simple {
+  flex: 1;
+  color: #333333;
+}
+
+.simple-photo .sig-name-simple {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333333;
+}
+
+.simple-photo .sig-title-simple {
+  font-size: 12px;
+  color: #555555;
+  margin-bottom: 8px;
+}
+
+.simple-photo .sig-contact-labeled {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #333333;
+}
+
+.simple-photo .sig-contact-labeled strong {
+  color: #666666;
+}
+
+.simple-photo .sig-contact-labeled div {
+  color: #333333;
+}
+
+/* ===========================================
+   LAYOUT: Orange Banner (Angle Nancy style)
+   =========================================== */
+.orange-banner {
+  padding: 0;
+  overflow: hidden;
+  border-top: 4px solid #e67e22;
+}
+
+.orange-banner .sig-row {
+  display: flex;
+  gap: 16px;
+  padding: 14px;
+}
+
+.orange-banner .sig-photo-frame {
+  width: 80px;
+  height: 90px;
+  border: 3px solid #e67e22;
+  padding: 3px;
+  flex-shrink: 0;
+}
+
+.orange-banner .sig-photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.orange-banner .sig-info {
+  flex: 1;
+  color: #333333;
+}
+
+.orange-banner .sig-name-split {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.orange-banner .sig-name-split .first {
+  color: #1e3a5f;
+}
+
+.orange-banner .sig-name-split .last {
+  color: #e67e22;
+}
+
+.orange-banner .sig-title-orange {
+  font-size: 11px;
+  color: #e67e22;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.orange-banner .sig-contact-icons-list {
+  font-size: 11px;
+  color: #333333;
+}
+
+.orange-banner .contact-icon-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  color: #333333;
+}
+
+.orange-banner .sig-logo-section {
+  text-align: center;
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.orange-banner .sig-logo-section .logo-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+
+.orange-banner .sig-logo-section .slogan {
+  font-size: 9px;
+  color: #666666;
+  letter-spacing: 2px;
+}
+
+/* ===========================================
+   LAYOUT: Yellow Hexagon (Thomas Smith style)
+   =========================================== */
+.yellow-hexagon {
+  padding: 0;
+  overflow: hidden;
+}
+
+.yellow-hexagon .sig-row {
+  display: flex;
+  gap: 16px;
+  padding: 14px;
+}
+
+.yellow-hexagon .sig-photo-hex {
+  width: 90px;
+  height: 90px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.yellow-hexagon .sig-photo-hex img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.yellow-hexagon .sig-content {
+  flex: 1;
+  color: #333333;
+}
+
+.yellow-hexagon .sig-name-bold {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333333;
+}
+
+.yellow-hexagon .sig-title-gray {
+  font-size: 12px;
+  color: #555555;
+  margin-bottom: 8px;
+}
+
+.yellow-hexagon .sig-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  font-size: 11px;
+  color: #333333;
+}
+
+.yellow-hexagon .contact-grid-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #333333;
+}
+
+.yellow-hexagon .sig-logo-col {
+  text-align: center;
+  flex-shrink: 0;
+  min-width: 70px;
+}
+
+/* ===========================================
+   LAYOUT: Blue Modern (Edward Richards style)
+   =========================================== */
+.blue-modern {
+  padding: 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f8fafc 0%, #e8f4fc 100%);
+}
+
+.blue-modern .sig-row {
+  display: flex;
+  gap: 20px;
+  padding: 16px;
+}
+
+.blue-modern .sig-content-left {
+  flex: 1;
+  color: #333333;
+}
+
+.blue-modern .sig-company-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 6px;
+}
+
+.blue-modern .sig-name-large {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1e3a5f;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.blue-modern .sig-title-blue {
+  font-size: 13px;
+  color: #2563eb;
   margin-bottom: 10px;
 }
 
-.signature-contact {
-  margin-bottom: 10px;
+.blue-modern .sig-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  font-size: 11px;
+  color: #333333;
 }
 
-.contact-item {
-  margin-bottom: 5px;
+.blue-modern .contact-label {
+  font-size: 9px;
+  color: #2563eb;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.contact-item a {
-  text-decoration: none;
-  transition: opacity 0.3s ease;
+.blue-modern .contact-value {
+  color: #333333;
+  font-size: 12px;
 }
 
-.contact-item a:hover {
-  opacity: 0.8;
-  text-decoration: underline;
+.blue-modern .sig-photo-right {
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 3px solid #2563eb;
 }
 
-.signature-social {
+.blue-modern .sig-photo-right img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ===========================================
+   LAYOUT: Black Footer (Andie Edmond style)
+   =========================================== */
+.black-footer {
+  padding: 0;
+  overflow: hidden;
+}
+
+.black-footer .sig-main {
+  display: flex;
+  gap: 20px;
+  padding: 16px;
+}
+
+.black-footer .sig-photo-square {
+  width: 100px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.black-footer .sig-photo-square img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.black-footer .sig-content {
+  flex: 1;
+  color: #333333;
+}
+
+.black-footer .sig-name-elegant {
+  font-size: 24px;
+  font-family: 'Playfair Display', serif;
+  color: #333333;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.black-footer .sig-title-caps {
+  font-size: 10px;
+  color: #666666;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.black-footer .sig-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 12px;
+  color: #333333;
+}
+
+.black-footer .contact-item-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333333;
+}
+
+.black-footer .contact-item-row span {
+  color: #333333;
+}
+
+.black-footer .sig-footer {
+  background: #1a1a1a;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.black-footer .follow-text {
+  font-family: 'Dancing Script', cursive;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.black-footer .sig-footer .social-icons-row {
+  margin-top: 0;
+}
+
+/* ===========================================
+   ORIGINAL LAYOUTS (kept for compatibility)
+   =========================================== */
+
+/* Corporate Two-Column */
+.corporate-two-column {
+  padding: 14px;
+}
+
+.corporate-two-column .sig-main-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.corporate-two-column .sig-left-col {
+  flex: 1;
+  color: #333333;
+}
+
+.corporate-two-column .sig-name {
+  color: #333333;
+}
+
+.corporate-two-column .sig-divider {
+  height: 70px;
+  flex-shrink: 0;
+}
+
+.corporate-two-column .sig-right-col {
+  flex: 1;
+  color: #333333;
+}
+
+.corporate-two-column .sig-contact-block {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #333333;
+}
+
+.corporate-two-column .sig-contact-block .label {
+  color: #555555;
+}
+
+.corporate-two-column .sig-company-name {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.corporate-two-column .sig-address {
+  font-size: 11px;
+  white-space: pre-line;
+  margin-top: 4px;
+  color: #333333;
+}
+
+.corporate-two-column .sig-website {
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+/* Elegant Minimal */
+.elegant-minimal {
+  padding: 16px;
+}
+
+.elegant-minimal .sig-main-row {
+  display: flex;
+  gap: 30px;
+}
+
+.elegant-minimal .sig-photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.elegant-minimal .vertical-line {
+  width: 1px;
+  height: 16px;
+  background: #1a1a1a;
+}
+
+.elegant-minimal .sig-photo-large {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 10px 0;
+}
+
+.elegant-minimal .sig-name-below {
+  font-size: 16px;
+  text-align: center;
+  color: #333333;
+}
+
+.elegant-minimal .sig-title-spaced {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #555555;
+  text-transform: uppercase;
+}
+
+.elegant-minimal .sig-info-section {
+  flex: 1;
+  color: #333333;
+}
+
+.elegant-minimal .sig-company-spaced {
+  font-size: 14px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #333333;
+}
+
+.elegant-minimal .sig-tagline-spaced {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #555555;
+  text-transform: uppercase;
+}
+
+.elegant-minimal .sig-contact-elegant {
+  margin-top: 20px;
+  font-size: 12px;
+  color: #333333;
+}
+
+.elegant-minimal .contact-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  color: #333333;
+}
+
+.elegant-minimal .contact-line span {
+  color: #333333;
+}
+
+/* Corporate Simple */
+.corporate-simple {
+  padding: 14px;
+}
+
+.corporate-simple .sig-header-simple .sig-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333333;
+}
+
+.corporate-simple .sig-header-simple .sig-title {
+  font-size: 12px;
+}
+
+.corporate-simple .sig-two-col {
+  display: flex;
+  gap: 24px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #333333;
+}
+
+.corporate-simple .sig-col-left,
+.corporate-simple .sig-col-right {
+  color: #333333;
+}
+
+.corporate-simple .sig-footer-simple {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #e0e0e0;
 }
 
-.signature-social a {
-  text-decoration: none;
-  transition: opacity 0.3s ease;
+/* Script Personal */
+.script-personal {
+  padding: 16px;
 }
 
-.signature-social a:hover {
-  opacity: 0.8;
-  text-decoration: underline;
+.script-personal .sig-main-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
 }
 
-.signature-bio {
+.script-personal .sig-photo-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #e8ddd0;
+  flex-shrink: 0;
+}
+
+.script-personal .sig-info-script {
+  flex: 1;
+  color: #333333;
+}
+
+.script-personal .sig-name-script {
+  font-size: 30px;
+  color: #333333;
+}
+
+.script-personal .sig-contact-script {
   margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #e0e0e0;
-  color: #666;
-  font-style: italic;
+  font-size: 12px;
+  color: #333333;
 }
 
+.script-personal .contact-line-script {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  color: #333333;
+}
+
+.script-personal .contact-line-script span {
+  color: #333333;
+}
+
+/* Default Layout */
+.default-layout {
+  padding: 14px;
+  color: #333333;
+}
+
+.default-layout .sig-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.default-layout .sig-specialty {
+  font-size: 12px;
+  color: #555555;
+  margin-bottom: 8px;
+}
+
+.default-layout div {
+  color: #333333;
+}
+
+/* ===========================================
+   MOBILE RESPONSIVE
+   =========================================== */
+@media (max-width: 500px) {
+  .signature-preview {
+    font-size: 11px;
+    padding: 12px;
+  }
+
+  /* Stack layouts on mobile */
+  .gradient-sidebar .sig-row,
+  .script-elegant .sig-row,
+  .red-circle .sig-row,
+  .simple-photo .sig-row,
+  .elegant-minimal .sig-main-row,
+  .script-personal .sig-main-row,
+  .orange-banner .sig-row,
+  .yellow-hexagon .sig-row,
+  .blue-modern .sig-row,
+  .black-footer .sig-main {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .gradient-sidebar .sig-gradient-left {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px;
+  }
+
+  .gradient-sidebar .sig-content-right,
+  .script-elegant .sig-content-elegant,
+  .red-circle .sig-info-col,
+  .simple-photo .sig-info-simple,
+  .orange-banner .sig-info,
+  .yellow-hexagon .sig-content,
+  .blue-modern .sig-content-left,
+  .black-footer .sig-content {
+    text-align: center;
+  }
+
+  .script-elegant .contact-row,
+  .elegant-minimal .contact-line,
+  .script-personal .contact-line-script,
+  .orange-banner .contact-icon-row,
+  .yellow-hexagon .contact-grid-item,
+  .black-footer .contact-item-row {
+    justify-content: center;
+  }
+
+  .yellow-hexagon .sig-contact-grid,
+  .blue-modern .sig-contact-grid,
+  .black-footer .sig-contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .corporate-two-column .sig-main-row {
+    flex-direction: column;
+  }
+
+  .corporate-two-column .sig-divider {
+    display: none;
+  }
+
+  .corporate-simple .sig-two-col {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .freelancer-cta {
+    justify-content: center;
+  }
+
+  .social-icons-row {
+    justify-content: center;
+  }
+}
