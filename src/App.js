@@ -7,6 +7,7 @@ import MySignatures from './components/MySignatures';
 import PremiumUpgrade from './components/PremiumUpgrade';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import CookiePolicy from './components/CookiePolicy';
 import './App.css';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
             <Route path="/premium" element={<PremiumUpgrade />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/cookies" element={<CookiePolicy />} />
           </Routes>
         </div>
       </Router>

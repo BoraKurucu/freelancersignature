@@ -123,15 +123,33 @@
   font-size: 1.75rem;
   font-weight: 700;
   text-align: center;
-  color: #1a1a1a;
+  color: #1a1a1a !important;
   margin-bottom: 12px;
+}
+
+.why-section .section-title,
+.features-section .section-title,
+.why-section h2,
+.features-section h2 {
+  color: #1a1a1a !important;
+}
+
+/* Ensure section titles are dark and readable */
+.why-section .section-title,
+.features-section .section-title,
+.why-section h2,
+.features-section h2,
+.why-section h2.section-title,
+.features-section h2.section-title {
+  color: #1a1a1a !important;
 }
 
 .section-subtitle {
   text-align: center;
-  color: #444444;
+  color: #1a1a1a;
   margin-bottom: 32px;
   font-size: 1rem;
+  font-weight: 500;
 }
 
 .comparison-grid {
@@ -277,7 +295,7 @@
 }
 
 .feature-card p {
-  color: #444444;
+  color: #1a1a1a;
   font-size: 0.85rem;
   line-height: 1.4;
 }
@@ -337,7 +355,7 @@
 
 .author-role {
   font-size: 0.8rem;
-  color: #555555;
+  color: #333333;
 }
 
 /* CTA Section */
@@ -458,7 +476,7 @@
 }
 
 .footer-dot {
-  color: #555;
+  color: #999;
   font-size: 0.8rem;
 }
 

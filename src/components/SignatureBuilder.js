@@ -244,7 +244,7 @@ function SignatureBuilder() {
           <UserMenu onSignInClick={() => setShowAuthModal(true)} />
         </div>
         <h1>Build Your Freelancer Signature</h1>
-        <p className="header-subtitle" style={{color: '#555555'}}>Stand out from competitors with a professional signature</p>
+        <p className="header-subtitle">Stand out from competitors with a professional signature</p>
       </div>
 
       {/* Quick Start: Load Sample Profiles */}

@@ -122,16 +122,6 @@ function TermsOfService() {
           </p>
         </section>
 
-        <section>
-          <h2>14. Contact Information</h2>
-          <p>
-            If you have any questions about these Terms, please contact us at:
-          </p>
-          <p className="contact-info">
-            <strong>Email:</strong> support@freelancersignature.com<br />
-            <strong>Website:</strong> freelancersignature.web.app
-          </p>
-        </section>
       </div>
     </div>
   );

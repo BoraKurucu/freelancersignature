@@ -114,7 +114,7 @@ function PrivacyPolicy() {
             <li><strong>Restriction:</strong> Request restriction of processing in certain circumstances</li>
           </ul>
           <p>
-            To exercise these rights, please contact us using the information provided below.
+            To exercise these rights, please contact us through the Service.
           </p>
         </section>
 
@@ -156,17 +156,6 @@ function PrivacyPolicy() {
           <h2>12. Changes to This Policy</h2>
           <p>
             We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the "Last Updated" date. We encourage you to review this policy periodically.
-          </p>
-        </section>
-
-        <section>
-          <h2>13. Contact Us</h2>
-          <p>
-            If you have any questions about this Privacy Policy or our data practices, please contact us at:
-          </p>
-          <p className="contact-info">
-            <strong>Email:</strong> privacy@freelancersignature.com<br />
-            <strong>Website:</strong> freelancersignature.web.app
           </p>
         </section>
       </div>
