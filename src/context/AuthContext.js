@@ -238,7 +238,24 @@ export function AuthProvider({ children }) {
 
   // Check if user can use premium features
   function isPremium() {
-    return userProfile?.subscriptionStatus === 'premium';
+    if (!userProfile || userProfile.subscriptionStatus !== 'premium') {
+      return false;
+    }
+    
+    // Check if subscription has expired
+    if (userProfile.subscriptionExpiry) {
+      const expiryDate = userProfile.subscriptionExpiry.toDate 
+        ? userProfile.subscriptionExpiry.toDate() 
+        : new Date(userProfile.subscriptionExpiry);
+      const now = new Date();
+      
+      if (expiryDate < now) {
+        // Subscription expired - update status (webhook should handle this, but this is a fallback)
+        return false;
+      }
+    }
+    
+    return true;
   }
 
   // Check if user is authenticated and verified

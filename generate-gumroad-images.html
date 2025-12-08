@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate Gumroad Images</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      padding: 40px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      margin-bottom: 40px;
+      color: #333;
+    }
+    
+    .image-container {
+      margin-bottom: 60px;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .image-container h2 {
+      margin-bottom: 20px;
+      color: #667eea;
+    }
+    
+    .preview-wrapper {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: auto;
+    }
+    
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    /* Cover Image Styles (1280x720) */
+    #coverImage {
+      width: 1280px;
+      height: 720px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      padding: 60px;
+    }
+    
+    .cover-badge {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      padding: 8px 20px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .cover-title {
+      font-size: 72px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 20px;
+      line-height: 1.1;
+    }
+    
+    .cover-subtitle {
+      font-size: 28px;
+      text-align: center;
+      opacity: 0.95;
+      margin-bottom: 40px;
+      max-width: 900px;
+    }
+    
+    .cover-features {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 40px;
+    }
+    
+    .cover-feature {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .cover-price {
+      position: absolute;
+      bottom: 40px;
+      right: 40px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #667eea;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-size: 32px;
+      font-weight: 800;
+    }
+    
+    /* Thumbnail Styles (600x600) */
+    #thumbnailImage {
+      width: 600px;
+      height: 600px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      padding: 40px;
+      border-radius: 20px;
+    }
+    
+    .thumbnail-icon {
+      font-size: 120px;
+      margin-bottom: 30px;
+    }
+    
+    .thumbnail-title {
+      font-size: 42px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+    
+    .thumbnail-subtitle {
+      font-size: 20px;
+      text-align: center;
+      opacity: 0.95;
+      margin-bottom: 30px;
+    }
+    
+    .thumbnail-price {
+      background: rgba(255, 255, 255, 0.95);
+      color: #667eea;
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-size: 28px;
+      font-weight: 800;
+      margin-top: 20px;
+    }
+    
+    .thumbnail-features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 30px;
+      width: 100%;
+      max-width: 500px;
+    }
+    
+    .thumbnail-feature {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Gumroad Product Images Generator</h1>
+    
+    <!-- Cover Image -->
+    <div class="image-container">
+      <h2>Cover Image (1280x720px)</h2>
+      <div class="preview-wrapper">
+        <div id="coverImage">
+          <div class="cover-badge">🚀 Premium Membership</div>
+          <div class="cover-title">
+            FreelancerSignature<br/>
+            <span style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Premium</span>
+          </div>
+          <div class="cover-subtitle">
+            Remove watermarks, copy HTML code, download PNGs, and unlock premium features
+          </div>
+          <div class="cover-features">
+            <div class="cover-feature">✨ No Watermarks</div>
+            <div class="cover-feature">📋 Copy HTML</div>
+            <div class="cover-feature">📥 Download PNG</div>
+            <div class="cover-feature">🎨 Premium Templates</div>
+          </div>
+          <div class="cover-price">$4.99/month</div>
+        </div>
+      </div>
+      <button onclick="downloadImage('coverImage', 'gumroad-cover.png')">Download Cover Image</button>
+    </div>
+    
+    <!-- Thumbnail Image -->
+    <div class="image-container">
+      <h2>Thumbnail Image (600x600px)</h2>
+      <div class="preview-wrapper">
+        <div id="thumbnailImage">
+          <div class="thumbnail-icon">⭐</div>
+          <div class="thumbnail-title">Premium</div>
+          <div class="thumbnail-subtitle">FreelancerSignature</div>
+          <div class="thumbnail-features">
+            <div class="thumbnail-feature">✨ No Watermarks</div>
+            <div class="thumbnail-feature">📋 Copy HTML</div>
+            <div class="thumbnail-feature">📥 Download PNG</div>
+            <div class="thumbnail-feature">🎨 Premium</div>
+          </div>
+          <div class="thumbnail-price">$4.99/mo</div>
+        </div>
+      </div>
+      <button onclick="downloadImage('thumbnailImage', 'gumroad-thumbnail.png')">Download Thumbnail Image</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    async function downloadImage(elementId, filename) {
+      const element = document.getElementById(elementId);
+      const button = event.target;
+      const originalText = button.textContent;
+      
+      button.textContent = 'Generating...';
+      button.disabled = true;
+      
+      try {
+        const canvas = await html2canvas(element, {
+          width: element.offsetWidth,
+          height: element.offsetHeight,
+          scale: 2, // Higher quality
+          useCORS: true,
+          backgroundColor: null
+        });
+        
+        canvas.toBlob(function(blob) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          
+          button.textContent = originalText;
+          button.disabled = false;
+        }, 'image/png');
+      } catch (error) {
+        console.error('Error generating image:', error);
+        alert('Error generating image. Please try again.');
+        button.textContent = originalText;
+        button.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
