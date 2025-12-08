@@ -1,12 +1,12 @@
 import html2canvas from 'html2canvas';
 
 /**
- * Downloads a signature as PNG image
+ * Downloads a signature as PNG image WITHOUT watermark
+ * This function is for PREMIUM users only - no watermark is ever added
  * @param {HTMLElement} element - The signature element to convert
  * @param {string} filename - The filename for the downloaded image
- * @param {boolean} showWatermark - Whether to show watermark in the image
  */
-export const downloadSignatureAsPNG = async (element, filename = 'signature.png', showWatermark = false) => {
+export const downloadSignatureAsPNG = async (element, filename = 'signature.png') => {
   try {
     // Wait for all images to load
     const images = element.querySelectorAll('img');
@@ -58,38 +58,89 @@ export const downloadSignatureAsPNG = async (element, filename = 'signature.png'
 };
 
 /**
- * Adds a subtle diagonal watermark overlay across the canvas
+ * Adds a visible centered watermark overlay on the canvas
+ * Dynamically calculates font size to fit within canvas bounds
  * @param {HTMLCanvasElement} canvas - The canvas to add watermark to
  */
 export const addDiagonalWatermark = (canvas) => {
-  const ctx = canvas.getContext('2d');
-  const width = canvas.width;
-  const height = canvas.height;
+  try {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Failed to get canvas context');
+      return;
+    }
 
-  ctx.save();
-  
-  // Set watermark style - subtle but visible
-  ctx.globalAlpha = 0.15; // Very subtle
-  ctx.fillStyle = '#888888';
-  ctx.font = 'bold 24px Arial, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  
-  // Rotate canvas for diagonal text
-  ctx.translate(width / 2, height / 2);
-  ctx.rotate(-Math.PI / 6); // -30 degrees
-  
-  // Calculate text position for diagonal placement
-  const text = 'freelancersignature.com';
-  const textWidth = ctx.measureText(text).width;
-  
-  // Draw watermark multiple times across the canvas
-  const spacing = 200;
-  for (let y = -height; y < height * 2; y += spacing) {
-    ctx.fillText(text, 0, y);
+    const width = canvas.width;
+    const height = canvas.height;
+
+    if (!width || !height || width === 0 || height === 0) {
+      console.warn('Canvas has invalid dimensions:', { width, height });
+      return;
+    }
+
+    const text = 'freelancersignature.com';
+    
+    // Start with a reasonable base font size
+    let fontSize = Math.min(width, height) * 0.15;
+    const minFontSize = 16;
+    const maxFontSize = 48;
+    
+    // Ensure font size is within bounds
+    fontSize = Math.max(minFontSize, Math.min(maxFontSize, fontSize));
+    
+    // Set context properties for measurement
+    ctx.save();
+    ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Measure text width
+    const textMetrics = ctx.measureText(text);
+    const textWidth = textMetrics.width;
+    const textHeight = fontSize * 1.2; // Approximate text height
+    
+    // Calculate available space (leave margins)
+    const marginX = width * 0.1; // 10% margin on each side
+    const marginY = height * 0.1; // 10% margin on top and bottom
+    const availableWidth = width - (marginX * 2);
+    const availableHeight = height - (marginY * 2);
+    
+    // Adjust font size if text is too wide
+    if (textWidth > availableWidth) {
+      fontSize = (availableWidth / textWidth) * fontSize;
+      fontSize = Math.max(minFontSize, fontSize);
+      ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+    }
+    
+    // Adjust font size if text is too tall
+    if (textHeight > availableHeight) {
+      fontSize = (availableHeight / textHeight) * fontSize;
+      fontSize = Math.max(minFontSize, fontSize);
+      ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+    }
+    
+    // Draw watermark at the center
+    const centerX = width / 2;
+    const centerY = height / 2;
+    
+    // Set drawing properties with reduced opacity
+    ctx.globalAlpha = 0.15; // Reduced opacity for subtlety
+    ctx.fillStyle = '#666666';
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2; // Thinner stroke
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Draw stroke first (white outline), then fill (gray text)
+    ctx.strokeText(text, centerX, centerY);
+    ctx.fillText(text, centerX, centerY);
+    
+    ctx.restore();
+    
+    console.log('Watermark drawn:', { centerX, centerY, fontSize, width, height, textWidth });
+  } catch (error) {
+    console.error('Error adding watermark:', error);
   }
-  
-  ctx.restore();
 };
 
 /**
@@ -131,7 +182,7 @@ export const downloadSignatureWithWatermark = async (element, filename = 'signat
     }
 
     // Capture the signature (watermark is already in the HTML at the bottom)
-    const canvas = await html2canvas(element, {
+    const originalCanvas = await html2canvas(element, {
       backgroundColor: '#ffffff',
       scale: 2, // Higher quality
       logging: false,
@@ -148,8 +199,19 @@ export const downloadSignatureWithWatermark = async (element, filename = 'signat
       },
     });
 
-    // Add subtle diagonal watermark overlay to make it harder to remove/crop
+    // Create a new canvas and copy the original image, then add watermark
+    const canvas = document.createElement('canvas');
+    canvas.width = originalCanvas.width;
+    canvas.height = originalCanvas.height;
+    const ctx = canvas.getContext('2d');
+    
+    // Draw the original canvas onto the new canvas
+    ctx.drawImage(originalCanvas, 0, 0);
+    
+    // Add watermark overlay to make it harder to remove/crop
+    console.log('Adding watermark to canvas:', { width: canvas.width, height: canvas.height });
     addDiagonalWatermark(canvas);
+    console.log('Watermark added');
 
     // Convert to blob and download
     canvas.toBlob((blob) => {

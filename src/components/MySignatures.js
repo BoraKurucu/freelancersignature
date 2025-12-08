@@ -96,9 +96,9 @@ function MySignatures() {
 
       if (isUserPremium) {
         // Premium users: download PNG without watermark
-        await downloadSignatureAsPNG(signatureElement, filename, false);
+        await downloadSignatureAsPNG(signatureElement, filename);
       } else {
-        // Free users: download PNG with watermark
+        // Free/non-logged-in users: download PNG with watermark
         await downloadSignatureWithWatermark(signatureElement, filename);
       }
     } catch (error) {
