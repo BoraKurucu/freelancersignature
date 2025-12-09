@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import SignaturePreview from './SignaturePreview';
 import UserMenu from './UserMenu';
 import AuthModal from './AuthModal';
@@ -46,6 +46,7 @@ const defaultSignatureData = {
 
 function SignatureBuilder() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { currentUser, isFullyAuthenticated, isPremium } = useAuth();
   
   const [selectedTemplate, setSelectedTemplate] = useState('gradientSidebar');
@@ -180,7 +181,21 @@ function SignatureBuilder() {
       handleSave();
     } else if (authAction === 'download') {
       handleDownload();
+    } else if (authAction === 'upgrade') {
+      navigate('/premium');
     }
+  };
+
+  const handleUpgradeClick = () => {
+    // Check if user is authenticated
+    if (!currentUser || !isFullyAuthenticated()) {
+      setAuthAction('upgrade');
+      setShowAuthModal(true);
+      return;
+    }
+    
+    // If signed in, navigate to premium page
+    navigate('/premium');
   };
 
   const handleDownload = async () => {
@@ -205,6 +220,7 @@ function SignatureBuilder() {
         await downloadSignatureAsPNG(signatureElement, filename);
       } else {
         // Free/non-logged-in users: download PNG with watermark
+        // The downloadSignatureWithWatermark function adds watermark programmatically
         await downloadSignatureWithWatermark(signatureElement, filename);
       }
     } catch (error) {
@@ -524,7 +540,7 @@ function SignatureBuilder() {
             {!isPremium() && (
               <p className="watermark-notice">
                 ✨ Free signatures include a small "Created with FreelancerSignature" link. 
-                <span className="upgrade-link"> Upgrade to remove →</span>
+                <span className="upgrade-link" onClick={handleUpgradeClick}> Upgrade to remove →</span>
               </p>
             )}
           </div>
@@ -536,7 +552,7 @@ function SignatureBuilder() {
             <p>This is how your signature will look</p>
           </div>
           <div className="preview-container" ref={previewRef}>
-            <SignaturePreview signatureData={signatureData} showWatermark={!isPremium()} />
+            <SignaturePreview signatureData={signatureData} showWatermark={false} />
           </div>
         </div>
       </div>

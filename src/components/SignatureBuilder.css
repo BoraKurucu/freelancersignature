@@ -367,6 +367,8 @@
 }
 
 .watermark-notice .upgrade-link {
+  cursor: pointer;
+  user-select: none;
   color: #667eea;
   cursor: pointer;
   font-weight: 600;
