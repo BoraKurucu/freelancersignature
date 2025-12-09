@@ -4,6 +4,7 @@ import SignaturePreview from './SignaturePreview';
 import UserMenu from './UserMenu';
 import AuthModal from './AuthModal';
 import Toast from './Toast';
+import ImageUploadCrop from './ImageUploadCrop';
 import { saveSignature, getSignatureCount } from '../services/signatureService';
 import { generateHTMLSignature } from '../utils/signatureGenerator';
 import { downloadSignatureAsPNG, downloadSignatureWithWatermark } from '../utils/signatureDownloader';
@@ -646,26 +647,28 @@ function SignatureBuilder() {
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>Photo URL</label>
-                <input 
-                  type="url" 
-                  name="photoUrl" 
-                  value={signatureData.photoUrl} 
-                  onChange={handleChange} 
-                  placeholder="https://example.com/your-photo.jpg"
+                <label>Photo</label>
+                <ImageUploadCrop
+                  value={signatureData.photoUrl}
+                  onChange={handleChange}
                   disabled={!enabledFields.photoUrl}
+                  label="Photo"
+                  placeholder="https://example.com/your-photo.jpg"
+                  hint="Upload your photo or paste a URL. Use a professional headshot for best results."
+                  fieldName="photoUrl"
                 />
-                <small className="input-hint">Use a professional headshot for best results</small>
               </div>
               <div className="form-group">
-                <label>Logo URL (optional)</label>
-                <input 
-                  type="url" 
-                  name="logoUrl" 
-                  value={signatureData.logoUrl} 
-                  onChange={handleChange} 
-                  placeholder="https://example.com/logo.png"
+                <label>Logo (optional)</label>
+                <ImageUploadCrop
+                  value={signatureData.logoUrl}
+                  onChange={handleChange}
                   disabled={!enabledFields.logoUrl}
+                  label="Logo"
+                  placeholder="https://example.com/logo.png"
+                  hint="Upload your logo or paste a URL"
+                  fieldName="logoUrl"
+                  aspectRatio={null}
                 />
               </div>
             </div>
