@@ -20,25 +20,13 @@ function Home() {
         <div className="hero-content">
           <div className="hero-badge">
             <span className="badge-icon">⚡</span>
-            <span>The Only Signature Generator Built for Freelancers</span>
+            <span>The Only Email Signature Generator Built for Freelancers</span>
           </div>
           
           <h1 className="hero-title">
             Email Signatures That
             <span className="gradient-text"> Win Clients</span>
           </h1>
-          
-          <p className="hero-subtitle">
-            Stop blending in. Show your rates, booking links, and portfolio<br />
-            in every email. Get more clients without extra work.
-          </p>
-
-          <div className="hero-features">
-            <div className="feature-pill">💰 Show Your Rates</div>
-            <div className="feature-pill">📅 Booking Links</div>
-            <div className="feature-pill">🎨 Portfolio Links</div>
-            <div className="feature-pill">✅ Availability Status</div>
-          </div>
 
           <div className="hero-cta">
             <Link to="/builder" className="btn-primary-large">
