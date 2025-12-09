@@ -386,6 +386,19 @@
   text-decoration: underline;
 }
 
+.signature-count-info {
+  width: 100%;
+  text-align: center;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.signature-count-info .limit-reached {
+  color: #e67e22;
+  font-weight: 600;
+}
+
 .btn {
   flex: 1;
   padding: 12px 18px;

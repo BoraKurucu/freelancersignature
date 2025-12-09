@@ -3,7 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import SignaturePreview from './SignaturePreview';
 import UserMenu from './UserMenu';
 import AuthModal from './AuthModal';
-import { saveSignature } from '../services/signatureService';
+import Toast from './Toast';
+import { saveSignature, getSignatureCount } from '../services/signatureService';
 import { generateHTMLSignature } from '../utils/signatureGenerator';
 import { downloadSignatureAsPNG, downloadSignatureWithWatermark } from '../utils/signatureDownloader';
 import { templates, sampleProfiles } from '../utils/templates';
@@ -161,10 +162,52 @@ function SignatureBuilder() {
   const [downloading, setDownloading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authAction, setAuthAction] = useState('save');
+  const [signatureCount, setSignatureCount] = useState(0);
+  const [toast, setToast] = useState({ message: '', type: 'info', isVisible: false });
   const previewRef = useRef(null);
+  
+  const showToast = (message, type = 'info') => {
+    setToast({ message, type, isVisible: true });
+  };
+  
+  const hideToast = () => {
+    setToast(prev => ({ ...prev, isVisible: false }));
+  };
   
   // Get enabled fields for current template
   const enabledFields = getTemplateFields(selectedTemplate);
+  
+  // Load signature count when user changes
+  useEffect(() => {
+    let isMounted = true;
+    
+    const loadSignatureCount = async () => {
+      if (currentUser && isFullyAuthenticated()) {
+        try {
+          const count = await getSignatureCount(currentUser.uid);
+          if (isMounted) {
+            setSignatureCount(count);
+          }
+        } catch (error) {
+          // Silently handle errors - don't show alerts on page load
+          console.error('Error loading signature count:', error);
+          if (isMounted) {
+            setSignatureCount(0);
+          }
+        }
+      } else {
+        if (isMounted) {
+          setSignatureCount(0);
+        }
+      }
+    };
+    
+    loadSignatureCount();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser, isFullyAuthenticated]);
 
   // Load profile from navigation state (when coming from Home page)
   useEffect(() => {
@@ -268,15 +311,31 @@ function SignatureBuilder() {
     }
 
     try {
+      // Check signature count limit
+      const signatureCount = await getSignatureCount(currentUser.uid);
+      const maxSignatures = isPremium() ? 10 : 2;
+      
+      if (signatureCount >= maxSignatures) {
+        const planType = isPremium() ? 'Premium' : 'Free';
+        const message = isPremium()
+          ? `You've reached your Premium plan limit of ${maxSignatures} saved signatures. Please delete an existing signature to save a new one.`
+          : `You've reached your Free plan limit of ${maxSignatures} saved signatures. Upgrade to Premium to save up to 10 signatures!`;
+        showToast(message, 'warning');
+        return;
+      }
+
       await saveSignature({
         ...signatureData,
         userId: currentUser.uid,
       });
+      // Update signature count after saving
+      const newCount = await getSignatureCount(currentUser.uid);
+      setSignatureCount(newCount);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (error) {
       console.error('Error saving signature:', error);
-      alert('Failed to save signature. Please try again.');
+      showToast('Failed to save signature. Please try again.', 'error');
     }
   };
 
@@ -327,12 +386,43 @@ function SignatureBuilder() {
         await downloadSignatureAsPNG(signatureElement, filename);
       } else {
         // Free/non-logged-in users: download PNG with watermark
-        // The downloadSignatureWithWatermark function adds watermark programmatically
-        await downloadSignatureWithWatermark(signatureElement, filename);
+        // Temporarily add watermark element to the preview for download
+        const watermarkExists = signatureElement.querySelector('.signature-watermark');
+        let watermarkAdded = false;
+        
+        if (!watermarkExists) {
+          // Create temporary watermark element for download
+          const watermarkDiv = document.createElement('div');
+          watermarkDiv.className = 'signature-watermark';
+          watermarkDiv.innerHTML = '✨ Created with <a href="https://freelancersignature.com" target="_blank" rel="noopener noreferrer">freelancersignature.com</a>';
+          // Match the CSS styling from SignaturePreview.css
+          watermarkDiv.style.cssText = 'width: 100%; margin-top: 12px; padding-top: 10px; border-top: 1px solid #e8e8e8; font-size: 11px; color: #888888; text-align: center; font-family: Arial, sans-serif;';
+          // Style the link inside
+          const link = watermarkDiv.querySelector('a');
+          if (link) {
+            link.style.cssText = 'color: #667eea; text-decoration: none; font-weight: 600;';
+          }
+          signatureElement.appendChild(watermarkDiv);
+          watermarkAdded = true;
+          // Small delay to ensure watermark is rendered
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+        
+        try {
+          await downloadSignatureWithWatermark(signatureElement, filename);
+        } finally {
+          // Remove temporary watermark if we added it
+          if (watermarkAdded) {
+            const addedWatermark = signatureElement.querySelector('.signature-watermark');
+            if (addedWatermark) {
+              addedWatermark.remove();
+            }
+          }
+        }
       }
     } catch (error) {
       console.error('Error downloading signature:', error);
-      alert('Failed to download signature. Please try again.');
+      showToast('Failed to download signature. Please try again.', 'error');
     } finally {
       setDownloading(false);
     }
@@ -738,6 +828,16 @@ function SignatureBuilder() {
             <button onClick={handleSave} className="btn btn-secondary">
               {saved ? '✓ Saved!' : '💾 Save'}
             </button>
+            {currentUser && isFullyAuthenticated() && (
+              <div className="signature-count-info">
+                <small>
+                  {signatureCount} / {isPremium() ? 10 : 2} signatures saved
+                  {signatureCount >= (isPremium() ? 10 : 2) && (
+                    <span className="limit-reached"> (Limit reached)</span>
+                  )}
+                </small>
+              </div>
+            )}
             <button 
               onClick={handleDownload} 
               className="btn btn-secondary"
@@ -775,6 +875,14 @@ function SignatureBuilder() {
         onClose={() => setShowAuthModal(false)}
         onSuccess={handleAuthSuccess}
         requiredAction={authAction}
+      />
+      
+      {/* Toast Notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
       />
     </div>
   );

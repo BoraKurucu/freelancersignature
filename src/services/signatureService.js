@@ -47,6 +47,25 @@ export const getSignatures = async (userId) => {
   }
 };
 
+// Get signature count for a user
+export const getSignatureCount = async (userId) => {
+  try {
+    if (!userId) {
+      return 0;
+    }
+    
+    const q = query(
+      collection(db, 'signatures'), 
+      where('userId', '==', userId)
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.size;
+  } catch (error) {
+    console.error('Error getting signature count:', error);
+    throw error;
+  }
+};
+
 // Delete a signature from Firestore
 export const deleteSignature = async (signatureId, userId) => {
   try {
