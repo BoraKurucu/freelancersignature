@@ -153,7 +153,7 @@ const getTemplateFields = (templateKey) => {
 function SignatureBuilder() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { currentUser, isFullyAuthenticated, isPremium } = useAuth();
+  const { currentUser, isFullyAuthenticated, isPremium, loading: authLoading, userProfile } = useAuth();
   
   const [selectedTemplate, setSelectedTemplate] = useState('gradientSidebar');
   const [selectedProfile, setSelectedProfile] = useState(null);
@@ -311,14 +311,26 @@ function SignatureBuilder() {
       return;
     }
 
+    // Wait for auth and user profile to finish loading to ensure premium status is accurate
+    // This prevents showing the wrong message for premium users
+    if (authLoading || (currentUser && !userProfile)) {
+      // Poll until auth and profile are loaded (max 1 second)
+      let attempts = 0;
+      while ((authLoading || (currentUser && !userProfile)) && attempts < 10) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+    }
+
     try {
       // Check signature count limit
       const signatureCount = await getSignatureCount(currentUser.uid);
-      const maxSignatures = isPremium() ? 10 : 2;
+      // Double-check premium status after waiting for profile to load
+      const premiumStatus = isPremium();
+      const maxSignatures = premiumStatus ? 10 : 2;
       
       if (signatureCount >= maxSignatures) {
-        const planType = isPremium() ? 'Premium' : 'Free';
-        const message = isPremium()
+        const message = premiumStatus
           ? `You've reached your Premium plan limit of ${maxSignatures} saved signatures. Please delete an existing signature to save a new one.`
           : `You've reached your Free plan limit of ${maxSignatures} saved signatures. Upgrade to Premium to save up to 10 signatures!`;
         showToast(message, 'warning');
