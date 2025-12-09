@@ -123,7 +123,7 @@ function MySignatures() {
   return (
     <div className="my-signatures-container">
       <div className="my-signatures-header">
-        <Link to="/" className="back-link">← Back to Home</Link>
+        <Link to="/builder" className="back-link">← Back to Builder</Link>
         <h1>My Signatures</h1>
         <p className="header-subtitle">Manage and copy your email signatures</p>
         <Link to="/builder" className="btn-primary">

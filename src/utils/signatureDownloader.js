@@ -124,7 +124,7 @@ export const addDiagonalWatermark = (canvas) => {
     const centerY = height / 2;
     
     // Set drawing properties with opacity
-    ctx.globalAlpha = 0.25; // 25% opacity
+    ctx.globalAlpha = 0.15; // 15% opacity
     ctx.fillStyle = '#666666';
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 2; // Thinner stroke
