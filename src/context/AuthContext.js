@@ -282,6 +282,7 @@ export function AuthProvider({ children }) {
       'auth/popup-closed-by-user': 'Sign-in popup was closed. Please try again.',
       'auth/cancelled-popup-request': 'Sign-in was cancelled.',
       'auth/popup-blocked': 'Sign-in popup was blocked. Please allow popups for this site.',
+      'auth/unauthorized-domain': 'This domain is not authorized for sign-in. Please contact support or try again later.',
     };
     return errorMessages[errorCode] || 'An error occurred. Please try again.';
   }
