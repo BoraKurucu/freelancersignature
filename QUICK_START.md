@@ -70,3 +70,4 @@ Follow the instructions in `WEBHOOK_SETUP.md` to:
 - See `GUMROAD_SETUP_GUIDE.md` for product configuration
 - See `WEBHOOK_SETUP.md` for webhook setup
 - See `INTEGRATION_CHECKLIST.md` for complete checklist
+

@@ -41,3 +41,4 @@ Your webhook is working correctly but can't access freelancersignature Firestore
 This grants the gamerlinks Cloud Function's service account permission to read/write to the freelancersignature Firestore database.
 
 After granting access, the webhook will work immediately! 🚀
+
