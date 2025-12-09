@@ -92,3 +92,4 @@ For integration issues:
 - Check webhook logs
 - Review Firestore security rules
 - Verify environment variables are set correctly
+

@@ -44,6 +44,110 @@ const defaultSignatureData = {
   },
 };
 
+// Function to determine which fields are used by each template layout
+const getTemplateFields = (templateKey) => {
+  const template = templates[templateKey];
+  const layout = template?.layout || 'gradientSidebar';
+  
+  // Base fields that are always used
+  const baseFields = {
+    name: true,
+    specialty: true,
+    email: true,
+    photoUrl: true,
+    hourlyRate: true,
+    availability: true,
+    bookingUrl: true,
+    portfolioUrl: true,
+  };
+  
+  // Field usage by layout - based on actual SignaturePreview.js implementations
+  const layoutFields = {
+    gradientSidebar: {
+      ...baseFields,
+      company: true,
+      mobile: true,
+      phone: true,
+      address: true,
+    },
+    scriptElegant: {
+      ...baseFields,
+      companyScript: true,
+      mobile: true,
+      phone: true,
+      website: true,
+      address: true,
+      logoUrl: true,
+    },
+    redCircle: {
+      ...baseFields,
+      company: true,
+      phone: true,
+      website: true,
+      address: true,
+    },
+    simplePhoto: {
+      ...baseFields,
+      phone: true,
+      website: true,
+      address: true,
+    },
+    twoColumnWithLogo: {
+      ...baseFields,
+      company: true,
+      phone: true,
+      mobile: true,
+      website: true,
+      address: true,
+    },
+    photoSidebar: {
+      ...baseFields,
+      company: true,
+      tagline: true,
+      phone: true,
+      website: true,
+      address: true,
+    },
+    twoColumnSimple: {
+      ...baseFields,
+      company: true,
+      phone: true,
+      mobile: true,
+      website: true,
+      address: true,
+    },
+    photoWithScript: {
+      ...baseFields,
+      phone: true,
+      website: true,
+      address: true,
+    },
+    // Default layout (used by yellowHexagon, orangeBanner, blueModern, blackFooter if not implemented)
+    // Based on default fallback in SignaturePreview.js - uses: name, specialty, email, phone, website
+    default: {
+      name: true,
+      specialty: true,
+      email: true,
+      phone: true,
+      website: true,
+      photoUrl: true,
+      hourlyRate: true,
+      availability: true,
+      bookingUrl: true,
+      portfolioUrl: true,
+      // These are NOT used in default layout
+      company: false,
+      companyScript: false,
+      tagline: false,
+      mobile: false,
+      address: false,
+      logoUrl: false,
+    },
+  };
+  
+  return layoutFields[layout] || layoutFields.default;
+};
+
 function SignatureBuilder() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -58,6 +162,9 @@ function SignatureBuilder() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authAction, setAuthAction] = useState('save');
   const previewRef = useRef(null);
+  
+  // Get enabled fields for current template
+  const enabledFields = getTemplateFields(selectedTemplate);
 
   // Load profile from navigation state (when coming from Home page)
   useEffect(() => {
@@ -332,46 +439,109 @@ function SignatureBuilder() {
             <div className="form-row">
               <div className="form-group">
                 <label>Full Name *</label>
-                <input type="text" name="name" value={signatureData.name} onChange={handleChange} placeholder="Jane Smith" />
+                <input 
+                  type="text" 
+                  name="name" 
+                  value={signatureData.name} 
+                  onChange={handleChange} 
+                  placeholder="Jane Smith"
+                  disabled={!enabledFields.name}
+                />
               </div>
               <div className="form-group">
                 <label>Title / What You Do *</label>
-                <input type="text" name="specialty" value={signatureData.specialty} onChange={handleChange} placeholder="Freelance UI/UX Designer" />
+                <input 
+                  type="text" 
+                  name="specialty" 
+                  value={signatureData.specialty} 
+                  onChange={handleChange} 
+                  placeholder="Freelance UI/UX Designer"
+                  disabled={!enabledFields.specialty}
+                />
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
                 <label>Company (optional)</label>
-                <input type="text" name="company" value={signatureData.company} onChange={handleChange} placeholder="Your Studio Name" />
+                <input 
+                  type="text" 
+                  name="company" 
+                  value={signatureData.company} 
+                  onChange={handleChange} 
+                  placeholder="Your Studio Name"
+                  disabled={!enabledFields.company}
+                />
               </div>
               <div className="form-group">
                 <label>Company Script (for elegant templates)</label>
-                <input type="text" name="companyScript" value={signatureData.companyScript} onChange={handleChange} placeholder="Design Magic" />
+                <input 
+                  type="text" 
+                  name="companyScript" 
+                  value={signatureData.companyScript} 
+                  onChange={handleChange} 
+                  placeholder="Design Magic"
+                  disabled={!enabledFields.companyScript}
+                />
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
                 <label>Phone</label>
-                <input type="tel" name="phone" value={signatureData.phone} onChange={handleChange} placeholder="+1 (555) 123-4567" />
+                <input 
+                  type="tel" 
+                  name="phone" 
+                  value={signatureData.phone} 
+                  onChange={handleChange} 
+                  placeholder="+1 (555) 123-4567"
+                  disabled={!enabledFields.phone}
+                />
               </div>
               <div className="form-group">
                 <label>Mobile</label>
-                <input type="tel" name="mobile" value={signatureData.mobile} onChange={handleChange} placeholder="+1 (555) 987-6543" />
+                <input 
+                  type="tel" 
+                  name="mobile" 
+                  value={signatureData.mobile} 
+                  onChange={handleChange} 
+                  placeholder="+1 (555) 987-6543"
+                  disabled={!enabledFields.mobile}
+                />
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
                 <label>Email</label>
-                <input type="email" name="email" value={signatureData.email} onChange={handleChange} placeholder="hello@yoursite.com" />
+                <input 
+                  type="email" 
+                  name="email" 
+                  value={signatureData.email} 
+                  onChange={handleChange} 
+                  placeholder="hello@yoursite.com"
+                  disabled={!enabledFields.email}
+                />
               </div>
               <div className="form-group">
                 <label>Website</label>
-                <input type="text" name="website" value={signatureData.website} onChange={handleChange} placeholder="www.yoursite.com" />
+                <input 
+                  type="text" 
+                  name="website" 
+                  value={signatureData.website} 
+                  onChange={handleChange} 
+                  placeholder="www.yoursite.com"
+                  disabled={!enabledFields.website}
+                />
               </div>
             </div>
             <div className="form-group">
               <label>Address (optional)</label>
-              <textarea name="address" value={signatureData.address} onChange={handleChange} placeholder="123 Main St, City, State 12345" rows="2" />
+              <textarea 
+                name="address" 
+                value={signatureData.address} 
+                onChange={handleChange} 
+                placeholder="123 Main St, City, State 12345" 
+                rows="2"
+                disabled={!enabledFields.address}
+              />
             </div>
           </div>
 
@@ -387,12 +557,26 @@ function SignatureBuilder() {
             <div className="form-row">
               <div className="form-group">
                 <label>Photo URL</label>
-                <input type="url" name="photoUrl" value={signatureData.photoUrl} onChange={handleChange} placeholder="https://example.com/your-photo.jpg" />
+                <input 
+                  type="url" 
+                  name="photoUrl" 
+                  value={signatureData.photoUrl} 
+                  onChange={handleChange} 
+                  placeholder="https://example.com/your-photo.jpg"
+                  disabled={!enabledFields.photoUrl}
+                />
                 <small className="input-hint">Use a professional headshot for best results</small>
               </div>
               <div className="form-group">
                 <label>Logo URL (optional)</label>
-                <input type="url" name="logoUrl" value={signatureData.logoUrl} onChange={handleChange} placeholder="https://example.com/logo.png" />
+                <input 
+                  type="url" 
+                  name="logoUrl" 
+                  value={signatureData.logoUrl} 
+                  onChange={handleChange} 
+                  placeholder="https://example.com/logo.png"
+                  disabled={!enabledFields.logoUrl}
+                />
               </div>
             </div>
           </div>
@@ -409,24 +593,52 @@ function SignatureBuilder() {
             <div className="form-row">
               <div className="form-group">
                 <label>💰 Hourly Rate</label>
-                <input type="text" name="hourlyRate" value={signatureData.hourlyRate} onChange={handleChange} placeholder="$95/hour" />
+                <input 
+                  type="text" 
+                  name="hourlyRate" 
+                  value={signatureData.hourlyRate} 
+                  onChange={handleChange} 
+                  placeholder="$95/hour"
+                  disabled={!enabledFields.hourlyRate}
+                />
                 <small className="input-hint">Show clients you're worth it</small>
               </div>
               <div className="form-group">
                 <label>✅ Availability</label>
-                <input type="text" name="availability" value={signatureData.availability} onChange={handleChange} placeholder="Available for projects" />
+                <input 
+                  type="text" 
+                  name="availability" 
+                  value={signatureData.availability} 
+                  onChange={handleChange} 
+                  placeholder="Available for projects"
+                  disabled={!enabledFields.availability}
+                />
                 <small className="input-hint">Let clients know if you're taking on work</small>
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
                 <label>📅 Booking Link (Calendly, Cal.com)</label>
-                <input type="url" name="bookingUrl" value={signatureData.bookingUrl} onChange={handleChange} placeholder="https://calendly.com/yourname" />
+                <input 
+                  type="url" 
+                  name="bookingUrl" 
+                  value={signatureData.bookingUrl} 
+                  onChange={handleChange} 
+                  placeholder="https://calendly.com/yourname"
+                  disabled={!enabledFields.bookingUrl}
+                />
                 <small className="input-hint">Let clients book calls directly</small>
               </div>
               <div className="form-group">
                 <label>🎨 Portfolio Link</label>
-                <input type="url" name="portfolioUrl" value={signatureData.portfolioUrl} onChange={handleChange} placeholder="https://dribbble.com/yourname" />
+                <input 
+                  type="url" 
+                  name="portfolioUrl" 
+                  value={signatureData.portfolioUrl} 
+                  onChange={handleChange} 
+                  placeholder="https://dribbble.com/yourname"
+                  disabled={!enabledFields.portfolioUrl}
+                />
                 <small className="input-hint">Show off your best work</small>
               </div>
             </div>

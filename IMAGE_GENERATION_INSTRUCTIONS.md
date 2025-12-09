@@ -53,3 +53,4 @@ If you want to customize the images:
 - **Download button not working**: Make sure you're using a modern browser (Chrome, Firefox, Safari, Edge)
 - **Images look blurry**: The script uses 2x scale for quality. If still blurry, try increasing the scale value in the script
 - **Wrong dimensions**: The HTML elements are set to exact dimensions. Make sure your browser isn't zoomed in/out
+

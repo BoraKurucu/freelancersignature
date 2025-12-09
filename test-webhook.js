@@ -32,3 +32,4 @@ console.log('\nWebhook would update user with:');
 console.log('- subscriptionStatus: premium');
 console.log('- gumroadProductId:', productPermalink);
 console.log('- gumroadPurchaseId:', testWebhook.sale_id);
+

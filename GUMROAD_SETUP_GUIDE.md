@@ -118,3 +118,4 @@ You'll also need to set up a webhook endpoint (see `WEBHOOK_SETUP.md` for detail
 - Subscriptions renew automatically
 - Users can cancel anytime from their Gumroad account
 - You'll receive email notifications for new sales
+

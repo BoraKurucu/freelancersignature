@@ -120,3 +120,4 @@ export function getSubscriptionExpiry(purchase) {
 export function getPurchaseEmail(purchase) {
   return purchase?.email || null;
 }
+

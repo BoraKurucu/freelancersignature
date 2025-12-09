@@ -59,3 +59,4 @@ After setting up:
 2. Check Firebase Functions logs: `firebase functions:log`
 3. Verify user subscription status in Firestore
 4. Test that premium features unlock
+

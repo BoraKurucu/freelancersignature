@@ -53,3 +53,4 @@ If you can't access the Firebase Console, I can help you:
 3. Or manually update your subscription in Firestore
 
 **But the easiest fix is granting permissions in the Firebase Console!**
+

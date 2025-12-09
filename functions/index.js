@@ -191,3 +191,4 @@ exports.gumroadWebhook = functions.https.onRequest(async (req, res) => {
     return res.status(500).send('Internal Server Error');
   }
 });
+
