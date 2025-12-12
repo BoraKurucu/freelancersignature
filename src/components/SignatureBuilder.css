@@ -493,6 +493,17 @@
   max-height: calc(100vh - 200px);
 }
 
+/* Error fallback styles */
+.signature-preview.error-fallback {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+}
+
 /* ===========================================
    MOBILE RESPONSIVE
    =========================================== */
@@ -508,9 +519,13 @@
   }
 
   .builder-preview {
-    position: relative;
+    position: sticky;
     top: 0;
+    z-index: 10;
     order: -1;
+    margin-bottom: 20px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   }
 
   .template-grid {
