@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, startTransition } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import SignaturePreview from './SignaturePreview';
 import UserMenu from './UserMenu';
@@ -165,7 +165,9 @@ function SignatureBuilder() {
   const [authAction, setAuthAction] = useState('save');
   const [signatureCount, setSignatureCount] = useState(0);
   const [toast, setToast] = useState({ message: '', type: 'info', isVisible: false });
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const previewRef = useRef(null);
+  const loadingProfileRef = useRef(false); // Ref to prevent multiple simultaneous loads
   
   const showToast = (message, type = 'info') => {
     setToast({ message, type, isVisible: true });
@@ -247,33 +249,80 @@ function SignatureBuilder() {
     }
   };
 
-  const loadSampleProfile = (profileKey) => {
-    // Toggle behavior - if same profile clicked, reset to default
-    if (selectedProfile === profileKey) {
-      resetForm();
+  const loadSampleProfile = useCallback((profileKey) => {
+    // Prevent rapid clicks that can cause crashes on mobile - use ref for immediate check
+    if (loadingProfileRef.current || isLoadingProfile) {
       return;
     }
 
-    const profile = sampleProfiles[profileKey];
-    if (profile) {
-      setSelectedProfile(profileKey);
-      setSignatureData({
-        ...defaultSignatureData,
-        ...profile,
-        socialLinks: {
-          ...defaultSignatureData.socialLinks,
-          ...(profile.socialLinks || {}),
-        },
-      });
-      setSelectedTemplate(profile.template);
-    }
-  };
+    try {
+      // Toggle behavior - if same profile clicked, reset to default
+      if (selectedProfile === profileKey) {
+        resetForm();
+        return;
+      }
 
-  const resetForm = () => {
+      const profile = sampleProfiles[profileKey];
+      if (!profile) {
+        console.error(`Profile not found: ${profileKey}`);
+        showToast('Profile not found. Please try another option.', 'error');
+        return;
+      }
+
+      // Set loading flags immediately to prevent multiple calls
+      loadingProfileRef.current = true;
+      setIsLoadingProfile(true);
+
+      // Use requestAnimationFrame for better mobile performance, then startTransition for non-urgent updates
+      requestAnimationFrame(() => {
+        startTransition(() => {
+          try {
+            // Batch all state updates together to prevent multiple re-renders
+            const newTemplate = (profile.template && templates[profile.template]) 
+              ? profile.template 
+              : 'gradientSidebar';
+            
+            // Update all states in a single batch
+            setSelectedProfile(profileKey);
+            setSelectedTemplate(newTemplate);
+            setSignatureData({
+              ...defaultSignatureData,
+              ...profile,
+              template: newTemplate,
+              socialLinks: {
+                ...defaultSignatureData.socialLinks,
+                ...(profile.socialLinks || {}),
+              },
+            });
+            
+            // Reset loading state after a small delay to ensure state updates complete
+            setTimeout(() => {
+              setIsLoadingProfile(false);
+              loadingProfileRef.current = false;
+            }, 100);
+          } catch (error) {
+            console.error('Error updating state in loadSampleProfile:', error);
+            setIsLoadingProfile(false);
+            loadingProfileRef.current = false;
+            showToast('Failed to load profile. Please try again.', 'error');
+          }
+        });
+      });
+    } catch (error) {
+      console.error('Error loading sample profile:', error);
+      setIsLoadingProfile(false);
+      loadingProfileRef.current = false;
+      showToast('Failed to load profile. Please try again.', 'error');
+    }
+  }, [selectedProfile, isLoadingProfile, showToast]);
+
+  const resetForm = useCallback(() => {
     setSelectedProfile(null);
     setSignatureData(defaultSignatureData);
     setSelectedTemplate('gradientSidebar');
-  };
+    setIsLoadingProfile(false);
+    loadingProfileRef.current = false;
+  }, []);
 
   const handleCopy = async () => {
     // Check if user is authenticated
@@ -323,11 +372,11 @@ function SignatureBuilder() {
     }
 
     try {
-      // Check signature count limit
+      // Check signature count limit - Free users can save 3 signatures
       const signatureCount = await getSignatureCount(currentUser.uid);
       // Double-check premium status after waiting for profile to load
       const premiumStatus = isPremium();
-      const maxSignatures = premiumStatus ? 10 : 2;
+      const maxSignatures = premiumStatus ? 10 : 3; // Free: 3, Premium: 10
       
       if (signatureCount >= maxSignatures) {
         const message = premiumStatus
@@ -487,10 +536,18 @@ function SignatureBuilder() {
           {allProfiles.map(profile => (
             <button 
               key={profile.key}
-              className={`sample-btn ${selectedProfile === profile.key ? 'active' : ''}`}
-              onClick={() => loadSampleProfile(profile.key)}
+              className={`sample-btn ${selectedProfile === profile.key ? 'active' : ''} ${isLoadingProfile ? 'loading' : ''}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!isLoadingProfile && !loadingProfileRef.current) {
+                  loadSampleProfile(profile.key);
+                }
+              }}
+              disabled={isLoadingProfile || loadingProfileRef.current}
+              type="button"
             >
-              {profile.icon} {profile.label}
+              {isLoadingProfile && selectedProfile === profile.key ? '⏳' : profile.icon} {profile.label}
             </button>
           ))}
         </div>
@@ -846,8 +903,8 @@ function SignatureBuilder() {
             {currentUser && isFullyAuthenticated() && (
               <div className="signature-count-info">
                 <small>
-                  {signatureCount} / {isPremium() ? 10 : 2} signatures saved
-                  {signatureCount >= (isPremium() ? 10 : 2) && (
+                  {signatureCount} / {isPremium() ? 10 : 3} signatures saved
+                  {signatureCount >= (isPremium() ? 10 : 3) && (
                     <span className="limit-reached"> (Limit reached)</span>
                   )}
                 </small>
