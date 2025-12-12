@@ -656,7 +656,6 @@
     padding: 16px 20px;
     background: #f8f9fa;
     border-bottom: 1px solid #e0e0e0;
-    cursor: pointer;
     user-select: none;
     display: flex;
     justify-content: space-between;
@@ -666,6 +665,40 @@
     flex-shrink: 0;
     touch-action: none;
     min-height: 60px;
+  }
+
+  .builder-preview.mobile-visible .preview-close-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.1);
+    color: #333;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    margin-left: 12px;
+  }
+
+  .builder-preview.mobile-visible .preview-close-btn:hover {
+    background: rgba(0, 0, 0, 0.15);
+    transform: scale(1.1);
+  }
+
+  .builder-preview.mobile-visible .preview-close-btn:active {
+    background: rgba(239, 68, 68, 0.2);
+    color: #dc2626;
+    transform: scale(0.95);
   }
 
   .builder-preview .preview-header > div {
