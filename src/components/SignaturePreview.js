@@ -2,7 +2,49 @@ import React from 'react';
 import { templates, socialIcons } from '../utils/templates';
 import './SignaturePreview.css';
 
+// Error boundary component for preview
+class PreviewErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('SignaturePreview error:', error, errorInfo);
+  }
+
+  componentDidUpdate(prevProps) {
+    // Reset error when signatureData changes
+    if (prevProps.signatureData !== this.props.signatureData && this.state.hasError) {
+      this.setState({ hasError: false, error: null });
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="signature-preview error-fallback">
+          <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+            <p>⚠️ Preview unavailable</p>
+            <p style={{ fontSize: '12px', marginTop: '8px' }}>
+              Please try a different template or refresh the page.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 function SignaturePreview({ signatureData, showWatermark = true }) {
+  // Wrap everything in try-catch for additional safety
+  try {
   const {
     name, email, phone, mobile, website, specialty,
     company, companyScript, tagline, address, photoUrl, logoUrl,
@@ -21,9 +63,25 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
     );
   };
 
-  const templateConfig = templates[template] || templates.gradientSidebar;
-  const layout = templateConfig.layout || 'gradientSidebar';
-  const accentColor = color || templateConfig.color;
+  // Safe template config access with fallback
+  let templateConfig;
+  let layout;
+  let accentColor;
+  
+  try {
+    templateConfig = templates[template];
+    if (!templateConfig) {
+      console.warn(`Template ${template} not found, using default`);
+      templateConfig = templates.gradientSidebar;
+    }
+    layout = templateConfig.layout || 'gradientSidebar';
+    accentColor = color || templateConfig.color || '#0d7377';
+  } catch (error) {
+    console.error('Error loading template config:', error);
+    templateConfig = templates.gradientSidebar;
+    layout = 'gradientSidebar';
+    accentColor = color || '#0d7377';
+  }
 
   // Render social icons row
   const renderSocialIcons = (style = 'default', size = 20) => {
@@ -273,6 +331,174 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
     );
   }
 
+  // Layout: Orange Banner
+  if (layout === 'orangeBanner') {
+    const nameParts = (name || 'Your Name').split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
+    return (
+      <div className="signature-preview orange-banner">
+        <div className="sig-row">
+          {photoUrl && (
+            <div className="sig-photo-frame">
+              <img src={photoUrl} alt={name} />
+            </div>
+          )}
+          <div className="sig-info">
+            <div className="sig-name-split">
+              <span className="first">{firstName}</span> <span className="last">{lastName}</span>
+            </div>
+            <div className="sig-title-orange">{specialty || 'Your Title'}</div>
+            <div className="sig-contact-icons-list">
+              {phone && <div className="contact-icon-row"><img src={socialIcons.phone} alt="phone" width="14" />{phone}</div>}
+              {email && <div className="contact-icon-row"><img src={socialIcons.email} alt="email" width="14" />{email}</div>}
+              {website && <div className="contact-icon-row"><img src={socialIcons.website} alt="website" width="14" />{website}</div>}
+            </div>
+            {renderSocialIcons('default', 18)}
+          </div>
+          {logoUrl && (
+            <div className="sig-logo-section">
+              <img src={logoUrl} alt="logo" style={{ maxWidth: '60px', maxHeight: '60px' }} />
+            </div>
+          )}
+        </div>
+        {renderFreelancerCTA()}
+        {renderWatermark()}
+      </div>
+    );
+  }
+
+  // Layout: Yellow Hexagon
+  if (layout === 'yellowHexagon') {
+    return (
+      <div className="signature-preview yellow-hexagon">
+        <div className="sig-row">
+          {photoUrl && (
+            <div className="sig-photo-hex">
+              <img src={photoUrl} alt={name} />
+            </div>
+          )}
+          <div className="sig-content">
+            <div className="sig-name-bold" style={{ color: accentColor }}>{name || 'Your Name'}</div>
+            <div className="sig-title-gray">{specialty || 'Your Title'}</div>
+            <div className="sig-contact-grid">
+              {phone && <div className="contact-grid-item"><img src={socialIcons.phone} alt="phone" width="14" /><span>{phone}</span></div>}
+              {email && <div className="contact-grid-item"><img src={socialIcons.email} alt="email" width="14" /><span>{email}</span></div>}
+              {mobile && <div className="contact-grid-item"><img src={socialIcons.mobile} alt="mobile" width="14" /><span>{mobile}</span></div>}
+              {website && <div className="contact-grid-item"><img src={socialIcons.website} alt="website" width="14" /><span>{website}</span></div>}
+            </div>
+            {renderSocialIcons('default', 18)}
+          </div>
+          {logoUrl && (
+            <div className="sig-logo-col">
+              <img src={logoUrl} alt="logo" style={{ maxWidth: '50px', maxHeight: '50px' }} />
+            </div>
+          )}
+        </div>
+        {renderFreelancerCTA()}
+        {renderWatermark()}
+      </div>
+    );
+  }
+
+  // Layout: Blue Modern
+  if (layout === 'blueModern') {
+    return (
+      <div className="signature-preview blue-modern">
+        <div className="sig-row">
+          <div className="sig-content-left">
+            {company && <div className="sig-company-name">{company}</div>}
+            <div className="sig-name-large" style={{ color: accentColor }}>{name || 'Your Name'}</div>
+            <div className="sig-title-blue">{specialty || 'Your Title'}</div>
+            <div className="sig-contact-grid">
+              {phone && (
+                <div>
+                  <div className="contact-label">Phone</div>
+                  <div className="contact-value">{phone}</div>
+                </div>
+              )}
+              {email && (
+                <div>
+                  <div className="contact-label">Email</div>
+                  <div className="contact-value">{email}</div>
+                </div>
+              )}
+              {mobile && (
+                <div>
+                  <div className="contact-label">Mobile</div>
+                  <div className="contact-value">{mobile}</div>
+                </div>
+              )}
+              {website && (
+                <div>
+                  <div className="contact-label">Website</div>
+                  <div className="contact-value">{website}</div>
+                </div>
+              )}
+            </div>
+            {renderSocialIcons('default', 20)}
+          </div>
+          {photoUrl && (
+            <div className="sig-photo-right">
+              <img src={photoUrl} alt={name} />
+            </div>
+          )}
+        </div>
+        {renderFreelancerCTA()}
+        {renderWatermark()}
+      </div>
+    );
+  }
+
+  // Layout: Black Footer
+  if (layout === 'blackFooter') {
+    return (
+      <div className="signature-preview black-footer">
+        <div className="sig-main">
+          {photoUrl && (
+            <div className="sig-photo-square">
+              <img src={photoUrl} alt={name} />
+            </div>
+          )}
+          <div className="sig-content">
+            <div className="sig-name-elegant" style={{ color: accentColor }}>{name || 'Your Name'}</div>
+            <div className="sig-title-caps">{specialty || 'Your Title'}</div>
+            <div className="sig-contact-grid">
+              {phone && (
+                <div className="contact-item-row">
+                  <img src={socialIcons.phone} alt="phone" width="16" />
+                  <span>{phone}</span>
+                </div>
+              )}
+              {email && (
+                <div className="contact-item-row">
+                  <img src={socialIcons.email} alt="email" width="16" />
+                  <span>{email}</span>
+                </div>
+              )}
+              {mobile && (
+                <div className="contact-item-row">
+                  <img src={socialIcons.mobile} alt="mobile" width="16" />
+                  <span>{mobile}</span>
+                </div>
+              )}
+              {website && (
+                <div className="contact-item-row">
+                  <img src={socialIcons.website} alt="website" width="16" />
+                  <span>{website}</span>
+                </div>
+              )}
+            </div>
+            {renderSocialIcons('default', 20)}
+          </div>
+        </div>
+        {renderFreelancerCTA()}
+        {renderWatermark()}
+      </div>
+    );
+  }
+
   // Layout: Script Personal with Photo
   if (layout === 'photoWithScript') {
     return (
@@ -308,6 +534,30 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
       {renderWatermark()}
     </div>
   );
+  } catch (error) {
+    console.error('Error rendering SignaturePreview:', error);
+    // Return a safe fallback
+    return (
+      <div className="signature-preview error-fallback">
+        <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+          <p>⚠️ Preview unavailable</p>
+          <p style={{ fontSize: '12px', marginTop: '8px' }}>
+            Please try a different template.
+          </p>
+        </div>
+      </div>
+    );
+  }
 }
 
-export default SignaturePreview;
+// Export with error boundary wrapper as default
+export default function SignaturePreviewWithBoundary(props) {
+  return (
+    <PreviewErrorBoundary signatureData={props.signatureData}>
+      <SignaturePreview {...props} />
+    </PreviewErrorBoundary>
+  );
+}
+
+// Also export the unwrapped version for Home page (which doesn't need error boundary)
+export { SignaturePreview };

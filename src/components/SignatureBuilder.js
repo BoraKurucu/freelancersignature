@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, startTransition } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import SignaturePreview from './SignaturePreview';
+import SignaturePreviewWithBoundary from './SignaturePreview';
 import UserMenu from './UserMenu';
 import AuthModal from './AuthModal';
 import Toast from './Toast';
@@ -936,7 +936,7 @@ function SignatureBuilder() {
             <p>This is how your signature will look</p>
           </div>
           <div className="preview-container" ref={previewRef}>
-            <SignaturePreview signatureData={signatureData} showWatermark={false} />
+            <SignaturePreviewWithBoundary signatureData={signatureData} showWatermark={false} />
           </div>
         </div>
       </div>
