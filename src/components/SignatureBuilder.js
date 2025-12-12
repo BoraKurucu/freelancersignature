@@ -170,10 +170,16 @@ function SignatureBuilder() {
   const previewRef = useRef(null);
   const loadingProfileRef = useRef(false); // Ref to prevent multiple simultaneous loads
 
-  // Lock body scroll when preview is open on mobile
+  // Lock body scroll when preview is open on mobile and scroll preview to top
   useEffect(() => {
     if (showPreviewMobile) {
       document.body.classList.add('preview-open');
+      // Scroll preview container to top when opened
+      if (previewRef.current) {
+        setTimeout(() => {
+          previewRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+      }
       return () => {
         document.body.classList.remove('preview-open');
       };
