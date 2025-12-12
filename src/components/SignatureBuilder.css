@@ -732,8 +732,6 @@
     /* Prevent scroll chaining - stops background from scrolling */
     overscroll-behavior-y: contain;
     overscroll-behavior-x: none;
-    /* Auto-scroll to top when opened */
-    scroll-behavior: smooth;
   }
 
   /* Ensure signature preview content fits */
