@@ -947,13 +947,15 @@ function SignatureBuilder() {
               <h2>Live Preview</h2>
               <p>This is how your signature will look</p>
             </div>
-            <button 
-              className="preview-close-btn"
-              onClick={() => setShowPreviewMobile(false)}
-              aria-label="Close preview"
-            >
-              ✕
-            </button>
+            {showPreviewMobile && (
+              <button 
+                className="preview-close-btn"
+                onClick={() => setShowPreviewMobile(false)}
+                aria-label="Close preview"
+              >
+                ✕
+              </button>
+            )}
           </div>
           <div 
             className="preview-container" 

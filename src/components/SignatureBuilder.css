@@ -476,6 +476,11 @@
   gap: 4px;
 }
 
+/* Hide close button on desktop */
+.preview-close-btn {
+  display: none;
+}
+
 .preview-header h2 {
   font-size: 1rem;
   font-weight: 600;
