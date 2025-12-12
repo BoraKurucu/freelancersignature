@@ -26,7 +26,6 @@ const ImageUploadCrop = ({
       const reader = new FileReader();
       reader.addEventListener('load', () => {
         setSrc(reader.result);
-        setOriginalImage(reader.result);
         setShowCropModal(true);
         // Reset crop to default with all required values
         setCrop({ 
