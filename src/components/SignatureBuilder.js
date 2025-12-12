@@ -948,12 +948,18 @@ function SignatureBuilder() {
         </div>
 
         <div className={`builder-preview ${showPreviewMobile ? 'mobile-visible' : ''}`}>
-          <div className="preview-header" onClick={() => setShowPreviewMobile(!showPreviewMobile)}>
-            <div>
+          <div className="preview-header">
+            <div onClick={() => setShowPreviewMobile(!showPreviewMobile)}>
               <h2>Live Preview</h2>
               <p>This is how your signature will look</p>
             </div>
-            <span className={`preview-toggle ${showPreviewMobile ? 'expanded' : ''}`}>▼</span>
+            <button 
+              className="preview-close-btn"
+              onClick={() => setShowPreviewMobile(false)}
+              aria-label="Close preview"
+            >
+              ✕
+            </button>
           </div>
           <div 
             className="preview-container" 
