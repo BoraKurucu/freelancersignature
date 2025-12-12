@@ -180,13 +180,13 @@ function SignatureBuilder() {
     }
   }, [showPreviewMobile]);
   
-  const showToast = (message, type = 'info') => {
+  const showToast = useCallback((message, type = 'info') => {
     setToast({ message, type, isVisible: true });
-  };
+  }, []);
   
-  const hideToast = () => {
+  const hideToast = useCallback(() => {
     setToast(prev => ({ ...prev, isVisible: false }));
-  };
+  }, []);
   
   // Get enabled fields for current template
   const enabledFields = getTemplateFields(selectedTemplate);
@@ -223,13 +223,6 @@ function SignatureBuilder() {
     };
   }, [currentUser, isFullyAuthenticated]);
 
-  // Load profile from navigation state (when coming from Home page)
-  useEffect(() => {
-    if (location.state?.loadProfile) {
-      loadSampleProfile(location.state.loadProfile);
-    }
-  }, [location.state, loadSampleProfile]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setSignatureData(prev => ({
@@ -259,6 +252,14 @@ function SignatureBuilder() {
       }));
     }
   };
+
+  const resetForm = useCallback(() => {
+    setSelectedProfile(null);
+    setSignatureData(defaultSignatureData);
+    setSelectedTemplate('gradientSidebar');
+    setIsLoadingProfile(false);
+    loadingProfileRef.current = false;
+  }, []);
 
   const loadSampleProfile = useCallback((profileKey) => {
     // Prevent rapid clicks that can cause crashes on mobile - use ref for immediate check
@@ -327,13 +328,12 @@ function SignatureBuilder() {
     }
   }, [selectedProfile, isLoadingProfile, showToast, resetForm]);
 
-  const resetForm = useCallback(() => {
-    setSelectedProfile(null);
-    setSignatureData(defaultSignatureData);
-    setSelectedTemplate('gradientSidebar');
-    setIsLoadingProfile(false);
-    loadingProfileRef.current = false;
-  }, []);
+  // Load profile from navigation state (when coming from Home page)
+  useEffect(() => {
+    if (location.state?.loadProfile) {
+      loadSampleProfile(location.state.loadProfile);
+    }
+  }, [location.state, loadSampleProfile]);
 
   const handleCopy = async () => {
     // Check if user is authenticated
