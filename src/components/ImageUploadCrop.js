@@ -17,7 +17,6 @@ const ImageUploadCrop = ({
   const [crop, setCrop] = useState({ unit: '%', width: 90, aspect: aspectRatio });
   const [completedCrop, setCompletedCrop] = useState(null);
   const [showCropModal, setShowCropModal] = useState(false);
-  const [originalImage, setOriginalImage] = useState(null);
   const imgRef = useRef(null);
   const fileInputRef = useRef(null);
 

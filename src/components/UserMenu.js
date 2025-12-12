@@ -27,7 +27,6 @@ function UserMenu({ onSignInClick }) {
   }
 
   const displayName = currentUser.displayName || currentUser.email?.split('@')[0] || 'User';
-  const photoURL = currentUser.photoURL;
   const isVerified = isFullyAuthenticated();
 
   return (

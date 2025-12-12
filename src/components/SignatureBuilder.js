@@ -228,7 +228,7 @@ function SignatureBuilder() {
     if (location.state?.loadProfile) {
       loadSampleProfile(location.state.loadProfile);
     }
-  }, [location.state]);
+  }, [location.state, loadSampleProfile]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -325,7 +325,7 @@ function SignatureBuilder() {
       loadingProfileRef.current = false;
       showToast('Failed to load profile. Please try again.', 'error');
     }
-  }, [selectedProfile, isLoadingProfile, showToast]);
+  }, [selectedProfile, isLoadingProfile, showToast, resetForm]);
 
   const resetForm = useCallback(() => {
     setSelectedProfile(null);
