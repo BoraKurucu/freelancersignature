@@ -169,6 +169,16 @@ function SignatureBuilder() {
   const [showPreviewMobile, setShowPreviewMobile] = useState(false);
   const previewRef = useRef(null);
   const loadingProfileRef = useRef(false); // Ref to prevent multiple simultaneous loads
+
+  // Lock body scroll when preview is open on mobile
+  useEffect(() => {
+    if (showPreviewMobile) {
+      document.body.classList.add('preview-open');
+      return () => {
+        document.body.classList.remove('preview-open');
+      };
+    }
+  }, [showPreviewMobile]);
   
   const showToast = (message, type = 'info') => {
     setToast({ message, type, isVisible: true });
@@ -939,7 +949,12 @@ function SignatureBuilder() {
             </div>
             <span className={`preview-toggle ${showPreviewMobile ? 'expanded' : ''}`}>▼</span>
           </div>
-          <div className="preview-container" ref={previewRef}>
+          <div 
+            className="preview-container" 
+            ref={previewRef}
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+          >
             <SignaturePreviewWithBoundary signatureData={signatureData} showWatermark={false} />
           </div>
         </div>
