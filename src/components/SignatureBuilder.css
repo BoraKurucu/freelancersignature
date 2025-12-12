@@ -108,6 +108,8 @@
   cursor: pointer;
   transition: all 0.2s;
   color: #333;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .sample-btn:hover {
@@ -121,6 +123,20 @@
   border-color: #1a1a1a;
   box-shadow: 0 0 0 2px rgba(26, 26, 26, 0.3);
   transform: translateY(-2px);
+}
+
+.sample-btn.loading,
+.sample-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none;
+}
+
+.sample-btn.loading:hover,
+.sample-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 /* Builder Content - Two Column */
