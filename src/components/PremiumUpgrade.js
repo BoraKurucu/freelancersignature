@@ -4,7 +4,7 @@ import { getGumroadCheckoutUrl } from '../services/gumroadService';
 import './PremiumUpgrade.css';
 
 function PremiumUpgrade() {
-  const { currentUser, userProfile, isPremium } = useAuth();
+  const { currentUser, isPremium } = useAuth();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {

@@ -205,7 +205,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
           </div>
           <div className="sig-info-col">
             <div className="sig-name-caps" style={{ color: accentColor }}>{name?.toUpperCase() || 'YOUR NAME'}</div>
-            <div className="sig-title-company">{specialty} {company && <span style={{ color: accentColor }}>// {company}</span>}</div>
+            <div className="sig-title-company">{specialty} {company && <span style={{ color: accentColor }}>{'// '}{company}</span>}</div>
             <div className="sig-contact-labeled">
               {phone && <div>C: {phone}</div>}
               {email && <div>{email}</div>}

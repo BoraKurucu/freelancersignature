@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getSignatures, deleteSignature } from '../services/signatureService';
 import { generateHTMLSignature } from '../utils/signatureGenerator';
@@ -15,20 +15,8 @@ function MySignatures() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(null);
   const [downloading, setDownloading] = useState(null);
-  const signatureRefs = useRef({});
 
-  useEffect(() => {
-    if (!authLoading) {
-      if (!currentUser || !isFullyAuthenticated()) {
-        // Redirect to builder if not logged in
-        navigate('/builder');
-      } else {
-        loadSignatures();
-      }
-    }
-  }, [currentUser, authLoading, isFullyAuthenticated, navigate]);
-
-  const loadSignatures = async () => {
+  const loadSignatures = useCallback(async () => {
     if (!currentUser) return;
     
     try {
@@ -39,7 +27,18 @@ function MySignatures() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (!currentUser || !isFullyAuthenticated()) {
+        // Redirect to builder if not logged in
+        navigate('/builder');
+      } else {
+        loadSignatures();
+      }
+    }
+  }, [currentUser, authLoading, isFullyAuthenticated, navigate, loadSignatures]);
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this signature?')) {
