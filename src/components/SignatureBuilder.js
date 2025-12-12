@@ -166,6 +166,7 @@ function SignatureBuilder() {
   const [signatureCount, setSignatureCount] = useState(0);
   const [toast, setToast] = useState({ message: '', type: 'info', isVisible: false });
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [showPreviewMobile, setShowPreviewMobile] = useState(false);
   const previewRef = useRef(null);
   const loadingProfileRef = useRef(false); // Ref to prevent multiple simultaneous loads
   
@@ -930,15 +931,37 @@ function SignatureBuilder() {
           </div>
         </div>
 
-        <div className="builder-preview">
-          <div className="preview-header">
-            <h2>Live Preview</h2>
-            <p>This is how your signature will look</p>
+        <div className={`builder-preview ${showPreviewMobile ? 'mobile-visible' : ''}`}>
+          <div className="preview-header" onClick={() => setShowPreviewMobile(!showPreviewMobile)}>
+            <div>
+              <h2>Live Preview</h2>
+              <p>This is how your signature will look</p>
+            </div>
+            <span className={`preview-toggle ${showPreviewMobile ? 'expanded' : ''}`}>▼</span>
           </div>
           <div className="preview-container" ref={previewRef}>
             <SignaturePreviewWithBoundary signatureData={signatureData} showWatermark={false} />
           </div>
         </div>
+
+        {/* Floating preview button for mobile */}
+        {!showPreviewMobile && (
+          <button 
+            className="floating-preview-btn"
+            onClick={() => setShowPreviewMobile(true)}
+            aria-label="Show preview"
+          >
+            👁️
+          </button>
+        )}
+
+        {/* Overlay for mobile preview */}
+        {showPreviewMobile && (
+          <div 
+            className="preview-overlay"
+            onClick={() => setShowPreviewMobile(false)}
+          />
+        )}
       </div>
 
       {/* Auth Modal */}
