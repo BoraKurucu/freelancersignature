@@ -1,5 +1,6 @@
 import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { sanitizeSignatureData } from '../utils/security';
 
 // Save a signature to Firestore
 export const saveSignature = async (signatureData) => {
@@ -8,8 +9,12 @@ export const saveSignature = async (signatureData) => {
       throw new Error('User ID is required to save a signature');
     }
     
+    // Sanitize all input data before saving
+    const sanitizedData = sanitizeSignatureData(signatureData);
+    
     const docRef = await addDoc(collection(db, 'signatures'), {
-      ...signatureData,
+      ...sanitizedData,
+      userId: signatureData.userId, // Keep userId as-is (already validated by auth)
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
