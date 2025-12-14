@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useTransition } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import SignaturePreview from './SignaturePreview';
+import ErrorBoundary from './ErrorBoundary';
 import UserMenu from './UserMenu';
 import AuthModal from './AuthModal';
 import Toast from './Toast';
@@ -165,7 +166,10 @@ function SignatureBuilder() {
   const [authAction, setAuthAction] = useState('save');
   const [signatureCount, setSignatureCount] = useState(0);
   const [toast, setToast] = useState({ message: '', type: 'info', isVisible: false });
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const previewRef = useRef(null);
+  const profileSwitchTimeoutRef = useRef(null);
   
   const showToast = (message, type = 'info') => {
     setToast({ message, type, isVisible: true });
@@ -247,7 +251,17 @@ function SignatureBuilder() {
     }
   };
 
-  const loadSampleProfile = (profileKey) => {
+  const loadSampleProfile = useCallback((profileKey) => {
+    // Prevent rapid clicking - clear any pending timeouts
+    if (profileSwitchTimeoutRef.current) {
+      clearTimeout(profileSwitchTimeoutRef.current);
+    }
+
+    // If already loading, ignore
+    if (isLoadingProfile) {
+      return;
+    }
+
     // Toggle behavior - if same profile clicked, reset to default
     if (selectedProfile === profileKey) {
       resetForm();
@@ -255,25 +269,72 @@ function SignatureBuilder() {
     }
 
     const profile = sampleProfiles[profileKey];
-    if (profile) {
-      setSelectedProfile(profileKey);
-      setSignatureData({
-        ...defaultSignatureData,
-        ...profile,
-        socialLinks: {
-          ...defaultSignatureData.socialLinks,
-          ...(profile.socialLinks || {}),
-        },
-      });
-      setSelectedTemplate(profile.template);
+    if (!profile) {
+      console.warn('Profile not found:', profileKey);
+      return;
     }
-  };
 
-  const resetForm = () => {
-    setSelectedProfile(null);
-    setSignatureData(defaultSignatureData);
-    setSelectedTemplate('gradientSidebar');
-  };
+    // Set loading state
+    setIsLoadingProfile(true);
+
+    // Use startTransition for non-urgent updates to prevent blocking
+    startTransition(() => {
+      try {
+        // Prepare new data
+        const newSignatureData = {
+          ...defaultSignatureData,
+          ...profile,
+          socialLinks: {
+            ...defaultSignatureData.socialLinks,
+            ...(profile.socialLinks || {}),
+          },
+        };
+
+        // Batch state updates together
+        setSelectedProfile(profileKey);
+        setSignatureData(newSignatureData);
+        setSelectedTemplate(profile.template || 'gradientSidebar');
+
+        // Small delay to ensure React has time to render
+        // This prevents blank screens on mobile browsers
+        profileSwitchTimeoutRef.current = setTimeout(() => {
+          setIsLoadingProfile(false);
+          profileSwitchTimeoutRef.current = null;
+        }, 100);
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        setIsLoadingProfile(false);
+        showToast('Failed to load profile. Please try again.', 'error');
+      }
+    });
+  }, [selectedProfile, isLoadingProfile, startTransition]);
+
+  const resetForm = useCallback(() => {
+    // Clear any pending profile switches
+    if (profileSwitchTimeoutRef.current) {
+      clearTimeout(profileSwitchTimeoutRef.current);
+      profileSwitchTimeoutRef.current = null;
+    }
+
+    setIsLoadingProfile(true);
+    startTransition(() => {
+      setSelectedProfile(null);
+      setSignatureData(defaultSignatureData);
+      setSelectedTemplate('gradientSidebar');
+      setTimeout(() => {
+        setIsLoadingProfile(false);
+      }, 50);
+    });
+  }, [startTransition]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (profileSwitchTimeoutRef.current) {
+        clearTimeout(profileSwitchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleCopy = async () => {
     // Check if user is authenticated
@@ -489,6 +550,11 @@ function SignatureBuilder() {
               key={profile.key}
               className={`sample-btn ${selectedProfile === profile.key ? 'active' : ''}`}
               onClick={() => loadSampleProfile(profile.key)}
+              disabled={isLoadingProfile || isPending}
+              style={{ 
+                opacity: (isLoadingProfile || isPending) ? 0.6 : 1,
+                cursor: (isLoadingProfile || isPending) ? 'wait' : 'pointer'
+              }}
             >
               {profile.icon} {profile.label}
             </button>
@@ -879,7 +945,26 @@ function SignatureBuilder() {
             <p>This is how your signature will look</p>
           </div>
           <div className="preview-container" ref={previewRef}>
-            <SignaturePreview signatureData={signatureData} showWatermark={false} />
+            {(isLoadingProfile || isPending) ? (
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                minHeight: '200px',
+                color: '#666',
+                fontSize: '14px'
+              }}>
+                Loading preview...
+              </div>
+            ) : (
+              <ErrorBoundary>
+                <SignaturePreview 
+                  key={`${selectedProfile || 'default'}-${selectedTemplate}-${Date.now()}`}
+                  signatureData={signatureData} 
+                  showWatermark={false} 
+                />
+              </ErrorBoundary>
+            )}
           </div>
         </div>
       </div>

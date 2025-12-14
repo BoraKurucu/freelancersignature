@@ -3,6 +3,15 @@ import { templates, socialIcons } from '../utils/templates';
 import './SignaturePreview.css';
 
 function SignaturePreview({ signatureData, showWatermark = true }) {
+  // Safety check - if no signatureData, return empty div to prevent blank screen
+  if (!signatureData || typeof signatureData !== 'object') {
+    return (
+      <div className="signature-preview default-layout" style={{ padding: '20px', color: '#666' }}>
+        <div>No signature data available</div>
+      </div>
+    );
+  }
+
   const {
     name, email, phone, mobile, website, specialty,
     company, companyScript, tagline, address, photoUrl, logoUrl,
@@ -12,7 +21,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
     servicePackages,
     industry, githubStats, techStack, dribbbleShots, designTools,
     publishedArticles, certifications, yearsExperience
-  } = signatureData || {};
+  } = signatureData;
   
   // Watermark component
   const renderWatermark = () => {
@@ -25,8 +34,20 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
   };
 
   const templateConfig = templates[template] || templates.gradientSidebar;
-  const layout = templateConfig.layout || 'gradientSidebar';
-  const accentColor = color || templateConfig.color;
+  let layout = templateConfig?.layout || 'gradientSidebar';
+  const accentColor = color || templateConfig?.color || '#667eea';
+  
+  // Map missing layouts to existing ones to prevent blank screens
+  const layoutMap = {
+    'orangeBanner': 'simplePhoto',      // Map to similar layout
+    'yellowHexagon': 'twoColumnSimple', // Map to similar layout
+    'blueModern': 'twoColumnSimple',     // Map to similar layout
+    'blackFooter': 'twoColumnSimple',    // Map to similar layout
+  };
+  
+  if (layoutMap[layout]) {
+    layout = layoutMap[layout];
+  }
 
   // Render social icons row
   const renderSocialIcons = (style = 'default', size = 20) => {

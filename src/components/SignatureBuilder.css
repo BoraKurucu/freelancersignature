@@ -110,6 +110,13 @@
   cursor: pointer;
   transition: all 0.2s;
   color: #333;
+  user-select: none; /* Prevent text selection on mobile */
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on iOS */
+}
+
+.sample-btn:disabled {
+  cursor: wait;
+  pointer-events: none;
 }
 
 .sample-btn:hover {
@@ -479,6 +486,9 @@
   max-height: calc(100vh - 200px); /* Fallback for older browsers */
   max-height: calc(-webkit-fill-available - 200px); /* iOS Safari fix */
   max-height: calc(100dvh - 200px); /* Dynamic viewport height - prevents layout shift */
+  min-height: 200px; /* Prevent blank screen during transitions */
+  position: relative; /* Ensure content stays visible */
+  will-change: contents; /* Optimize for transitions */
 }
 
 /* ===========================================
