@@ -54,3 +54,4 @@ If you want to customize the images:
 - **Images look blurry**: The script uses 2x scale for quality. If still blurry, try increasing the scale value in the script
 - **Wrong dimensions**: The HTML elements are set to exact dimensions. Make sure your browser isn't zoomed in/out
 
+

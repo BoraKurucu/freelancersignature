@@ -60,3 +60,4 @@ After setting up:
 3. Verify user subscription status in Firestore
 4. Test that premium features unlock
 
+

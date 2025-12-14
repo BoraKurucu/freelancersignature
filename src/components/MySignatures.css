@@ -1,5 +1,7 @@
 .my-signatures-container {
-  min-height: 100vh;
+  min-height: 100vh; /* Fallback for older browsers */
+  min-height: -webkit-fill-available; /* iOS Safari fix */
+  min-height: 100dvh; /* Dynamic viewport height - prevents layout shift */
   background: #f5f5f5;
   padding: 2rem;
 }

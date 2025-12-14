@@ -43,3 +43,4 @@ firebase functions:log --project gamerlinks-844c5
 
 Everything is set up and ready. Just test with a purchase to confirm it works! 🎉
 
+

@@ -8,7 +8,9 @@
   padding: 20px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: #f5f5f5;
-  min-height: 100vh;
+  min-height: 100vh; /* Fallback for older browsers */
+  min-height: -webkit-fill-available; /* iOS Safari fix */
+  min-height: 100dvh; /* Dynamic viewport height - prevents layout shift */
 }
 
 .builder-header {
@@ -108,8 +110,6 @@
   cursor: pointer;
   transition: all 0.2s;
   color: #333;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .sample-btn:hover {
@@ -123,20 +123,6 @@
   border-color: #1a1a1a;
   box-shadow: 0 0 0 2px rgba(26, 26, 26, 0.3);
   transform: translateY(-2px);
-}
-
-.sample-btn.loading,
-.sample-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  pointer-events: none;
-  transform: none;
-}
-
-.sample-btn.loading:hover,
-.sample-btn:disabled:hover {
-  transform: none;
-  box-shadow: none;
 }
 
 /* Builder Content - Two Column */
@@ -471,14 +457,6 @@
 .preview-header {
   text-align: center;
   margin-bottom: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-/* Hide close button on desktop */
-.preview-close-btn {
-  display: none;
 }
 
 .preview-header h2 {
@@ -498,18 +476,9 @@
   border-radius: 8px;
   padding: 12px;
   overflow: auto;
-  max-height: calc(100vh - 200px);
-}
-
-/* Error fallback styles */
-.signature-preview.error-fallback {
-  min-height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fff3cd;
-  border: 1px solid #ffc107;
-  border-radius: 8px;
+  max-height: calc(100vh - 200px); /* Fallback for older browsers */
+  max-height: calc(-webkit-fill-available - 200px); /* iOS Safari fix */
+  max-height: calc(100dvh - 200px); /* Dynamic viewport height - prevents layout shift */
 }
 
 /* ===========================================
@@ -528,21 +497,8 @@
 
   .builder-preview {
     position: relative;
-    order: 999;
-    margin-top: 20px;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  .builder-preview.collapsed {
-    max-height: 60px;
-    overflow: hidden;
-  }
-
-  .builder-preview.collapsed .preview-container {
-    display: none;
+    top: 0;
+    order: -1;
   }
 
   .template-grid {
@@ -568,7 +524,6 @@
 @media (max-width: 600px) {
   .builder-container {
     padding: 12px;
-    padding-bottom: 80px; /* Space for floating preview button */
   }
 
   .builder-header {
@@ -586,258 +541,37 @@
   .sample-btn {
     width: 100%;
     text-align: center;
-    padding: 12px;
-    font-size: 14px;
-    min-height: 44px; /* Better touch target */
   }
 
   .form-section {
-    padding: 16px;
-    margin-bottom: 12px;
+    padding: 14px;
   }
 
   .form-row {
     grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .form-group {
-    margin-bottom: 16px;
-  }
-
-  .form-group input,
-  .form-group textarea {
-    font-size: 16px; /* Prevents zoom on iOS */
-    padding: 12px;
-    min-height: 44px; /* Better touch target */
   }
 
   .template-grid {
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  .template-card {
-    min-height: 80px;
-    padding: 12px;
   }
 
   .social-links-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
   }
 
   .form-actions {
     flex-direction: column;
     position: relative;
     bottom: 0;
-    gap: 12px;
-    padding: 16px;
-  }
-
-  .form-actions .btn {
-    min-height: 48px;
-    font-size: 15px;
-    padding: 14px;
   }
 
   .section-header {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 16px;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
   }
 
   .step-number {
-    margin-bottom: 0;
-    flex-shrink: 0;
-  }
-
-  .section-header h2 {
-    font-size: 1.1rem;
-  }
-
-  .builder-preview.mobile-visible .preview-header {
-    padding: 16px 20px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e0e0e0;
-    user-select: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    text-align: left;
-    margin-bottom: 0;
-    flex-shrink: 0;
-    touch-action: none;
-    min-height: 60px;
-  }
-
-  .builder-preview.mobile-visible .preview-close-btn {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(0, 0, 0, 0.1);
-    color: #333;
-    font-size: 28px;
-    font-weight: 600;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    flex-shrink: 0;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    margin-left: 12px;
-  }
-
-  .builder-preview.mobile-visible .preview-close-btn:hover {
-    background: rgba(0, 0, 0, 0.15);
-    transform: scale(1.1);
-  }
-
-  .builder-preview.mobile-visible .preview-close-btn:active {
-    background: rgba(239, 68, 68, 0.2);
-    color: #dc2626;
-    transform: scale(0.95);
-  }
-
-  .builder-preview .preview-header > div {
-    flex: 1;
-  }
-
-  .builder-preview .preview-header h2 {
-    font-size: 0.95rem;
-    margin: 0;
-    text-align: left;
-  }
-
-  .preview-toggle {
-    font-size: 1.2rem;
-    transition: transform 0.3s;
-  }
-
-  .preview-toggle.expanded {
-    transform: rotate(180deg);
-  }
-
-  .builder-preview.mobile-visible .preview-container {
-    flex: 1;
-    min-height: 0; /* Important for flex scrolling */
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 20px;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    touch-action: pan-y;
-    /* Prevent scroll chaining - stops background from scrolling */
-    overscroll-behavior-y: contain;
-    overscroll-behavior-x: none;
-  }
-
-  /* Ensure signature preview content fits */
-  .builder-preview.mobile-visible .preview-container .signature-preview {
-    max-width: 100%;
-    overflow-x: hidden;
-    word-wrap: break-word;
-    /* Make sure content is visible without scrolling initially */
-    min-height: auto;
-  }
-
-  /* Optimize preview content for mobile viewing */
-  .builder-preview.mobile-visible .preview-container .signature-preview * {
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-
-  /* Lock body scroll when preview is open */
-  body.preview-open {
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
-  }
-
-  /* Floating preview button */
-  .floating-preview-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
-    border: none;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    font-size: 24px;
-    cursor: pointer;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s;
-  }
-
-  .floating-preview-btn:active {
-    transform: scale(0.95);
-  }
-
-  .builder-preview {
-    display: none; /* Hidden by default on mobile */
-  }
-
-  .builder-preview.mobile-visible {
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 100vh;
-    max-height: 100vh;
-    border-radius: 0;
-    z-index: 200;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-    animation: slideUp 0.3s ease-out;
-    background: #fff;
-    overflow: hidden;
-    touch-action: pan-y;
-  }
-
-  @keyframes slideUp {
-    from {
-      transform: translateY(100%);
-    }
-    to {
-      transform: translateY(0);
-    }
-  }
-
-  .preview-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 199;
-    animation: fadeIn 0.3s;
-    touch-action: none;
-    /* Prevent any scrolling on overlay */
-    overscroll-behavior: none;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    margin-bottom: 6px;
   }
 }

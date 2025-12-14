@@ -1,21 +1,15 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './UserMenu.css';
 
 function UserMenu({ onSignInClick }) {
   const { currentUser, logout, isFullyAuthenticated, isPremium } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
     setIsDropdownOpen(false);
-  };
-
-  const handleUpgradeClick = () => {
-    setIsDropdownOpen(false);
-    navigate('/premium');
   };
 
   if (!currentUser) {
@@ -27,6 +21,7 @@ function UserMenu({ onSignInClick }) {
   }
 
   const displayName = currentUser.displayName || currentUser.email?.split('@')[0] || 'User';
+  const photoURL = currentUser.photoURL;
   const isVerified = isFullyAuthenticated();
 
   return (
@@ -35,10 +30,13 @@ function UserMenu({ onSignInClick }) {
         className="user-menu-trigger"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
       >
-        {/* Always use placeholder to avoid broken/unloaded image issues */}
-        <div className="user-avatar-placeholder">
-          {displayName.charAt(0).toUpperCase()}
-        </div>
+        {photoURL ? (
+          <img src={photoURL} alt={displayName} className="user-avatar" />
+        ) : (
+          <div className="user-avatar-placeholder">
+            {displayName.charAt(0).toUpperCase()}
+          </div>
+        )}
         <span className="user-name">{displayName}</span>
         {isPremium() && <span className="premium-badge">PRO</span>}
         <svg 
@@ -76,7 +74,7 @@ function UserMenu({ onSignInClick }) {
             </Link>
             
             {!isPremium() && (
-              <button className="dropdown-item upgrade" onClick={handleUpgradeClick}>
+              <button className="dropdown-item upgrade">
                 🚀 Upgrade to Premium
               </button>
             )}

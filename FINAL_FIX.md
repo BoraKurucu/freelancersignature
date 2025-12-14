@@ -40,3 +40,4 @@ If the script still doesn't work, manually update in Firestore Console:
 
 This will work immediately!
 
+

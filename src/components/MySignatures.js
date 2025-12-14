@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getSignatures, deleteSignature } from '../services/signatureService';
 import { generateHTMLSignature } from '../utils/signatureGenerator';
@@ -15,19 +15,7 @@ function MySignatures() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(null);
   const [downloading, setDownloading] = useState(null);
-
-  const loadSignatures = useCallback(async () => {
-    if (!currentUser) return;
-    
-    try {
-      const data = await getSignatures(currentUser.uid);
-      setSignatures(data);
-    } catch (error) {
-      console.error('Error loading signatures:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentUser]);
+  const signatureRefs = useRef({});
 
   useEffect(() => {
     if (!authLoading) {
@@ -38,7 +26,20 @@ function MySignatures() {
         loadSignatures();
       }
     }
-  }, [currentUser, authLoading, isFullyAuthenticated, navigate, loadSignatures]);
+  }, [currentUser, authLoading, isFullyAuthenticated, navigate]);
+
+  const loadSignatures = async () => {
+    if (!currentUser) return;
+    
+    try {
+      const data = await getSignatures(currentUser.uid);
+      setSignatures(data);
+    } catch (error) {
+      console.error('Error loading signatures:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this signature?')) {
@@ -122,7 +123,7 @@ function MySignatures() {
   return (
     <div className="my-signatures-container">
       <div className="my-signatures-header">
-        <Link to="/builder" className="back-link">← Back to Builder</Link>
+        <Link to="/" className="back-link">← Back to Home</Link>
         <h1>My Signatures</h1>
         <p className="header-subtitle">Manage and copy your email signatures</p>
         <Link to="/builder" className="btn-primary">
