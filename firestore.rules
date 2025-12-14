@@ -1,29 +1,103 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Helper function to validate email format
+    function isValidEmail(email) {
+      return email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+    
+    // Helper function to validate string length
+    function isValidString(str, maxLength) {
+      return str is string && str.size() <= maxLength;
+    }
+    
+    // Helper function to validate URL format
+    function isValidUrl(url) {
+      return url is string && 
+             url.matches('^https?://[^\\s/$.?#].[^\\s]*$') &&
+             url.size() <= 2000;
+    }
+    
     // Users collection - users can only read/write their own document
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Users can read their own document
+      allow read: if request.auth != null && request.auth.uid == userId;
+      
+      // Users can create their own document with validation
+      allow create: if request.auth != null && 
+        request.auth.uid == userId &&
+        // Validate required fields
+        request.resource.data.keys().hasAll(['email', 'displayName', 'createdAt']) &&
+        // Validate email format
+        isValidEmail(request.resource.data.email) &&
+        // Validate string lengths
+        isValidString(request.resource.data.displayName, 200) &&
+        // Ensure subscription status is valid
+        request.resource.data.subscriptionStatus in ['free', 'premium'] &&
+        // Prevent users from setting admin fields
+        !request.resource.data.keys().hasAny(['admin', 'role']);
+      
+      // Users can update their own document with restrictions
+      allow update: if request.auth != null && 
+        request.auth.uid == userId &&
+        // Prevent changing critical fields
+        request.resource.data.email == resource.data.email &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        // Validate subscription status if changed
+        (!('subscriptionStatus' in request.resource.data.diff(resource.data).affectedKeys()) ||
+         request.resource.data.subscriptionStatus in ['free', 'premium']) &&
+        // Prevent users from setting admin fields
+        !request.resource.data.keys().hasAny(['admin', 'role']);
+      
+      // Users cannot delete their own account (admin only via Cloud Functions)
+      allow delete: if false;
     }
     
     // Signatures collection - users can only access their own signatures
     match /signatures/{signatureId} {
-      // Allow read (get and list) if authenticated
-      // For list queries, Firestore validates at query time that userId == auth.uid
-      allow read: if request.auth != null;
+      // Allow read only if authenticated and signature belongs to user
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
       
-      // Allow create if the user is authenticated and they're setting their own userId
+      // Allow list queries only for user's own signatures
+      allow list: if request.auth != null &&
+        request.query.limit <= 100; // Prevent large queries
+      
+      // Allow create with validation
       allow create: if request.auth != null && 
-        request.resource.data.userId == request.auth.uid;
+        request.auth.uid == userId &&
+        // Validate required fields
+        request.resource.data.keys().hasAll(['userId', 'createdAt']) &&
+        // Ensure userId matches auth.uid
+        request.resource.data.userId == request.auth.uid &&
+        // Validate data structure
+        isValidString(request.resource.data.name, 200) &&
+        (!('email' in request.resource.data) || isValidEmail(request.resource.data.email)) &&
+        // Prevent setting future timestamps
+        request.resource.data.createdAt <= request.time;
       
-      // Allow update if the user is authenticated and the signature belongs to them
+      // Allow update with validation
       allow update: if request.auth != null && 
         resource.data.userId == request.auth.uid &&
-        request.resource.data.userId == request.auth.uid;
+        request.resource.data.userId == request.auth.uid &&
+        // Prevent changing userId or createdAt
+        request.resource.data.userId == resource.data.userId &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        // Validate updated fields
+        (!('name' in request.resource.data.diff(resource.data).affectedKeys()) ||
+         isValidString(request.resource.data.name, 200)) &&
+        (!('email' in request.resource.data.diff(resource.data).affectedKeys()) ||
+         isValidEmail(request.resource.data.email));
       
-      // Allow delete if the user is authenticated and the signature belongs to them
+      // Allow delete if signature belongs to user
       allow delete: if request.auth != null && 
         resource.data.userId == request.auth.uid;
+    }
+    
+    // Deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

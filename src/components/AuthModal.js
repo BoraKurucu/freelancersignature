@@ -4,21 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import './AuthModal.css';
 
 function AuthModal({ isOpen, onClose, onSuccess, requiredAction = 'save' }) {
-  const [mode, setMode] = useState('signin'); // 'signin' or 'signup'
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState(null);
-  const [showVerificationMessage, setShowVerificationMessage] = useState(false);
 
   const { 
     currentUser,
     isFullyAuthenticated,
-    signInWithGoogle, 
-    signUpWithEmail, 
-    signInWithEmail, 
-    resendVerificationEmail,
+    signInWithGoogle,
     authError, 
     setAuthError 
   } = useAuth();
@@ -35,11 +27,7 @@ function AuthModal({ isOpen, onClose, onSuccess, requiredAction = 'save' }) {
   if (!isOpen) return null;
 
   const handleClose = () => {
-    setEmail('');
-    setPassword('');
-    setConfirmPassword('');
     setMessage(null);
-    setShowVerificationMessage(false);
     setAuthError(null);
     onClose();
   };
@@ -47,67 +35,15 @@ function AuthModal({ isOpen, onClose, onSuccess, requiredAction = 'save' }) {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     setMessage(null);
+    setAuthError(null);
     const result = await signInWithGoogle();
     setIsLoading(false);
     
     if (result.success) {
       handleClose();
       if (onSuccess) onSuccess();
-    }
-  };
-
-  const handleEmailSubmit = async (e) => {
-    e.preventDefault();
-    setMessage(null);
-    setAuthError(null);
-
-    if (mode === 'signup') {
-      // Validate passwords match
-      if (password !== confirmPassword) {
-        setMessage({ type: 'error', text: 'Passwords do not match.' });
-        return;
-      }
-      
-      // Validate password strength
-      if (password.length < 6) {
-        setMessage({ type: 'error', text: 'Password must be at least 6 characters.' });
-        return;
-      }
-
-      setIsLoading(true);
-      const result = await signUpWithEmail(email, password);
-      setIsLoading(false);
-
-      if (result.success) {
-        setMessage({ type: 'success', text: result.message });
-        setShowVerificationMessage(true);
-      }
-    } else {
-      setIsLoading(true);
-      const result = await signInWithEmail(email, password);
-      setIsLoading(false);
-
-      if (result.success) {
-        if (!result.emailVerified) {
-          setMessage({ type: 'warning', text: result.message });
-          setShowVerificationMessage(true);
-        } else {
-          handleClose();
-          if (onSuccess) onSuccess();
-        }
-      }
-    }
-  };
-
-  const handleResendVerification = async () => {
-    setIsLoading(true);
-    const result = await resendVerificationEmail();
-    setIsLoading(false);
-    
-    if (result.success) {
-      setMessage({ type: 'success', text: 'Verification email sent! Check your inbox.' });
-    } else {
-      setMessage({ type: 'error', text: result.error });
+    } else if (result.error) {
+      setMessage({ type: 'error', text: authError || 'Failed to sign in. Please try again.' });
     }
   };
 
@@ -128,9 +64,16 @@ function AuthModal({ isOpen, onClose, onSuccess, requiredAction = 'save' }) {
         <button className="auth-modal-close" onClick={handleClose}>×</button>
         
         <div className="auth-modal-header">
-          <h2>{mode === 'signin' ? 'Welcome Back' : 'Create Account'}</h2>
-          <p>Sign in to {getActionText()}</p>
+          <h2>Welcome</h2>
+          <p>Sign in with Google to {getActionText()}</p>
         </div>
+
+        {/* Error/Success Messages */}
+        {(authError || message) && (
+          <div className={`auth-message ${message?.type || 'error'}`}>
+            {authError || message?.text}
+          </div>
+        )}
 
         {/* Google Sign In */}
         <button 
@@ -144,122 +87,8 @@ function AuthModal({ isOpen, onClose, onSuccess, requiredAction = 'save' }) {
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
-          Continue with Google
+          {isLoading ? 'Signing in...' : 'Continue with Google'}
         </button>
-
-        <div className="auth-divider">
-          <span>or</span>
-        </div>
-
-        {/* Email/Password Form */}
-        <form onSubmit={handleEmailSubmit} className="auth-form">
-          <div className="auth-input-group">
-            <label>Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-              disabled={isLoading}
-            />
-          </div>
-
-          <div className="auth-input-group">
-            <label>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              disabled={isLoading}
-              minLength={6}
-            />
-          </div>
-
-          {mode === 'signup' && (
-            <div className="auth-input-group">
-              <label>Confirm Password</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                disabled={isLoading}
-                minLength={6}
-              />
-            </div>
-          )}
-
-          {/* Error/Success Messages */}
-          {(authError || message) && (
-            <div className={`auth-message ${message?.type || 'error'}`}>
-              {authError || message?.text}
-            </div>
-          )}
-
-          {/* Verification Message */}
-          {showVerificationMessage && (
-            <div className="auth-verification">
-              <p>📧 Check your email for a verification link.</p>
-              <button 
-                type="button" 
-                className="auth-link-btn"
-                onClick={handleResendVerification}
-                disabled={isLoading}
-              >
-                Resend verification email
-              </button>
-            </div>
-          )}
-
-          <button 
-            type="submit" 
-            className="auth-btn auth-btn-primary"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Please wait...' : (mode === 'signin' ? 'Sign In' : 'Create Account')}
-          </button>
-        </form>
-
-        {/* Toggle Sign In / Sign Up */}
-        <div className="auth-toggle">
-          {mode === 'signin' ? (
-            <p>
-              Don't have an account?{' '}
-              <button 
-                type="button"
-                className="auth-link-btn"
-                onClick={() => {
-                  setMode('signup');
-                  setMessage(null);
-                  setAuthError(null);
-                  setShowVerificationMessage(false);
-                }}
-              >
-                Sign up
-              </button>
-            </p>
-          ) : (
-            <p>
-              Already have an account?{' '}
-              <button 
-                type="button"
-                className="auth-link-btn"
-                onClick={() => {
-                  setMode('signin');
-                  setMessage(null);
-                  setAuthError(null);
-                  setShowVerificationMessage(false);
-                }}
-              >
-                Sign in
-              </button>
-            </p>
-          )}
-        </div>
 
         <p className="auth-terms">
           By signing in, you agree to our{' '}
