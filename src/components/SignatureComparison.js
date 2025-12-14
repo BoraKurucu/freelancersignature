@@ -87,3 +87,4 @@ function SignatureComparison({ currentSignature, expertSignature }) {
 
 export default SignatureComparison;
 
+

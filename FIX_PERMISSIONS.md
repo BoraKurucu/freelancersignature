@@ -37,3 +37,4 @@ If the above doesn't work, we can use a service account key file:
 2. Check logs: `firebase functions:log --project gamerlinks-844c5`
 3. Verify user subscription updates in Firestore
 
+
