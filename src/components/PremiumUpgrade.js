@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getGumroadCheckoutUrl } from '../services/gumroadService';
+import SEO from './SEO';
 import './PremiumUpgrade.css';
 
 function PremiumUpgrade() {
@@ -65,6 +66,13 @@ function PremiumUpgrade() {
   if (isPremium()) {
     return (
       <div className="premium-upgrade-page">
+        <SEO
+          title="Premium Upgrade - FreelancerSignature"
+          description="Upgrade to Premium and unlock watermark removal, HTML code copy, PNG downloads, and premium templates."
+          canonical="https://freelancersignature.com/premium"
+          ogTitle="Premium Upgrade - FreelancerSignature"
+          ogDescription="Upgrade to Premium and unlock watermark removal, HTML code copy, PNG downloads, and premium templates."
+        />
         <div className="premium-container">
           <div className="premium-success">
             <div className="success-icon">⭐</div>
@@ -87,6 +95,13 @@ function PremiumUpgrade() {
 
   return (
     <div className="premium-upgrade-page">
+      <SEO
+        title="Premium Upgrade - FreelancerSignature"
+        description="Upgrade to Premium and unlock watermark removal, HTML code copy, PNG downloads, and premium templates."
+        canonical="https://freelancersignature.com/premium"
+        ogTitle="Premium Upgrade - FreelancerSignature"
+        ogDescription="Upgrade to Premium and unlock watermark removal, HTML code copy, PNG downloads, and premium templates."
+      />
       <div className="premium-container">
         {/* Hero Section */}
         <div className="premium-hero">

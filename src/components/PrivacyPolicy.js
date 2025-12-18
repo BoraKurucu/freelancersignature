@@ -1,10 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import SEO from './SEO';
 import './LegalPages.css';
 
 function PrivacyPolicy() {
   return (
     <div className="legal-page">
+      <SEO
+        title="Privacy Policy - FreelancerSignature"
+        description="Privacy Policy for FreelancerSignature. Learn how we collect, use, and protect your personal information."
+        canonical="https://freelancersignature.com/privacy"
+        ogTitle="Privacy Policy - FreelancerSignature"
+        ogDescription="Privacy Policy for FreelancerSignature. Learn how we collect, use, and protect your personal information."
+      />
       <div className="legal-container">
         <Link to="/" className="back-link">← Back to Home</Link>
         
