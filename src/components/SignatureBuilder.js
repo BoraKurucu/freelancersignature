@@ -6,6 +6,7 @@ import UserMenu from './UserMenu';
 import AuthModal from './AuthModal';
 import Toast from './Toast';
 import ImageUploadCrop from './ImageUploadCrop';
+import SEO from './SEO';
 import { saveSignature, getSignatureCount } from '../services/signatureService';
 import { generateHTMLSignature } from '../utils/signatureGenerator';
 import { downloadSignatureAsPNG, downloadSignatureWithWatermark } from '../utils/signatureDownloader';
@@ -525,6 +526,13 @@ function SignatureBuilder() {
 
   return (
     <div className="builder-container">
+      <SEO
+        title="Email Signature Builder - FreelancerSignature"
+        description="Create professional email signatures for freelancers. Build custom signatures with rates, booking links, and portfolio in minutes."
+        canonical="https://freelancersignature.com/builder"
+        ogTitle="Email Signature Builder - FreelancerSignature"
+        ogDescription="Create professional email signatures for freelancers. Build custom signatures with rates, booking links, and portfolio in minutes."
+      />
       <div className="builder-header">
         <div className="header-top">
           <Link to="/" className="back-link">← Back to Home</Link>
