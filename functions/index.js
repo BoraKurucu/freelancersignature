@@ -75,112 +75,64 @@ function sanitizeString(input) {
 }
 
 /**
- * Update subscription manually via HTTP call
- * Usage: POST to /updateSubscription with { email, subscriptionId, saleId }
+ * DISABLED - This endpoint was a security vulnerability
+ * Subscription updates should ONLY happen via Gumroad webhook
+ * 
+ * If you need to manually update a subscription, use Firebase Admin SDK directly
+ * or the Firebase Console, not an unauthenticated HTTP endpoint.
  */
-exports.updateSubscription = functions.https.onRequest(async (req, res) => {
-  // Enable CORS (restrict to your domain in production)
-  const allowedOrigins = [
-    'https://freelancersignature.com',
-    'https://www.freelancersignature.com',
-    'http://localhost:3000' // For development
-  ];
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.set('Access-Control-Allow-Origin', origin);
-  }
-  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type');
-  res.set('Access-Control-Max-Age', '3600');
+// exports.updateSubscription - REMOVED FOR SECURITY
 
-  if (req.method === 'OPTIONS') {
-    res.status(204).send('');
-    return;
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).send('Method Not Allowed');
-  }
-
-  // Rate limiting
-  const clientIP = getClientIP(req);
-  if (!checkRateLimit(clientIP)) {
-    return res.status(429).json({ 
-      success: false, 
-      error: 'Too many requests. Please try again later.' 
-    });
-  }
-
-  try {
-    const { email, subscriptionId, saleId, status = 'premium' } = req.body;
-
-    // Validate input
-    if (!email || !isValidEmail(email)) {
-      return res.status(400).json({ success: false, error: 'Invalid email address' });
+/**
+ * Validate signature creation - enforces limits server-side
+ * This is triggered when a new signature is created
+ */
+exports.validateSignatureCreate = functions.firestore
+  .document('signatures/{signatureId}')
+  .onCreate(async (snap, context) => {
+    const signatureData = snap.data();
+    const userId = signatureData.userId;
+    
+    if (!userId) {
+      console.error('Signature created without userId - deleting');
+      await snap.ref.delete();
+      return;
     }
-
-    // Sanitize inputs
-    const sanitizedEmail = email.toLowerCase().trim();
-    const sanitizedStatus = ['premium', 'free'].includes(status) ? status : 'premium';
-    const sanitizedSubscriptionId = subscriptionId ? sanitizeString(subscriptionId) : null;
-    const sanitizedSaleId = saleId ? sanitizeString(saleId) : null;
-
-    console.log('Updating subscription for:', sanitizedEmail);
-
-    // Find user by email
-    const usersRef = db.collection('users');
-    const snapshot = await usersRef.where('email', '==', sanitizedEmail).get();
-
-    if (snapshot.empty) {
-      console.log('User not found:', sanitizedEmail);
-      return res.status(404).json({ success: false, error: 'User not found' });
+    
+    try {
+      // Get user's subscription status
+      const userDoc = await db.collection('users').doc(userId).get();
+      
+      if (!userDoc.exists) {
+        console.error('User not found for signature - deleting signature');
+        await snap.ref.delete();
+        return;
+      }
+      
+      const userData = userDoc.data();
+      const isPremium = userData.subscriptionStatus === 'premium' && userData.planType === 'premium';
+      const maxSignatures = isPremium ? 10 : 2;
+      
+      // Count existing signatures for this user
+      const signaturesSnapshot = await db.collection('signatures')
+        .where('userId', '==', userId)
+        .get();
+      
+      const signatureCount = signaturesSnapshot.size;
+      
+      // If over limit, delete the newly created signature
+      if (signatureCount > maxSignatures) {
+        console.warn(`User ${userId} exceeded signature limit (${signatureCount}/${maxSignatures}) - deleting excess signature`);
+        await snap.ref.delete();
+        return;
+      }
+      
+      console.log(`Signature created for user ${userId} (${signatureCount}/${maxSignatures})`);
+    } catch (error) {
+      console.error('Error validating signature creation:', error);
+      // Don't delete on error - let the signature exist but log the issue
     }
-
-    // Calculate expiry date (1 month from now for monthly subscriptions)
-    const expiryDate = new Date();
-    expiryDate.setMonth(expiryDate.getMonth() + 1);
-
-    const updates = {
-      subscriptionStatus: sanitizedStatus,
-      planType: sanitizedStatus === 'premium' ? 'premium' : null,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      gumroadProductId: 'pddxf',
-      subscriptionExpiry: expiryDate,
-    };
-
-    if (sanitizedSubscriptionId) {
-      updates.gumroadSubscriptionId = sanitizedSubscriptionId;
-    }
-    if (sanitizedSaleId) {
-      updates.gumroadPurchaseId = sanitizedSaleId;
-    }
-    if (sanitizedStatus === 'premium') {
-      updates.subscriptionStartedAt = admin.firestore.FieldValue.serverTimestamp();
-    }
-
-    // Update all matching users (should only be one)
-    const batch = db.batch();
-    snapshot.forEach(doc => {
-      batch.update(doc.ref, updates);
-    });
-    await batch.commit();
-
-    console.log('Subscription updated successfully:', sanitizedEmail, sanitizedStatus);
-    return res.status(200).json({ 
-      success: true, 
-      message: 'Subscription updated',
-      email: sanitizedEmail,
-      status: sanitizedStatus,
-      expiryDate: expiryDate.toISOString()
-    });
-  } catch (error) {
-    console.error('Error updating subscription:', error);
-    return res.status(500).json({ 
-      success: false, 
-      error: error.message 
-    });
-  }
-});
+  });
 
 /**
  * Webhook endpoint that receives Gumroad webhooks
@@ -309,5 +261,6 @@ exports.gumroadWebhook = functions.https.onRequest(async (req, res) => {
     return res.status(500).send('Internal Server Error');
   }
 });
+
 
 

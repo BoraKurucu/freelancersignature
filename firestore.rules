@@ -19,12 +19,54 @@ service cloud.firestore {
              url.size() <= 2000;
     }
     
+    // List of protected subscription fields that only webhooks/admin can modify
+    function isProtectedField(field) {
+      return field in [
+        'subscriptionStatus',
+        'planType', 
+        'subscriptionExpiry',
+        'subscriptionStartedAt',
+        'subscriptionEndedAt',
+        'subscriptionCancelledAt',
+        'gumroadSubscriptionId',
+        'gumroadPurchaseId',
+        'gumroadProductId',
+        'gumroadSubscriptionCancelled',
+        'lastWebhookAt',
+        'refundedAt',
+        'isPremium',
+        'premiumActivatedAt'
+      ];
+    }
+    
+    // Check if any protected fields are being modified
+    function modifiesProtectedFields() {
+      let changedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return changedKeys.hasAny([
+        'subscriptionStatus',
+        'planType', 
+        'subscriptionExpiry',
+        'subscriptionStartedAt',
+        'subscriptionEndedAt',
+        'subscriptionCancelledAt',
+        'gumroadSubscriptionId',
+        'gumroadPurchaseId',
+        'gumroadProductId',
+        'gumroadSubscriptionCancelled',
+        'lastWebhookAt',
+        'refundedAt',
+        'isPremium',
+        'premiumActivatedAt'
+      ]);
+    }
+    
     // Users collection - users can only read/write their own document
     match /users/{userId} {
       // Users can read their own document
       allow read: if request.auth != null && request.auth.uid == userId;
       
       // Users can create their own document with validation
+      // SECURITY: New users MUST start as 'free' - cannot self-assign premium
       allow create: if request.auth != null && 
         request.auth.uid == userId &&
         // Validate required fields
@@ -33,20 +75,23 @@ service cloud.firestore {
         isValidEmail(request.resource.data.email) &&
         // Validate string lengths
         isValidString(request.resource.data.displayName, 200) &&
-        // Ensure subscription status is valid
-        request.resource.data.subscriptionStatus in ['free', 'premium'] &&
+        // SECURITY: New users MUST be 'free' - only webhooks can set 'premium'
+        request.resource.data.subscriptionStatus == 'free' &&
+        // SECURITY: planType must be null for new users
+        (!('planType' in request.resource.data) || request.resource.data.planType == null) &&
         // Prevent users from setting admin fields
         !request.resource.data.keys().hasAny(['admin', 'role']);
       
       // Users can update their own document with restrictions
+      // SECURITY: Users CANNOT modify subscription-related fields
       allow update: if request.auth != null && 
         request.auth.uid == userId &&
         // Prevent changing critical fields
         request.resource.data.email == resource.data.email &&
         request.resource.data.createdAt == resource.data.createdAt &&
-        // Validate subscription status if changed
-        (!('subscriptionStatus' in request.resource.data.diff(resource.data).affectedKeys()) ||
-         request.resource.data.subscriptionStatus in ['free', 'premium']) &&
+        // SECURITY: Block ALL subscription field modifications by users
+        // Only Cloud Functions (webhooks) can modify these fields
+        !modifiesProtectedFields() &&
         // Prevent users from setting admin fields
         !request.resource.data.keys().hasAny(['admin', 'role']);
       
@@ -56,6 +101,17 @@ service cloud.firestore {
     
     // Signatures collection - users can only access their own signatures
     match /signatures/{signatureId} {
+      // Helper to check if user is premium by reading their user document
+      function getUserData() {
+        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      }
+      
+      function isPremiumUser() {
+        let userData = getUserData();
+        return userData.subscriptionStatus == 'premium' && 
+               userData.planType == 'premium';
+      }
+      
       // Allow read only if authenticated and signature belongs to user
       allow read: if request.auth != null && 
         resource.data.userId == request.auth.uid;
@@ -65,17 +121,20 @@ service cloud.firestore {
         request.query.limit <= 100; // Prevent large queries
       
       // Allow create with validation
+      // Note: Signature count limit is enforced client-side and via Cloud Functions
+      // Firestore rules cannot count documents, so we rely on client + backend validation
       allow create: if request.auth != null && 
-        request.auth.uid == userId &&
+        // Ensure userId matches auth.uid (prevent creating signatures for other users)
+        request.resource.data.userId == request.auth.uid &&
         // Validate required fields
         request.resource.data.keys().hasAll(['userId', 'createdAt']) &&
-        // Ensure userId matches auth.uid
-        request.resource.data.userId == request.auth.uid &&
         // Validate data structure
         isValidString(request.resource.data.name, 200) &&
         (!('email' in request.resource.data) || isValidEmail(request.resource.data.email)) &&
-        // Prevent setting future timestamps
-        request.resource.data.createdAt <= request.time;
+        // Prevent XSS in string fields
+        (!('name' in request.resource.data) || !request.resource.data.name.matches('.*<script.*')) &&
+        (!('specialty' in request.resource.data) || !request.resource.data.specialty.matches('.*<script.*')) &&
+        (!('company' in request.resource.data) || !request.resource.data.company.matches('.*<script.*'));
       
       // Allow update with validation
       allow update: if request.auth != null && 
@@ -93,6 +152,17 @@ service cloud.firestore {
       // Allow delete if signature belongs to user
       allow delete: if request.auth != null && 
         resource.data.userId == request.auth.uid;
+    }
+    
+    // PendingPremium collection - only Cloud Functions can write (for users who buy before signing up)
+    // Users can read their own pending premium status
+    match /pendingPremium/{email} {
+      // Users can read their pending premium status (by email)
+      allow read: if request.auth != null && 
+        request.auth.token.email == email;
+      
+      // Only Cloud Functions (admin) can write - no client access
+      allow write: if false;
     }
     
     // Deny all other collections
