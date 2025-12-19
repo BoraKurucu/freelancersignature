@@ -205,3 +205,4 @@ export const rateLimiter = new RateLimiter();
 if (typeof window !== 'undefined') {
   setInterval(() => rateLimiter.cleanup(), 5 * 60 * 1000);
 }
+

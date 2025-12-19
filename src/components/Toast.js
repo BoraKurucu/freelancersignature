@@ -31,3 +31,4 @@ function Toast({ message, type = 'info', isVisible, onClose, duration = 4000 }) 
 
 export default Toast;
 
+
