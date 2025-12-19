@@ -484,7 +484,6 @@
   padding: 12px;
   overflow: auto;
   max-height: calc(100vh - 200px); /* Fallback for older browsers */
-  max-height: calc(-webkit-fill-available - 200px); /* iOS Safari fix */
   max-height: calc(100dvh - 200px); /* Dynamic viewport height - prevents layout shift */
   min-height: 200px; /* Prevent blank screen during transitions */
   position: relative; /* Ensure content stays visible */
