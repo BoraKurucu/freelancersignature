@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getGumroadCheckoutUrl } from '../services/gumroadService';
 import './UserMenu.css';
 
 function UserMenu({ onSignInClick }) {
@@ -10,6 +11,19 @@ function UserMenu({ onSignInClick }) {
   const handleLogout = async () => {
     await logout();
     setIsDropdownOpen(false);
+  };
+
+  const handleUpgradeClick = () => {
+    setIsDropdownOpen(false);
+    if (currentUser && isFullyAuthenticated()) {
+      const checkoutUrl = getGumroadCheckoutUrl(currentUser.email, true);
+      window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      // If not authenticated, trigger sign in first
+      if (onSignInClick) {
+        onSignInClick();
+      }
+    }
   };
 
   if (!currentUser) {
@@ -74,7 +88,10 @@ function UserMenu({ onSignInClick }) {
             </Link>
             
             {!isPremium() && (
-              <button className="dropdown-item upgrade">
+              <button 
+                className="dropdown-item upgrade"
+                onClick={handleUpgradeClick}
+              >
                 🚀 Upgrade to Premium
               </button>
             )}
