@@ -10,7 +10,7 @@ Use this checklist to ensure your Gumroad premium membership integration is comp
 - [ ] Added product description with premium features
 - [ ] Uploaded cover image (1280x720px)
 - [ ] Uploaded thumbnail (600x600px)
-- [ ] Set price to $4.99/month
+- [ ] Set price to $2.99/month
 - [ ] Configured product settings (refund policy, etc.)
 - [ ] Copied product URL: `https://streamerservices.gumroad.com/l/pddxf`
 - [ ] Tested checkout flow
@@ -92,6 +92,7 @@ For integration issues:
 - Check webhook logs
 - Review Firestore security rules
 - Verify environment variables are set correctly
+
 
 
 

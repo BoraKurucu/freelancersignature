@@ -22,7 +22,7 @@ This is the correct choice for a recurring monthly subscription.
 
 Use the details from `GUMROAD_SETUP_GUIDE.md`:
 - Name: `freelancersignature premium subscription`
-- Price: `$4.99`
+- Price: `$2.99`
 - Type: `Membership`
 - Description: Copy from the guide
 
@@ -70,6 +70,7 @@ Follow the instructions in `WEBHOOK_SETUP.md` to:
 - See `GUMROAD_SETUP_GUIDE.md` for product configuration
 - See `WEBHOOK_SETUP.md` for webhook setup
 - See `INTEGRATION_CHECKLIST.md` for complete checklist
+
 
 
 

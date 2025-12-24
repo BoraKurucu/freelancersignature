@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getSignatures, deleteSignature } from '../services/signatureService';
-import { generateHTMLSignature } from '../utils/signatureGenerator';
+import { getSignatureHTML, getSignatureHTMLForDownload } from '../services/signatureApiService';
 import { downloadSignatureAsPNG, downloadSignatureWithWatermark } from '../utils/signatureDownloader';
 import SignaturePreview from './SignaturePreview';
 import { useAuth } from '../context/AuthContext';
@@ -15,7 +15,6 @@ function MySignatures() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(null);
   const [downloading, setDownloading] = useState(null);
-  const signatureRefs = useRef({});
 
   useEffect(() => {
     if (!authLoading) {
@@ -26,6 +25,7 @@ function MySignatures() {
         loadSignatures();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, authLoading, isFullyAuthenticated, navigate]);
 
   const loadSignatures = async () => {
@@ -54,21 +54,27 @@ function MySignatures() {
   };
 
   const handleCopy = async (signatureData, signatureId) => {
-    const showWatermark = !isPremium();
-    const htmlContent = generateHTMLSignature(signatureData, { showWatermark });
     try {
-      await navigator.clipboard.writeText(htmlContent);
-      setCopied(signatureId);
-      setTimeout(() => setCopied(null), 2000);
-    } catch (err) {
-      const textArea = document.createElement('textarea');
-      textArea.value = htmlContent;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-      setCopied(signatureId);
-      setTimeout(() => setCopied(null), 2000);
+      // Get HTML from server-side (validates premium status)
+      const { html } = await getSignatureHTML(signatureId);
+      
+      try {
+        await navigator.clipboard.writeText(html);
+        setCopied(signatureId);
+        setTimeout(() => setCopied(null), 2000);
+      } catch (err) {
+        const textArea = document.createElement('textarea');
+        textArea.value = html;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        setCopied(signatureId);
+        setTimeout(() => setCopied(null), 2000);
+      }
+    } catch (error) {
+      console.error('Error copying signature:', error);
+      alert('Failed to copy signature. Please try again.');
     }
   };
 
@@ -80,27 +86,30 @@ function MySignatures() {
   const handleDownload = async (signatureId, signatureData) => {
     setDownloading(signatureId);
     try {
-      // Find the signature preview element using the data attribute
-      const wrapperElement = document.querySelector(`[data-signature-id="${signatureId}"]`);
-      if (!wrapperElement) {
-        throw new Error('Signature wrapper not found');
-      }
+      // Get HTML from server-side (validates premium status and adds watermark if needed)
+      const { html, isPremium: serverIsPremium } = await getSignatureHTMLForDownload(signatureId);
       
-      const signatureElement = wrapperElement.querySelector('.signature-preview');
-      if (!signatureElement) {
-        throw new Error('Signature preview element not found');
-      }
-
+      // Create a temporary container to render the HTML
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.width = '600px';
+      tempContainer.innerHTML = html;
+      document.body.appendChild(tempContainer);
+      
+      const signatureElement = tempContainer.querySelector('table') || tempContainer;
       const filename = `${signatureData?.name || 'signature'}.png`;
-      const isUserPremium = isPremium();
 
-      if (isUserPremium) {
-        // Premium users: download PNG without watermark
+      if (serverIsPremium) {
+        // Premium users: download PNG without watermark (server validated)
         await downloadSignatureAsPNG(signatureElement, filename);
       } else {
-        // Free/non-logged-in users: download PNG with watermark
+        // Free users: download PNG with watermark (server validated)
         await downloadSignatureWithWatermark(signatureElement, filename);
       }
+      
+      // Clean up
+      document.body.removeChild(tempContainer);
     } catch (error) {
       console.error('Error downloading signature:', error);
       alert('Failed to download signature. Please try again.');

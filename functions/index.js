@@ -1,5 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const { generateHTMLSignature } = require('./signatureGenerator');
 
 admin.initializeApp();
 
@@ -75,6 +76,57 @@ function sanitizeString(input) {
 }
 
 /**
+ * Check if user is premium (server-side validation)
+ */
+async function isUserPremium(userId) {
+  if (!userId) return false;
+  
+  try {
+    const userDoc = await db.collection('users').doc(userId).get();
+    if (!userDoc.exists) return false;
+    
+    const userData = userDoc.data();
+    const isPremium = userData.subscriptionStatus === 'premium' && 
+                      userData.planType === 'premium';
+    
+    // Check expiry if exists
+    if (isPremium && userData.subscriptionExpiry) {
+      const expiryDate = userData.subscriptionExpiry.toDate 
+        ? userData.subscriptionExpiry.toDate() 
+        : new Date(userData.subscriptionExpiry);
+      const now = new Date();
+      if (expiryDate < now) {
+        return false;
+      }
+    }
+    
+    return isPremium;
+  } catch (error) {
+    console.error('Error checking premium status:', error);
+    return false;
+  }
+}
+
+/**
+ * Verify Firebase ID token
+ */
+async function verifyAuth(req) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+  
+  const idToken = authHeader.split('Bearer ')[1];
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    return decodedToken;
+  } catch (error) {
+    console.error('Error verifying token:', error);
+    return null;
+  }
+}
+
+/**
  * DISABLED - This endpoint was a security vulnerability
  * Subscription updates should ONLY happen via Gumroad webhook
  * 
@@ -133,6 +185,200 @@ exports.validateSignatureCreate = functions.firestore
       // Don't delete on error - let the signature exist but log the issue
     }
   });
+
+/**
+ * Server-side endpoint to get signature HTML code
+ * SECURITY: Validates premium status server-side before returning HTML
+ */
+exports.getSignatureHTML = functions.https.onRequest(async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).send('Method Not Allowed');
+  }
+
+  // Rate limiting
+  const clientIP = getClientIP(req);
+  if (!checkRateLimit(clientIP)) {
+    return res.status(429).json({ error: 'Too many requests' });
+  }
+
+  try {
+    // Verify authentication
+    const decodedToken = await verifyAuth(req);
+    if (!decodedToken) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { signatureId } = req.body;
+    if (!signatureId || typeof signatureId !== 'string') {
+      return res.status(400).json({ error: 'Invalid signatureId' });
+    }
+
+    // Get signature from Firestore
+    const signatureDoc = await db.collection('signatures').doc(signatureId).get();
+    if (!signatureDoc.exists) {
+      return res.status(404).json({ error: 'Signature not found' });
+    }
+
+    const signatureData = signatureDoc.data();
+    
+    // Verify signature belongs to user
+    if (signatureData.userId !== decodedToken.uid) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    // Check premium status server-side
+    const isPremium = await isUserPremium(decodedToken.uid);
+    const showWatermark = !isPremium;
+
+    // Generate HTML server-side with watermark control
+    const htmlContent = generateHTMLSignature(signatureData, { showWatermark });
+
+    return res.status(200).json({
+      success: true,
+      html: htmlContent,
+      showWatermark: showWatermark,
+      isPremium: isPremium
+    });
+
+  } catch (error) {
+    console.error('Error getting signature HTML:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Server-side endpoint to get signature HTML from data (for unsaved signatures)
+ * SECURITY: Validates premium status server-side
+ */
+exports.getSignatureHTMLFromData = functions.https.onRequest(async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).send('Method Not Allowed');
+  }
+
+  // Rate limiting
+  const clientIP = getClientIP(req);
+  if (!checkRateLimit(clientIP)) {
+    return res.status(429).json({ error: 'Too many requests' });
+  }
+
+  try {
+    // Verify authentication
+    const decodedToken = await verifyAuth(req);
+    if (!decodedToken) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { signatureData } = req.body;
+    if (!signatureData || typeof signatureData !== 'object') {
+      return res.status(400).json({ error: 'Invalid signatureData' });
+    }
+
+    // Check premium status server-side
+    const isPremium = await isUserPremium(decodedToken.uid);
+    const showWatermark = !isPremium;
+
+    // Generate HTML server-side with watermark control
+    const htmlContent = generateHTMLSignature(signatureData, { showWatermark });
+
+    return res.status(200).json({
+      success: true,
+      html: htmlContent,
+      showWatermark: showWatermark,
+      isPremium: isPremium
+    });
+
+  } catch (error) {
+    console.error('Error getting signature HTML from data:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Server-side endpoint to get signature HTML for download
+ * SECURITY: Validates premium status server-side, always includes watermark for free users
+ */
+exports.getSignatureHTMLForDownload = functions.https.onRequest(async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).send('Method Not Allowed');
+  }
+
+  // Rate limiting
+  const clientIP = getClientIP(req);
+  if (!checkRateLimit(clientIP)) {
+    return res.status(429).json({ error: 'Too many requests' });
+  }
+
+  try {
+    // Verify authentication
+    const decodedToken = await verifyAuth(req);
+    if (!decodedToken) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { signatureId } = req.body;
+    if (!signatureId || typeof signatureId !== 'string') {
+      return res.status(400).json({ error: 'Invalid signatureId' });
+    }
+
+    // Get signature from Firestore
+    const signatureDoc = await db.collection('signatures').doc(signatureId).get();
+    if (!signatureDoc.exists) {
+      return res.status(404).json({ error: 'Signature not found' });
+    }
+
+    const signatureData = signatureDoc.data();
+    
+    // Verify signature belongs to user
+    if (signatureData.userId !== decodedToken.uid) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    // Check premium status server-side
+    const isPremium = await isUserPremium(decodedToken.uid);
+    const showWatermark = !isPremium; // Server-side enforces watermark for free users
+
+    // Generate HTML server-side with watermark control
+    const htmlContent = generateHTMLSignature(signatureData, { showWatermark });
+
+    return res.status(200).json({
+      success: true,
+      html: htmlContent,
+      showWatermark: showWatermark,
+      isPremium: isPremium
+    });
+
+  } catch (error) {
+    console.error('Error getting signature HTML for download:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 /**
  * Webhook endpoint that receives Gumroad webhooks
@@ -261,7 +507,3 @@ exports.gumroadWebhook = functions.https.onRequest(async (req, res) => {
     return res.status(500).send('Internal Server Error');
   }
 });
-
-
-
-

@@ -19,6 +19,7 @@ function PremiumUpgrade() {
       const checkoutUrl = getGumroadCheckoutUrl(currentUser.email, true);
       window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, userProfile?.subscriptionStatus, userProfile?.planType]);
 
   const handleUpgrade = () => {
@@ -128,7 +129,7 @@ function PremiumUpgrade() {
           <div className="pricing-header">
             <div className="price">
               <span className="currency">$</span>
-              <span className="amount">4.99</span>
+              <span className="amount">2.99</span>
               <span className="period">/month</span>
             </div>
             <p className="pricing-subtitle">Cancel anytime • No commitment</p>
