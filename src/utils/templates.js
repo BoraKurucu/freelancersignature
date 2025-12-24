@@ -122,9 +122,9 @@ export const templates = {
   },
   corporateGreen: {
     id: 'corporateGreen',
-    name: 'Corporate Green',
-    description: 'Clean layout, green accents',
-    layout: 'twoColumnSimple',
+    name: 'Creative Writer',
+    description: 'Word-focused, elegant design',
+    layout: 'creativeWriter',
     color: '#2F6B3E',
     fontFamily: 'Arial, sans-serif',
   },

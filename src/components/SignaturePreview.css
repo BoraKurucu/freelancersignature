@@ -126,86 +126,100 @@
 }
 
 /* ===========================================
-   LAYOUT: Gradient Sidebar (Jasmine style)
+   LAYOUT: Gradient Sidebar (Modern Gradient)
    =========================================== */
 .gradient-sidebar {
   padding: 0;
   overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .gradient-sidebar .sig-row {
   display: flex;
-  min-height: 140px;
+  min-height: 150px;
 }
 
 .gradient-sidebar .sig-gradient-left {
-  width: 90px;
-  min-width: 90px;
+  width: 100px;
+  min-width: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  position: relative;
 }
 
 .gradient-sidebar .sig-photo-gradient {
-  width: 70px;
-  height: 70px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  border: 3px solid #fff;
+  border: 4px solid #ffffff;
   object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 1;
 }
 
 .gradient-sidebar .sig-content-right {
   flex: 1;
-  padding: 14px;
+  padding: 18px;
+  background: #ffffff;
   color: #333333;
 }
 
 .gradient-sidebar .sig-name-bold {
-  font-size: 16px;
-  font-weight: 700;
-  font-style: italic;
-  text-transform: uppercase;
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
 }
 
 .gradient-sidebar .sig-title-italic {
   font-size: 12px;
-  font-style: italic;
-  color: #555555;
+  color: #666666;
+  font-weight: 600;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .gradient-sidebar .sig-company-italic {
   font-size: 11px;
+  color: #888888;
   font-style: italic;
-  color: #666666;
-  margin-top: 4px;
+  margin-bottom: 12px;
 }
 
 .gradient-sidebar .sig-contact-list {
-  margin-top: 10px;
   font-size: 11px;
+  line-height: 1.8;
   color: #333333;
 }
 
 .gradient-sidebar .contact-item {
-  margin-bottom: 3px;
-  color: #333333;
+  margin-bottom: 4px;
 }
 
 .gradient-sidebar .contact-item strong {
-  color: #333333;
+  color: #666666;
+  font-weight: 600;
+  margin-right: 6px;
 }
 
 /* ===========================================
-   LAYOUT: Script Elegant (Melissa style)
+   LAYOUT: Script Elegant (Elegant Script)
    =========================================== */
 .script-elegant {
-  padding: 14px;
+  padding: 18px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .script-elegant .sig-row {
   display: flex;
-  gap: 20px;
+  gap: 24px;
+  align-items: flex-start;
 }
 
 .script-elegant .sig-photo-section-large {
@@ -214,18 +228,20 @@
 }
 
 .script-elegant .sig-photo-elegant {
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  border: 3px solid #e0e0e0;
+  border: 4px solid #f0f0f0;
   object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 10px;
 }
 
 .script-elegant .sig-company-script {
   font-family: 'Dancing Script', cursive;
-  font-size: 14px;
-  color: #555555;
-  margin-top: 6px;
+  font-size: 16px;
+  color: #666666;
+  font-weight: 600;
 }
 
 .script-elegant .sig-content-elegant {
@@ -234,30 +250,32 @@
 }
 
 .script-elegant .sig-name-script {
-  font-size: 28px;
+  font-size: 32px;
   line-height: 1.2;
-  color: #333333;
+  margin-bottom: 8px;
+  font-weight: 600;
 }
 
 .script-elegant .sig-title-spaced {
   font-size: 11px;
-  letter-spacing: 2px;
-  color: #666666;
-  margin-bottom: 10px;
+  letter-spacing: 2.5px;
+  color: #888888;
+  margin-bottom: 14px;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
 .script-elegant .sig-contact-icons {
   font-size: 12px;
   color: #333333;
+  margin-bottom: 12px;
 }
 
 .script-elegant .contact-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 5px;
-  color: #333333;
+  gap: 10px;
+  margin-bottom: 6px;
 }
 
 .script-elegant .contact-row span {
@@ -265,50 +283,62 @@
 }
 
 .script-elegant .contact-row small {
-  color: #666666;
+  color: #888888;
   font-size: 10px;
+  margin-left: 4px;
 }
 
 .script-elegant .sig-bottom-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e8e8e8;
 }
 
 .script-elegant .sig-logo-small {
-  height: 36px;
+  height: 40px;
+  max-width: 120px;
 }
 
 /* ===========================================
-   LAYOUT: Red Circle (Jenny style)
+   LAYOUT: Red Circle (Bold Red Accent)
    =========================================== */
 .red-circle {
-  padding: 14px;
+  padding: 18px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-left: 5px solid;
 }
 
 .red-circle .sig-row {
   display: flex;
-  gap: 20px;
+  gap: 24px;
+  align-items: flex-start;
 }
 
 .red-circle .sig-photo-col {
   text-align: center;
   flex-shrink: 0;
-  width: 100px;
+  width: 110px;
 }
 
 .red-circle .sig-photo-bordered {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
-  border: 3px solid;
+  border: 4px solid;
   object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  margin-bottom: 10px;
 }
 
 .red-circle .sig-name-script {
-  font-size: 16px;
-  margin-top: 6px;
+  font-size: 18px;
+  margin-top: 8px;
+  font-weight: 600;
 }
 
 .red-circle .sig-info-col {
@@ -317,46 +347,54 @@
 }
 
 .red-circle .sig-name-caps {
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 1px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
 }
 
 .red-circle .sig-title-company {
-  font-size: 11px;
-  color: #555555;
-  margin-bottom: 8px;
+  font-size: 12px;
+  color: #666666;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .red-circle .sig-contact-labeled {
   font-size: 11px;
   color: #333333;
-  line-height: 1.6;
+  line-height: 1.8;
 }
 
 .red-circle .sig-contact-labeled div {
-  color: #333333;
+  margin-bottom: 4px;
 }
 
 /* ===========================================
-   LAYOUT: Simple Photo (Kelly style)
+   LAYOUT: Simple Photo (Minimal Clean)
    =========================================== */
 .simple-photo {
-  padding: 14px;
+  padding: 18px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .simple-photo .sig-row {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   align-items: flex-start;
 }
 
 .simple-photo .sig-photo-simple {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 .simple-photo .sig-info-simple {
@@ -365,341 +403,376 @@
 }
 
 .simple-photo .sig-name-simple {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333333;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
 }
 
 .simple-photo .sig-title-simple {
   font-size: 12px;
-  color: #555555;
-  margin-bottom: 8px;
+  color: #666666;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .simple-photo .sig-contact-labeled {
   font-size: 11px;
-  line-height: 1.6;
+  line-height: 1.8;
   color: #333333;
 }
 
 .simple-photo .sig-contact-labeled strong {
   color: #666666;
+  font-weight: 600;
+  margin-right: 6px;
+  text-transform: lowercase;
 }
 
 .simple-photo .sig-contact-labeled div {
-  color: #333333;
+  margin-bottom: 4px;
 }
 
 /* ===========================================
-   LAYOUT: Orange Banner (Angle Nancy style)
+   LAYOUT: Orange Banner (Bold Colorful Banner)
    =========================================== */
 .orange-banner {
   padding: 0;
   overflow: hidden;
-  border-top: 4px solid #e67e22;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.orange-banner .sig-banner-top {
+  height: 6px;
+  width: 100%;
 }
 
 .orange-banner .sig-row {
   display: flex;
-  gap: 16px;
-  padding: 14px;
+  gap: 18px;
+  padding: 18px;
+  background: #ffffff;
 }
 
 .orange-banner .sig-photo-frame {
-  width: 80px;
-  height: 90px;
-  border: 3px solid #e67e22;
-  padding: 3px;
+  width: 100px;
+  height: 100px;
+  border: 4px solid;
+  padding: 4px;
   flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
 .orange-banner .sig-photo-frame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 4px;
 }
 
-.orange-banner .sig-info {
+.orange-banner .sig-content {
   flex: 1;
   color: #333333;
 }
 
-.orange-banner .sig-name-split {
-  font-size: 18px;
-  font-weight: 700;
+.orange-banner .sig-name-bold {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.orange-banner .sig-title {
+  font-size: 13px;
+  color: #666666;
+  font-weight: 600;
   margin-bottom: 4px;
-}
-
-.orange-banner .sig-name-split .first {
-  color: #1e3a5f;
-}
-
-.orange-banner .sig-name-split .last {
-  color: #e67e22;
-}
-
-.orange-banner .sig-title-orange {
-  font-size: 11px;
-  color: #e67e22;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 8px;
 }
 
-.orange-banner .sig-contact-icons-list {
+.orange-banner .sig-company {
+  font-size: 11px;
+  color: #888888;
+  font-style: italic;
+  margin-bottom: 10px;
+}
+
+.orange-banner .sig-contact-info {
   font-size: 11px;
   color: #333333;
+  line-height: 1.8;
 }
 
-.orange-banner .contact-icon-row {
+.orange-banner .contact-info-item {
+  margin-bottom: 3px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-  color: #333333;
-}
-
-.orange-banner .sig-logo-section {
-  text-align: center;
-  flex-shrink: 0;
-  min-width: 80px;
-}
-
-.orange-banner .sig-logo-section .logo-text {
-  font-size: 14px;
-  font-weight: 700;
-  color: #1e3a5f;
-}
-
-.orange-banner .sig-logo-section .slogan {
-  font-size: 9px;
-  color: #666666;
-  letter-spacing: 2px;
+  gap: 6px;
 }
 
 /* ===========================================
-   LAYOUT: Yellow Hexagon (Thomas Smith style)
+   LAYOUT: Yellow Hexagon (Creative Grid)
    =========================================== */
 .yellow-hexagon {
   padding: 0;
   overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.yellow-hexagon .sig-row {
+.yellow-hexagon .sig-hex-header {
+  padding: 14px 18px;
+  color: #ffffff;
+  text-align: center;
+}
+
+.yellow-hexagon .sig-name-hex {
+  font-size: 19px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+}
+
+.yellow-hexagon .sig-title-hex {
+  font-size: 11px;
+  opacity: 0.95;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.yellow-hexagon .sig-hex-content {
   display: flex;
-  gap: 16px;
-  padding: 14px;
+  gap: 18px;
+  padding: 18px;
+  background: #ffffff;
+}
+
+.yellow-hexagon .sig-hex-left {
+  flex-shrink: 0;
+  text-align: center;
 }
 
 .yellow-hexagon .sig-photo-hex {
-  width: 90px;
-  height: 90px;
-  position: relative;
-  flex-shrink: 0;
-}
-
-.yellow-hexagon .sig-photo-hex img {
-  width: 100%;
-  height: 100%;
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
   object-fit: cover;
-  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
-.yellow-hexagon .sig-content {
+.yellow-hexagon .sig-company-hex {
+  font-size: 10px;
+  color: #666666;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.yellow-hexagon .sig-hex-right {
   flex: 1;
   color: #333333;
-}
-
-.yellow-hexagon .sig-name-bold {
-  font-size: 18px;
-  font-weight: 700;
-  color: #333333;
-}
-
-.yellow-hexagon .sig-title-gray {
-  font-size: 12px;
-  color: #555555;
-  margin-bottom: 8px;
 }
 
 .yellow-hexagon .sig-contact-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4px;
+  gap: 8px 12px;
   font-size: 11px;
+  margin-bottom: 12px;
+}
+
+.yellow-hexagon .grid-item {
   color: #333333;
 }
 
-.yellow-hexagon .contact-grid-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #333333;
+.yellow-hexagon .grid-item strong {
+  color: #666666;
+  font-weight: 600;
+  margin-right: 4px;
 }
 
-.yellow-hexagon .sig-logo-col {
-  text-align: center;
-  flex-shrink: 0;
-  min-width: 70px;
+.yellow-hexagon .grid-item.full-width {
+  grid-column: 1 / -1;
 }
 
 /* ===========================================
-   LAYOUT: Blue Modern (Edward Richards style)
+   LAYOUT: Blue Modern (Corporate Blue)
    =========================================== */
 .blue-modern {
   padding: 0;
   overflow: hidden;
-  background: linear-gradient(135deg, #f8fafc 0%, #e8f4fc 100%);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: #ffffff;
 }
 
-.blue-modern .sig-row {
+.blue-modern .sig-blue-header {
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e8f4fc 100%);
+  border-bottom: 2px solid;
+}
+
+.blue-modern .sig-company-blue {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.blue-modern .sig-name-blue {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1e3a5f;
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+}
+
+.blue-modern .sig-title-blue {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.blue-modern .sig-blue-body {
   display: flex;
   gap: 20px;
-  padding: 16px;
+  padding: 18px;
 }
 
-.blue-modern .sig-content-left {
+.blue-modern .sig-blue-left {
   flex: 1;
   color: #333333;
 }
 
-.blue-modern .sig-company-name {
-  font-size: 12px;
-  font-weight: 700;
-  color: #2563eb;
-  margin-bottom: 6px;
-}
-
-.blue-modern .sig-name-large {
-  font-size: 22px;
-  font-weight: 800;
-  color: #1e3a5f;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.blue-modern .sig-title-blue {
-  font-size: 13px;
-  color: #2563eb;
-  margin-bottom: 10px;
-}
-
-.blue-modern .sig-contact-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
+.blue-modern .sig-contact-blue {
   font-size: 11px;
-  color: #333333;
+  line-height: 1.8;
+  margin-bottom: 12px;
 }
 
-.blue-modern .contact-label {
-  font-size: 9px;
-  color: #2563eb;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+.blue-modern .sig-contact-blue div {
+  margin-bottom: 4px;
 }
 
-.blue-modern .contact-value {
-  color: #333333;
-  font-size: 12px;
+.blue-modern .label-blue {
+  font-weight: 700;
+  color: #666666;
+  margin-right: 6px;
+  font-size: 10px;
 }
 
-.blue-modern .sig-photo-right {
-  width: 100px;
-  height: 100px;
-  border-radius: 12px;
-  overflow: hidden;
+.blue-modern .sig-blue-right {
   flex-shrink: 0;
-  border: 3px solid #2563eb;
 }
 
-.blue-modern .sig-photo-right img {
-  width: 100%;
-  height: 100%;
+.blue-modern .sig-photo-blue {
+  width: 110px;
+  height: 110px;
+  border-radius: 8px;
+  border: 3px solid;
   object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
 /* ===========================================
-   LAYOUT: Black Footer (Andie Edmond style)
+   LAYOUT: Black Footer (Dark Elegant)
    =========================================== */
 .black-footer {
   padding: 0;
   overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: #ffffff;
 }
 
-.black-footer .sig-main {
+.black-footer .sig-dark-main {
   display: flex;
   gap: 20px;
-  padding: 16px;
+  padding: 18px;
 }
 
-.black-footer .sig-photo-square {
-  width: 100px;
-  height: 120px;
+.black-footer .sig-photo-dark {
+  width: 110px;
+  height: 110px;
   flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
-.black-footer .sig-photo-square img {
+.black-footer .sig-photo-dark img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.black-footer .sig-content {
+.black-footer .sig-content-dark {
   flex: 1;
   color: #333333;
 }
 
-.black-footer .sig-name-elegant {
-  font-size: 24px;
-  font-family: 'Playfair Display', serif;
-  color: #333333;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+.black-footer .sig-name-dark {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
 }
 
-.black-footer .sig-title-caps {
-  font-size: 10px;
+.black-footer .sig-title-dark {
+  font-size: 12px;
   color: #666666;
-  letter-spacing: 2px;
+  font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.black-footer .sig-company-dark {
+  font-size: 11px;
+  color: #888888;
+  font-style: italic;
   margin-bottom: 12px;
 }
 
-.black-footer .sig-contact-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  font-size: 12px;
+.black-footer .sig-contact-dark {
+  font-size: 11px;
+  line-height: 1.8;
   color: #333333;
 }
 
-.black-footer .contact-item-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #333333;
+.black-footer .sig-contact-dark div {
+  margin-bottom: 4px;
 }
 
-.black-footer .contact-item-row span {
-  color: #333333;
-}
-
-.black-footer .sig-footer {
-  background: #1a1a1a;
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.black-footer .follow-text {
-  font-family: 'Dancing Script', cursive;
+.black-footer .sig-dark-footer {
+  padding: 12px 18px;
   color: #ffffff;
-  font-size: 14px;
 }
 
-.black-footer .sig-footer .social-icons-row {
+.black-footer .sig-footer-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.black-footer .sig-follow-text {
+  font-family: 'Dancing Script', cursive;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.black-footer .sig-dark-footer .social-icons-row {
   margin-top: 0;
 }
 
@@ -707,15 +780,19 @@
    ORIGINAL LAYOUTS (kept for compatibility)
    =========================================== */
 
-/* Corporate Two-Column */
+/* Corporate Two-Column (Professional Classic) */
 .corporate-two-column {
-  padding: 14px;
+  padding: 18px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-top: 4px solid;
 }
 
 .corporate-two-column .sig-main-row {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
+  gap: 20px;
 }
 
 .corporate-two-column .sig-left-col {
@@ -724,12 +801,18 @@
 }
 
 .corporate-two-column .sig-name {
-  color: #333333;
+  color: #1a1a1a;
+  font-size: 19px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
 }
 
 .corporate-two-column .sig-divider {
-  height: 70px;
+  height: 80px;
   flex-shrink: 0;
+  width: 2px;
+  border-radius: 1px;
 }
 
 .corporate-two-column .sig-right-col {
@@ -738,18 +821,28 @@
 }
 
 .corporate-two-column .sig-contact-block {
-  margin-top: 8px;
+  margin-top: 10px;
   font-size: 11px;
+  line-height: 1.8;
   color: #333333;
 }
 
+.corporate-two-column .sig-contact-block div {
+  margin-bottom: 4px;
+}
+
 .corporate-two-column .sig-contact-block .label {
-  color: #555555;
+  color: #666666;
+  font-weight: 600;
+  text-transform: lowercase;
+  margin-right: 6px;
 }
 
 .corporate-two-column .sig-company-name {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
 }
 
 .corporate-two-column .sig-address {
@@ -757,21 +850,27 @@
   white-space: pre-line;
   margin-top: 4px;
   color: #333333;
+  line-height: 1.6;
 }
 
 .corporate-two-column .sig-website {
   font-size: 11px;
-  margin-top: 4px;
+  margin-top: 6px;
+  font-weight: 600;
 }
 
-/* Elegant Minimal */
+/* Elegant Minimal (Minimal with Large Photo) */
 .elegant-minimal {
-  padding: 16px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .elegant-minimal .sig-main-row {
   display: flex;
-  gap: 30px;
+  gap: 32px;
+  align-items: flex-start;
 }
 
 .elegant-minimal .sig-photo-section {
@@ -779,33 +878,39 @@
   flex-direction: column;
   align-items: center;
   flex-shrink: 0;
+  width: 120px;
 }
 
 .elegant-minimal .vertical-line {
-  width: 1px;
-  height: 16px;
-  background: #1a1a1a;
+  width: 2px;
+  height: 20px;
+  background: #e0e0e0;
+  border-radius: 1px;
 }
 
 .elegant-minimal .sig-photo-large {
-  width: 100px;
-  height: 100px;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
   object-fit: cover;
-  margin: 10px 0;
+  margin: 12px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .elegant-minimal .sig-name-below {
   font-size: 16px;
   text-align: center;
-  color: #333333;
+  color: #1a1a1a;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
 .elegant-minimal .sig-title-spaced {
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: #555555;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: #888888;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
 .elegant-minimal .sig-info-section {
@@ -814,61 +919,88 @@
 }
 
 .elegant-minimal .sig-company-spaced {
-  font-size: 14px;
-  letter-spacing: 3px;
+  font-size: 12px;
+  letter-spacing: 4px;
   text-transform: uppercase;
-  color: #333333;
+  color: #1a1a1a;
+  font-weight: 700;
+  margin-bottom: 6px;
 }
 
 .elegant-minimal .sig-tagline-spaced {
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: #555555;
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  color: #666666;
   text-transform: uppercase;
+  margin-bottom: 18px;
+  font-weight: 600;
 }
 
 .elegant-minimal .sig-contact-elegant {
-  margin-top: 20px;
-  font-size: 12px;
+  font-size: 11px;
+  line-height: 1.8;
   color: #333333;
 }
 
 .elegant-minimal .contact-line {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 6px;
-  color: #333333;
 }
 
 .elegant-minimal .contact-line span {
   color: #333333;
 }
 
-/* Corporate Simple */
+/* Corporate Simple (Modern Split) */
 .corporate-simple {
-  padding: 14px;
+  padding: 18px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-top: 4px solid;
+}
+
+.corporate-simple .sig-header-simple {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8e8e8;
 }
 
 .corporate-simple .sig-header-simple .sig-name {
-  font-size: 16px;
-  font-weight: 700;
-  color: #333333;
+  font-size: 19px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+  letter-spacing: 0.3px;
 }
 
 .corporate-simple .sig-header-simple .sig-title {
   font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .corporate-simple .sig-two-col {
   display: flex;
-  gap: 24px;
-  margin-top: 8px;
+  gap: 28px;
+  margin-top: 12px;
   font-size: 11px;
+  line-height: 1.8;
   color: #333333;
 }
 
 .corporate-simple .sig-col-left,
+.corporate-simple .sig-col-right {
+  flex: 1;
+}
+
+.corporate-simple .sig-col-left {
+  font-weight: 500;
+}
+
 .corporate-simple .sig-col-right {
   color: #333333;
 }
@@ -877,27 +1009,124 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #e8e8e8;
 }
 
-/* Script Personal */
+/* ===========================================
+   LAYOUT: Creative Writer (Word-focused design)
+   =========================================== */
+.creative-writer {
+  padding: 0;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.creative-writer .sig-writer-header {
+  padding: 18px 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-left: 5px solid;
+}
+
+.creative-writer .sig-writer-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+
+.creative-writer .sig-writer-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.creative-writer .sig-writer-company {
+  font-size: 11px;
+  color: #666666;
+  font-style: italic;
+  font-weight: 600;
+}
+
+.creative-writer .sig-writer-body {
+  display: flex;
+  gap: 24px;
+  padding: 18px 20px;
+}
+
+.creative-writer .sig-writer-left {
+  flex: 1;
+}
+
+.creative-writer .sig-writer-contact {
+  margin-bottom: 12px;
+}
+
+.creative-writer .writer-contact-item {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 11px;
+}
+
+.creative-writer .writer-label {
+  font-weight: 700;
+  color: #666666;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  min-width: 50px;
+}
+
+.creative-writer .writer-value {
+  font-weight: 600;
+  color: #333333;
+  flex: 1;
+}
+
+.creative-writer .sig-writer-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.creative-writer .sig-writer-address {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #333333;
+  white-space: pre-line;
+}
+
+/* Script Personal (Personal Script) */
 .script-personal {
-  padding: 16px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .script-personal .sig-main-row {
   display: flex;
   align-items: flex-start;
-  gap: 20px;
+  gap: 24px;
 }
 
 .script-personal .sig-photo-circle {
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  background: #e8ddd0;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  border: 3px solid #f0f0f0;
 }
 
 .script-personal .sig-info-script {
@@ -906,22 +1135,25 @@
 }
 
 .script-personal .sig-name-script {
-  font-size: 30px;
-  color: #333333;
+  font-size: 34px;
+  color: #1a1a1a;
+  font-weight: 600;
+  margin-bottom: 10px;
+  line-height: 1.2;
 }
 
 .script-personal .sig-contact-script {
-  margin-top: 10px;
+  margin-top: 12px;
   font-size: 12px;
+  line-height: 1.8;
   color: #333333;
 }
 
 .script-personal .contact-line-script {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 6px;
-  color: #333333;
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
 .script-personal .contact-line-script span {
@@ -966,9 +1198,10 @@
   .elegant-minimal .sig-main-row,
   .script-personal .sig-main-row,
   .orange-banner .sig-row,
-  .yellow-hexagon .sig-row,
-  .blue-modern .sig-row,
-  .black-footer .sig-main {
+  .yellow-hexagon .sig-hex-content,
+  .blue-modern .sig-blue-body,
+  .black-footer .sig-dark-main,
+  .creative-writer .sig-writer-body {
     flex-direction: column;
     align-items: center;
     text-align: center;
