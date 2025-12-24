@@ -37,17 +37,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
   let layout = templateConfig?.layout || 'gradientSidebar';
   const accentColor = color || templateConfig?.color || '#667eea';
   
-  // Map missing layouts to existing ones to prevent blank screens
-  const layoutMap = {
-    'orangeBanner': 'simplePhoto',      // Map to similar layout
-    'yellowHexagon': 'twoColumnSimple', // Map to similar layout
-    'blueModern': 'twoColumnSimple',     // Map to similar layout
-    'blackFooter': 'twoColumnSimple',    // Map to similar layout
-  };
-  
-  if (layoutMap[layout]) {
-    layout = layoutMap[layout];
-  }
+  // All layouts are now implemented - no mapping needed
 
   // Render social icons row
   const renderSocialIcons = (style = 'default', size = 20) => {
@@ -351,6 +341,47 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
     );
   }
 
+  // Layout: Creative Writer (Word-focused design)
+  if (layout === 'creativeWriter') {
+    return (
+      <div className="signature-preview creative-writer">
+        <div className="sig-writer-header" style={{ borderLeft: `5px solid ${accentColor}` }}>
+          <div className="sig-writer-name">{name || 'Your Name'}</div>
+          <div className="sig-writer-title" style={{ color: accentColor }}>{specialty || 'Your Title'}</div>
+          {company && <div className="sig-writer-company">{company}</div>}
+        </div>
+        <div className="sig-writer-body">
+          <div className="sig-writer-left">
+            <div className="sig-writer-contact">
+              {phone && <div className="writer-contact-item">
+                <span className="writer-label">Phone</span>
+                <span className="writer-value" style={{ color: accentColor }}>{phone}</span>
+              </div>}
+              {mobile && <div className="writer-contact-item">
+                <span className="writer-label">Mobile</span>
+                <span className="writer-value" style={{ color: accentColor }}>{mobile}</span>
+              </div>}
+              {email && <div className="writer-contact-item">
+                <span className="writer-label">Email</span>
+                <span className="writer-value" style={{ color: accentColor }}>{email}</span>
+              </div>}
+              {website && <div className="writer-contact-item">
+                <span className="writer-label">Website</span>
+                <span className="writer-value" style={{ color: accentColor }}>{website}</span>
+              </div>}
+            </div>
+            {renderSocialIcons('writer', 20)}
+          </div>
+          <div className="sig-writer-right">
+            {address && <div className="sig-writer-address">{address}</div>}
+            {renderFreelancerCTA()}
+          </div>
+        </div>
+        {renderWatermark()}
+      </div>
+    );
+  }
+
   // Layout: Script Personal with Photo
   if (layout === 'photoWithScript') {
     return (
@@ -368,6 +399,133 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
           </div>
         </div>
         {renderFreelancerCTA()}
+        {renderWatermark()}
+      </div>
+    );
+  }
+
+  // Layout: Orange Banner (Bold Colorful Banner)
+  if (layout === 'orangeBanner') {
+    return (
+      <div className="signature-preview orange-banner">
+        <div className="sig-banner-top" style={{ backgroundColor: accentColor }}></div>
+        <div className="sig-row">
+          {photoUrl && (
+            <div className="sig-photo-frame" style={{ borderColor: accentColor }}>
+              <img src={photoUrl} alt={name} />
+            </div>
+          )}
+          <div className="sig-content">
+            <div className="sig-name-bold" style={{ color: accentColor }}>{name?.toUpperCase() || 'YOUR NAME'}</div>
+            <div className="sig-title">{specialty || 'Your Title'}</div>
+            {company && <div className="sig-company">{company}</div>}
+            <div className="sig-contact-info">
+              {phone && <div className="contact-info-item">📞 {phone}</div>}
+              {email && <div className="contact-info-item">✉️ {email}</div>}
+              {website && <div className="contact-info-item">🌐 {website}</div>}
+              {address && <div className="contact-info-item">📍 {address.replace(/\n/g, ', ')}</div>}
+            </div>
+            {renderSocialIcons('bold', 22)}
+            {renderFreelancerCTA()}
+            {renderWatermark()}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Layout: Yellow Hexagon (Creative Grid)
+  if (layout === 'yellowHexagon') {
+    return (
+      <div className="signature-preview yellow-hexagon">
+        <div className="sig-hex-header" style={{ backgroundColor: accentColor }}>
+          <div className="sig-name-hex">{name || 'Your Name'}</div>
+          <div className="sig-title-hex">{specialty || 'Your Title'}</div>
+        </div>
+        <div className="sig-hex-content">
+          <div className="sig-hex-left">
+            {photoUrl && <img src={photoUrl} alt={name} className="sig-photo-hex" />}
+            {company && <div className="sig-company-hex">{company}</div>}
+          </div>
+          <div className="sig-hex-right">
+            <div className="sig-contact-grid">
+              {phone && <div className="grid-item"><strong>Phone:</strong> {phone}</div>}
+              {mobile && <div className="grid-item"><strong>Mobile:</strong> {mobile}</div>}
+              {email && <div className="grid-item"><strong>Email:</strong> {email}</div>}
+              {website && <div className="grid-item"><strong>Web:</strong> {website}</div>}
+              {address && <div className="grid-item full-width"><strong>Address:</strong> {address.replace(/\n/g, ', ')}</div>}
+            </div>
+            {renderSocialIcons('grid', 20)}
+            {renderFreelancerCTA()}
+            {renderWatermark()}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Layout: Blue Modern (Corporate Blue)
+  if (layout === 'blueModern') {
+    return (
+      <div className="signature-preview blue-modern">
+        <div className="sig-blue-header">
+          {company && <div className="sig-company-blue" style={{ color: accentColor }}>{company}</div>}
+          <div className="sig-name-blue">{name?.toUpperCase() || 'YOUR NAME'}</div>
+          <div className="sig-title-blue" style={{ color: accentColor }}>{specialty || 'Your Title'}</div>
+        </div>
+        <div className="sig-blue-body">
+          <div className="sig-blue-left">
+            <div className="sig-contact-blue">
+              {phone && <div><span className="label-blue">P:</span> {phone}</div>}
+              {mobile && <div><span className="label-blue">M:</span> {mobile}</div>}
+              {email && <div><span className="label-blue">E:</span> {email}</div>}
+              {website && <div><span className="label-blue">W:</span> {website}</div>}
+              {address && <div><span className="label-blue">A:</span> {address.replace(/\n/g, ', ')}</div>}
+            </div>
+            {renderSocialIcons('blue', 20)}
+            {renderFreelancerCTA()}
+          </div>
+          {photoUrl && (
+            <div className="sig-blue-right">
+              <img src={photoUrl} alt={name} className="sig-photo-blue" style={{ borderColor: accentColor }} />
+            </div>
+          )}
+        </div>
+        {renderWatermark()}
+      </div>
+    );
+  }
+
+  // Layout: Black Footer (Dark Elegant)
+  if (layout === 'blackFooter') {
+    return (
+      <div className="signature-preview black-footer">
+        <div className="sig-dark-main">
+          {photoUrl && (
+            <div className="sig-photo-dark">
+              <img src={photoUrl} alt={name} />
+            </div>
+          )}
+          <div className="sig-content-dark">
+            <div className="sig-name-dark">{name || 'Your Name'}</div>
+            <div className="sig-title-dark">{specialty || 'Your Title'}</div>
+            {company && <div className="sig-company-dark">{company}</div>}
+            <div className="sig-contact-dark">
+              {phone && <div>📞 {phone}</div>}
+              {mobile && <div>📱 {mobile}</div>}
+              {email && <div>✉️ {email}</div>}
+              {website && <div>🌐 {website}</div>}
+              {address && <div>📍 {address.replace(/\n/g, ', ')}</div>}
+            </div>
+            {renderFreelancerCTA()}
+          </div>
+        </div>
+        <div className="sig-dark-footer" style={{ backgroundColor: accentColor }}>
+          <div className="sig-footer-content">
+            <div className="sig-follow-text">Follow me</div>
+            {renderSocialIcons('dark', 24)}
+          </div>
+        </div>
         {renderWatermark()}
       </div>
     );
