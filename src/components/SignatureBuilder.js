@@ -10,6 +10,7 @@ import SEO from './SEO';
 import { saveSignature, getSignatureCount } from '../services/signatureService';
 import { getSignatureHTMLFromData } from '../services/signatureApiService';
 import { downloadSignatureAsPNG, downloadSignatureWithWatermark } from '../utils/signatureDownloader';
+import { getGumroadCheckoutUrl } from '../services/gumroadService';
 import { templates, sampleProfiles } from '../utils/templates';
 import { useAuth } from '../context/AuthContext';
 import './SignatureBuilder.css';
@@ -182,6 +183,9 @@ function SignatureBuilder() {
   
   // Get enabled fields for current template
   const enabledFields = getTemplateFields(selectedTemplate);
+  
+  // Helper: Only show free plan limitations when loading is done, user profile is loaded, and user is not premium
+  const shouldShowFreeLimits = !authLoading && userProfile && !isPremium();
   
   // Load signature count when user changes
   useEffect(() => {
@@ -392,15 +396,27 @@ function SignatureBuilder() {
       // Check signature count limit
       const signatureCount = await getSignatureCount(currentUser.uid);
       // Double-check premium status after waiting for profile to load
-      const premiumStatus = isPremium();
-      const maxSignatures = premiumStatus ? 10 : 2;
-      
-      if (signatureCount >= maxSignatures) {
-        const message = premiumStatus
-          ? `You've reached your Premium plan limit of ${maxSignatures} saved signatures. Please delete an existing signature to save a new one.`
-          : `You've reached your Free plan limit of ${maxSignatures} saved signatures. Upgrade to Premium to save up to 10 signatures!`;
-        showToast(message, 'warning');
-        return;
+      // Only check if loading is done and user profile is loaded
+      if (!authLoading && userProfile) {
+        const premiumStatus = isPremium();
+        const maxSignatures = premiumStatus ? 10 : 2;
+        
+        if (signatureCount >= maxSignatures) {
+          // Only show limit message if user is actually at limit
+          if (premiumStatus) {
+            showToast(`You've reached your Premium plan limit of ${maxSignatures} saved signatures. Please delete an existing signature to save a new one.`, 'warning');
+          } else {
+            showToast(`You've reached your Free plan limit of ${maxSignatures} saved signatures. Upgrade to Premium to save up to 10 signatures!`, 'warning');
+          }
+          return;
+        }
+      } else {
+        // If still loading, wait a bit and retry
+        await new Promise(resolve => setTimeout(resolve, 500));
+        if (authLoading || (currentUser && !userProfile)) {
+          showToast('Please wait while we verify your account status...', 'info');
+          return;
+        }
       }
 
       await saveSignature({
@@ -427,7 +443,10 @@ function SignatureBuilder() {
     } else if (authAction === 'download') {
       handleDownload();
     } else if (authAction === 'upgrade') {
-      navigate('/premium');
+      if (currentUser && isFullyAuthenticated()) {
+        const checkoutUrl = getGumroadCheckoutUrl(currentUser.email, true);
+        window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
+      }
     }
   };
 
@@ -439,8 +458,9 @@ function SignatureBuilder() {
       return;
     }
     
-    // If signed in, navigate to premium page
-    navigate('/premium');
+    // If signed in, open Gumroad checkout directly
+    const checkoutUrl = getGumroadCheckoutUrl(currentUser.email, true);
+    window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleDownload = async () => {
@@ -575,41 +595,31 @@ function SignatureBuilder() {
       <div className="builder-content">
         <div className="builder-form">
           
-          {/* Step 1: Choose Template */}
+          {/* Premium Upgrade Banner - Only show for non-premium users when data is loaded */}
+          {shouldShowFreeLimits && (
+            <div className="premium-upgrade-banner">
+              <div className="premium-banner-content">
+                <div className="premium-banner-left">
+                  <div className="premium-banner-icon">⭐</div>
+                  <div>
+                    <h3>Unlock Premium Features</h3>
+                    <p>Remove watermarks • Copy HTML code • Download PNG • Save up to 10 signatures</p>
+                  </div>
+                </div>
+                <button 
+                  className="premium-banner-btn"
+                  onClick={handleUpgradeClick}
+                >
+                  Upgrade Now - $2.99/mo
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 1: Basic Info */}
           <div className="form-section">
             <div className="section-header">
               <span className="step-number">1</span>
-              <div>
-                <h2>Choose Your Style</h2>
-                <p className="section-hint">Pick a layout that matches your brand</p>
-              </div>
-            </div>
-            <div className="template-grid">
-              {allTemplates.map((key) => {
-                const template = templates[key];
-                if (!template) return null;
-                return (
-                  <div
-                    key={key}
-                    className={`template-card ${selectedTemplate === key ? 'active' : ''}`}
-                    onClick={() => handleTemplateChange(key)}
-                  >
-                    <div className="template-preview" style={{
-                      borderTop: `4px solid ${template.color}`,
-                    }}>
-                      <div className="template-name">{template.name}</div>
-                      <div className="template-desc">{template.description}</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Step 2: Basic Info */}
-          <div className="form-section">
-            <div className="section-header">
-              <span className="step-number">2</span>
               <div>
                 <h2>Your Information</h2>
                 <p className="section-hint">Tell clients who you are</p>
@@ -724,10 +734,10 @@ function SignatureBuilder() {
             </div>
           </div>
 
-          {/* Step 3: Photo/Logo */}
+          {/* Step 2: Photo/Logo */}
           <div className="form-section">
             <div className="section-header">
-              <span className="step-number">3</span>
+              <span className="step-number">2</span>
               <div>
                 <h2>Photo & Logo</h2>
                 <p className="section-hint">Add your professional photo</p>
@@ -762,10 +772,10 @@ function SignatureBuilder() {
             </div>
           </div>
 
-          {/* Step 4: Freelancer Features */}
+          {/* Step 3: Freelancer Features */}
           <div className="form-section freelancer-section">
             <div className="section-header">
-              <span className="step-number">4</span>
+              <span className="step-number">3</span>
               <div>
                 <h2>💼 Freelancer Features</h2>
                 <p className="section-hint">What makes YOU stand out from competitors</p>
@@ -825,10 +835,10 @@ function SignatureBuilder() {
             </div>
           </div>
 
-          {/* Step 5: Social Links */}
+          {/* Step 4: Social Links */}
           <div className="form-section">
             <div className="section-header">
-              <span className="step-number">5</span>
+              <span className="step-number">4</span>
               <div>
                 <h2>Social Links</h2>
                 <p className="section-hint">Icons appear automatically when you add links</p>
@@ -874,10 +884,10 @@ function SignatureBuilder() {
             </div>
           </div>
 
-          {/* Step 6: Color */}
+          {/* Step 5: Color */}
           <div className="form-section">
             <div className="section-header">
-              <span className="step-number">6</span>
+              <span className="step-number">5</span>
               <div>
                 <h2>Brand Color</h2>
                 <p className="section-hint">Match your brand identity</p>
@@ -903,7 +913,7 @@ function SignatureBuilder() {
 
           {/* Actions */}
           <div className="form-actions">
-            {isPremium() ? (
+            {(!authLoading && userProfile && isPremium()) ? (
               <button onClick={handleCopy} className="btn btn-primary">
                 {copied ? '✓ Copied!' : '📋 Copy HTML'}
               </button>
@@ -919,11 +929,14 @@ function SignatureBuilder() {
             <button onClick={handleSave} className="btn btn-secondary">
               {saved ? '✓ Saved!' : '💾 Save'}
             </button>
-            {currentUser && isFullyAuthenticated() && (
+            {currentUser && isFullyAuthenticated() && !authLoading && userProfile && (
               <div className="signature-count-info">
                 <small>
                   {signatureCount} / {isPremium() ? 10 : 2} signatures saved
-                  {signatureCount >= (isPremium() ? 10 : 2) && (
+                  {shouldShowFreeLimits && signatureCount >= 2 && (
+                    <span className="limit-reached"> (Limit reached)</span>
+                  )}
+                  {!shouldShowFreeLimits && isPremium() && signatureCount >= 10 && (
                     <span className="limit-reached"> (Limit reached)</span>
                   )}
                 </small>
@@ -936,16 +949,10 @@ function SignatureBuilder() {
             >
               {downloading 
                 ? '⏳ Downloading...' 
-                : isPremium() 
+                : (!authLoading && userProfile && isPremium())
                   ? '📥 Download PNG' 
                   : '📥 Download PNG (Premium to remove watermark)'}
             </button>
-            {!isPremium() && (
-              <p className="watermark-notice">
-                ✨ Free signatures include a small "Created with FreelancerSignature" link. 
-                <span className="upgrade-link" onClick={handleUpgradeClick}> Upgrade to remove →</span>
-              </p>
-            )}
           </div>
         </div>
 
@@ -954,6 +961,7 @@ function SignatureBuilder() {
             <h2>Live Preview</h2>
             <p>This is how your signature will look</p>
           </div>
+          
           <div className="preview-container" ref={previewRef}>
             {(isLoadingProfile || isPending) ? (
               <div style={{ 
@@ -971,13 +979,36 @@ function SignatureBuilder() {
                 <SignaturePreview 
                   key={`${selectedProfile || 'default'}-${selectedTemplate}-${Date.now()}`}
                   signatureData={signatureData} 
-                  showWatermark={false} 
+                  showWatermark={shouldShowFreeLimits} 
                 />
               </ErrorBoundary>
             )}
           </div>
         </div>
       </div>
+
+      {/* Premium CTA Box - Fixed at bottom */}
+      {shouldShowFreeLimits && (
+        <div className="premium-cta-box-fixed">
+          <div className="premium-cta-content">
+            <div className="premium-cta-icon">🔒</div>
+            <div className="premium-cta-text">
+              <strong>Free Plan Limitations:</strong>
+              <ul>
+                <li>Watermark on all signatures</li>
+                <li>Cannot copy HTML code</li>
+                <li>Only 2 saved signatures</li>
+              </ul>
+            </div>
+          </div>
+          <button 
+            className="premium-cta-button"
+            onClick={handleUpgradeClick}
+          >
+            🚀 Upgrade to Premium - $2.99/mo
+          </button>
+        </div>
+      )}
 
       {/* Auth Modal */}
       <AuthModal 

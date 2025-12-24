@@ -8,8 +8,11 @@ import { useAuth } from '../context/AuthContext';
 import './MySignatures.css';
 
 function MySignatures() {
-  const { currentUser, isFullyAuthenticated, isPremium, loading: authLoading } = useAuth();
+  const { currentUser, isFullyAuthenticated, isPremium, loading: authLoading, userProfile } = useAuth();
   const navigate = useNavigate();
+  
+  // Helper: Only show free plan limitations when loading is done, user profile is loaded, and user is not premium
+  const shouldShowFreeLimits = !authLoading && userProfile && !isPremium();
   
   const [signatures, setSignatures] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -165,11 +168,11 @@ function MySignatures() {
               >
                 <SignaturePreview 
                   signatureData={signature.data} 
-                  showWatermark={!isPremium()}
+                  showWatermark={shouldShowFreeLimits}
                 />
               </div>
               <div className="signature-card-actions">
-                {isPremium() ? (
+                {(!authLoading && userProfile && isPremium()) ? (
                   <button
                     onClick={() => handleCopy(signature.data, signature.id)}
                     className="btn-action btn-copy"
@@ -192,7 +195,7 @@ function MySignatures() {
                 >
                   {downloading === signature.id 
                     ? '⏳ Downloading...' 
-                    : isPremium() 
+                    : (!authLoading && userProfile && isPremium())
                       ? '📥 Download PNG' 
                       : '📥 Download PNG (Premium to remove watermark)'}
                 </button>
