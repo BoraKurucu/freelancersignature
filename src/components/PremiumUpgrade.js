@@ -11,7 +11,15 @@ function PremiumUpgrade() {
   useEffect(() => {
     // Scroll to top on mount
     window.scrollTo(0, 0);
-  }, []);
+    
+    // If user is logged in and not premium, automatically open Gumroad checkout
+    // Only open once when userProfile is loaded and user is not premium
+    const isUserPremium = userProfile?.subscriptionStatus === 'premium' && userProfile?.planType === 'premium';
+    if (currentUser && userProfile && !isUserPremium) {
+      const checkoutUrl = getGumroadCheckoutUrl(currentUser.email, true);
+      window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
+    }
+  }, [currentUser, userProfile?.subscriptionStatus, userProfile?.planType]);
 
   const handleUpgrade = () => {
     if (!currentUser) {
@@ -21,8 +29,8 @@ function PremiumUpgrade() {
 
     setLoading(true);
     
-    // Get Gumroad checkout URL with user's email pre-filled
-    const checkoutUrl = getGumroadCheckoutUrl(currentUser.email);
+    // Get Gumroad checkout URL with user's email pre-filled and wanted=true
+    const checkoutUrl = getGumroadCheckoutUrl(currentUser.email, true);
     
     // Open Gumroad checkout in new window
     window.open(checkoutUrl, '_blank', 'noopener,noreferrer');

@@ -9,14 +9,23 @@ const GUMROAD_PRODUCT_URL = process.env.REACT_APP_GUMROAD_PRODUCT_URL || 'https:
 /**
  * Get the Gumroad checkout URL for premium subscription
  * @param {string} email - User's email address (optional, for pre-filling)
+ * @param {boolean} wanted - If true, opens checkout directly (wanted=true parameter)
  * @returns {string} - Gumroad checkout URL
  */
-export function getGumroadCheckoutUrl(email = '') {
+export function getGumroadCheckoutUrl(email = '', wanted = true) {
   const baseUrl = GUMROAD_PRODUCT_URL;
-  if (email) {
-    return `${baseUrl}?email=${encodeURIComponent(email)}`;
+  const params = new URLSearchParams();
+  
+  if (wanted) {
+    params.append('wanted', 'true');
   }
-  return baseUrl;
+  
+  if (email) {
+    params.append('email', email);
+  }
+  
+  const queryString = params.toString();
+  return queryString ? `${baseUrl}?${queryString}` : baseUrl;
 }
 
 /**
