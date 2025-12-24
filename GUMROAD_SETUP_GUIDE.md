@@ -61,7 +61,7 @@ Your subscription renews monthly and can be cancelled anytime.
 
 ### Pricing
 
-**Amount:** $4.99
+**Amount:** $2.99
 
 **Settings:**
 - ✅ Allow customers to pay what they want (optional - you can disable this)
@@ -118,6 +118,7 @@ You'll also need to set up a webhook endpoint (see `WEBHOOK_SETUP.md` for detail
 - Subscriptions renew automatically
 - Users can cancel anytime from their Gumroad account
 - You'll receive email notifications for new sales
+
 
 
 

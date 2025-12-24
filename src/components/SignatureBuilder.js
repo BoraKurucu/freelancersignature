@@ -8,7 +8,7 @@ import Toast from './Toast';
 import ImageUploadCrop from './ImageUploadCrop';
 import SEO from './SEO';
 import { saveSignature, getSignatureCount } from '../services/signatureService';
-import { generateHTMLSignature } from '../utils/signatureGenerator';
+import { getSignatureHTMLFromData } from '../services/signatureApiService';
 import { downloadSignatureAsPNG, downloadSignatureWithWatermark } from '../utils/signatureDownloader';
 import { templates, sampleProfiles } from '../utils/templates';
 import { useAuth } from '../context/AuthContext';
@@ -345,23 +345,27 @@ function SignatureBuilder() {
       return;
     }
 
-    // Generate HTML with watermark (unless premium)
-    const showWatermark = !isPremium();
-    const htmlContent = generateHTMLSignature(signatureData, { showWatermark });
-    
     try {
-      await navigator.clipboard.writeText(htmlContent);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      const textArea = document.createElement('textarea');
-      textArea.value = htmlContent;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      // Get HTML from server-side (validates premium status)
+      const { html } = await getSignatureHTMLFromData(signatureData);
+      
+      try {
+        await navigator.clipboard.writeText(html);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        const textArea = document.createElement('textarea');
+        textArea.value = html;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (error) {
+      console.error('Error copying signature:', error);
+      showToast('Failed to copy signature. Please try again.', 'error');
     }
   };
 
@@ -440,61 +444,59 @@ function SignatureBuilder() {
   };
 
   const handleDownload = async () => {
+    // Check if user is authenticated
+    if (!currentUser || !isFullyAuthenticated()) {
+      setAuthAction('download');
+      setShowAuthModal(true);
+      return;
+    }
+
     setDownloading(true);
     try {
-      // Find the signature preview element
-      const previewContainer = previewRef.current;
-      if (!previewContainer) {
-        throw new Error('Preview container not found');
+      // Get HTML from server-side (validates premium status and adds watermark if needed)
+      const { html, isPremium: serverIsPremium } = await getSignatureHTMLFromData(signatureData);
+      
+      // Create a temporary container to render the HTML
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.width = '600px';
+      tempContainer.style.backgroundColor = '#ffffff';
+      tempContainer.innerHTML = html;
+      document.body.appendChild(tempContainer);
+      
+      // Wait for images to load
+      const images = tempContainer.querySelectorAll('img');
+      if (images.length > 0) {
+        await Promise.all(
+          Array.from(images).map(
+            (img) =>
+              new Promise((resolve, reject) => {
+                if (img.complete) {
+                  resolve();
+                } else {
+                  img.onload = resolve;
+                  img.onerror = resolve; // Continue even if image fails
+                  setTimeout(() => resolve(), 5000);
+                }
+              })
+          )
+        );
       }
       
-      const signatureElement = previewContainer.querySelector('.signature-preview');
-      if (!signatureElement) {
-        throw new Error('Signature preview element not found');
-      }
-
+      const signatureElement = tempContainer.querySelector('table') || tempContainer;
       const filename = `${signatureData?.name || 'signature'}.png`;
-      const isUserPremium = isPremium();
 
-      if (isUserPremium) {
-        // Premium users: download PNG without watermark
+      if (serverIsPremium) {
+        // Premium users: download PNG without watermark (server validated)
         await downloadSignatureAsPNG(signatureElement, filename);
       } else {
-        // Free/non-logged-in users: download PNG with watermark
-        // Temporarily add watermark element to the preview for download
-        const watermarkExists = signatureElement.querySelector('.signature-watermark');
-        let watermarkAdded = false;
-        
-        if (!watermarkExists) {
-          // Create temporary watermark element for download
-          const watermarkDiv = document.createElement('div');
-          watermarkDiv.className = 'signature-watermark';
-          watermarkDiv.innerHTML = '✨ Created with <a href="https://freelancersignature.com" target="_blank" rel="noopener noreferrer">freelancersignature.com</a>';
-          // Match the CSS styling from SignaturePreview.css
-          watermarkDiv.style.cssText = 'width: 100%; margin-top: 12px; padding-top: 10px; border-top: 1px solid #e8e8e8; font-size: 11px; color: #888888; text-align: center; font-family: Arial, sans-serif;';
-          // Style the link inside
-          const link = watermarkDiv.querySelector('a');
-          if (link) {
-            link.style.cssText = 'color: #667eea; text-decoration: none; font-weight: 600;';
-          }
-          signatureElement.appendChild(watermarkDiv);
-          watermarkAdded = true;
-          // Small delay to ensure watermark is rendered
-          await new Promise(resolve => setTimeout(resolve, 50));
-        }
-        
-        try {
-          await downloadSignatureWithWatermark(signatureElement, filename);
-        } finally {
-          // Remove temporary watermark if we added it
-          if (watermarkAdded) {
-            const addedWatermark = signatureElement.querySelector('.signature-watermark');
-            if (addedWatermark) {
-              addedWatermark.remove();
-            }
-          }
-        }
+        // Free users: download PNG with watermark (server validated)
+        await downloadSignatureWithWatermark(signatureElement, filename);
       }
+      
+      // Clean up
+      document.body.removeChild(tempContainer);
     } catch (error) {
       console.error('Error downloading signature:', error);
       showToast('Failed to download signature. Please try again.', 'error');

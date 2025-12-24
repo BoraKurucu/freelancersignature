@@ -146,12 +146,19 @@
 }
 
 .signature-preview-wrapper {
-  background: #f8f9fa;
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid #e0e0e0;
+  background: #f9f9f9;
+  padding: 12px;
+  border-radius: 8px;
   margin-bottom: 16px;
   overflow-x: auto;
+  /* Match builder preview container styling */
+}
+
+/* Ensure signature preview maintains its styling within the wrapper */
+.signature-preview-wrapper .signature-preview {
+  margin: 0;
+  /* Let individual layouts control their own padding */
+  box-shadow: none;
 }
 
 .signature-card-actions {
