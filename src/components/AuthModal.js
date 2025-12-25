@@ -19,8 +19,18 @@ function AuthModal({ isOpen, onClose, onSuccess, requiredAction = 'save' }) {
   useEffect(() => {
     if (isOpen && currentUser && isFullyAuthenticated()) {
       // User is now authenticated, close modal
-      onClose();
-      if (onSuccess) onSuccess();
+      // Add small delay to ensure auth state is fully settled
+      const timer = setTimeout(() => {
+        onClose();
+        if (onSuccess) {
+          // Call onSuccess after a brief delay to ensure everything is ready
+          setTimeout(() => {
+            onSuccess();
+          }, 100);
+        }
+      }, 200);
+      
+      return () => clearTimeout(timer);
     }
   }, [currentUser, isOpen, isFullyAuthenticated, onClose, onSuccess]);
 
