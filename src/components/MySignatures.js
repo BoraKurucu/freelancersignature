@@ -97,10 +97,6 @@ function MySignatures() {
     }
   };
 
-  const handleEdit = (signatureData) => {
-    // Navigate to builder with signature data
-    navigate('/builder', { state: { editSignature: signatureData } });
-  };
 
   const handleDownload = async (signatureId, signatureData) => {
     // Check if we're still checking status - silently return
@@ -260,12 +256,6 @@ function MySignatures() {
                     : (!isCheckingStatus && userProfile && isPremium())
                       ? '📄 Download PDF' 
                       : '📄 Download PDF (Upgrade to remove watermark)'}
-                </button>
-                <button
-                  onClick={() => handleEdit(signature.data)}
-                  className="btn-action btn-edit"
-                >
-                  ✏️ Edit
                 </button>
                 <button
                   onClick={() => handleDelete(signature.id)}
