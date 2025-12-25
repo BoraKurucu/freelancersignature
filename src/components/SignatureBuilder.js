@@ -491,28 +491,56 @@ function SignatureBuilder() {
         throw new Error('Preview container not found');
       }
       
-      // Select the container that includes the watermark overlay
-      const signatureElement = previewContainer.querySelector('.signature-preview-container');
+      // ÖNEMLİ: Doğru element'i seç
+      let signatureElement = previewContainer.querySelector('.tpl-modern-vertical') || 
+                             previewContainer.querySelector('.signature-preview') ||
+                             previewContainer.querySelector('.signature-preview-container');
+      
       if (!signatureElement) {
-        // Fallback to .signature-preview if container not found
-        const fallbackElement = previewContainer.querySelector('.signature-preview');
-        if (!fallbackElement) {
-          throw new Error('Signature preview element not found');
-        }
-        const filename = `${signatureData?.name || 'signature'}.png`;
-        const isPremiumUser = !isCheckingStatus && userProfile && isPremium();
-        await downloadSignaturePNG(fallbackElement, filename, isPremiumUser);
-        return;
+        signatureElement = previewContainer;
       }
+      
+      console.log('Download için element bulundu:', signatureElement);
       
       const filename = `${signatureData?.name || 'signature'}.png`;
       const isPremiumUser = !isCheckingStatus && userProfile && isPremium();
+      
+      // Doğrudan downloadSignaturePNG fonksiyonunu çağır
       await downloadSignaturePNG(signatureElement, filename, isPremiumUser);
+      
+      showToast('PNG downloaded successfully!', 'success');
     } catch (error) {
       console.error('Error downloading signature:', error);
       showToast('Failed to download signature. Please try again.', 'error');
     } finally {
       setDownloading(false);
+    }
+  };
+
+  const handleDebug = async () => {
+    try {
+      const previewContainer = previewRef.current;
+      if (!previewContainer) {
+        showToast('Preview container not found', 'error');
+        return;
+      }
+      
+      let signatureElement = previewContainer.querySelector('.tpl-modern-vertical') || 
+                             previewContainer.querySelector('.signature-preview') ||
+                             previewContainer.querySelector('.signature-preview-container');
+      
+      if (!signatureElement) {
+        signatureElement = previewContainer;
+      }
+      
+      // Debug modunu aç (watermark'ı göster)
+      const { debugCanvas } = await import('../utils/downloadHelpers');
+      await debugCanvas(signatureElement, true);
+      
+      showToast('Debug mode: Canvas displayed on screen', 'info');
+    } catch (error) {
+      console.error('Debug error:', error);
+      showToast('Debug failed: ' + error.message, 'error');
     }
   };
 
@@ -532,39 +560,29 @@ function SignatureBuilder() {
 
     setDownloadingPDF(true);
     try {
-      const filename = `${signatureData?.name || 'signature'}.pdf`;
-      const isPremiumUser = !isCheckingStatus && userProfile && isPremium();
-
-      // Select the container that includes the watermark overlay
       const previewContainer = previewRef.current;
       if (!previewContainer) {
         throw new Error('Preview container not found');
       }
-      const signatureElement = previewContainer.querySelector('.signature-preview-container');
+      
+      // ÖNEMLİ: Doğru element'i seç
+      let signatureElement = previewContainer.querySelector('.tpl-modern-vertical') || 
+                             previewContainer.querySelector('.signature-preview') ||
+                             previewContainer.querySelector('.signature-preview-container');
+      
       if (!signatureElement) {
-        // Fallback to .signature-preview if container not found
-        const fallbackElement = previewContainer.querySelector('.signature-preview');
-        if (!fallbackElement) {
-          throw new Error('Signature preview element not found');
-        }
-        await downloadSignaturePDF(
-          fallbackElement, 
-          filename, 
-          isPremiumUser, 
-          null, 
-          null
-        );
-        return;
+        signatureElement = previewContainer;
       }
-
-      // Use element directly for both premium and free (same as PNG)
-      await downloadSignaturePDF(
-        signatureElement, 
-        filename, 
-        isPremiumUser, 
-        null, 
-        null
-      );
+      
+      console.log('PDF download için element bulundu:', signatureElement);
+      
+      const filename = `${signatureData?.name || 'signature'}.pdf`;
+      const isPremiumUser = !isCheckingStatus && userProfile && isPremium();
+      
+      // Doğrudan downloadSignaturePDF fonksiyonunu çağır
+      await downloadSignaturePDF(signatureElement, filename, isPremiumUser);
+      
+      showToast('PDF downloaded successfully!', 'success');
     } catch (error) {
       console.error('Error downloading signature as PDF:', error);
       showToast('Failed to download signature as PDF. Please try again.', 'error');
@@ -1037,6 +1055,15 @@ function SignatureBuilder() {
                     : '📄 Download PDF (Upgrade to remove watermark)'}
               </button>
             )}
+
+            {/* DEBUG BUTTON */}
+            <button 
+              onClick={handleDebug}
+              className="btn btn-secondary"
+              style={{ backgroundColor: '#ff6b6b', color: 'white' }}
+            >
+              🐛 Debug Canvas
+            </button>
           </div>
         </div>
 
