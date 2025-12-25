@@ -135,7 +135,7 @@
 /* Builder Content - Two Column */
 .builder-content {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 1fr max-content;
   gap: 20px;
   align-items: start;
 }
@@ -459,6 +459,10 @@
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  overflow: visible !important; /* İçerik genişleyebilir */
+  max-width: none !important; /* Maksimum genişlik kısıtlaması yok */
+  width: max-content !important; /* Genişlik signature'a göre */
+  min-width: max-content !important;
 }
 
 .preview-header {
@@ -629,12 +633,13 @@
   background: #f9f9f9;
   border-radius: 8px;
   padding: 12px;
-  overflow: auto;
-  max-height: calc(100vh - 200px); /* Fallback for older browsers */
-  max-height: calc(100dvh - 200px); /* Dynamic viewport height - prevents layout shift */
+  overflow: visible !important; /* Scroll kaldırıldı - içerik genişleyebilir */
   min-height: 200px; /* Prevent blank screen during transitions */
   position: relative; /* Ensure content stays visible */
   will-change: contents; /* Optimize for transitions */
+  max-width: none !important; /* Maksimum genişlik kısıtlaması yok */
+  width: max-content !important; /* Genişlik signature'a göre */
+  min-width: max-content !important;
 }
 
 /* ===========================================
