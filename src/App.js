@@ -8,6 +8,7 @@ import MySignatures from './components/MySignatures';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import CookiePolicy from './components/CookiePolicy';
+import CookieConsent from './components/CookieConsent';
 import './App.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
       <AuthProvider>
         <Router>
           <div className="App">
+            <CookieConsent />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/builder" element={<SignatureBuilder />} />
