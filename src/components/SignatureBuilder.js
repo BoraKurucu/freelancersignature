@@ -517,33 +517,6 @@ function SignatureBuilder() {
     }
   };
 
-  const handleDebug = async () => {
-    try {
-      const previewContainer = previewRef.current;
-      if (!previewContainer) {
-        showToast('Preview container not found', 'error');
-        return;
-      }
-      
-      let signatureElement = previewContainer.querySelector('.tpl-modern-vertical') || 
-                             previewContainer.querySelector('.signature-preview') ||
-                             previewContainer.querySelector('.signature-preview-container');
-      
-      if (!signatureElement) {
-        signatureElement = previewContainer;
-      }
-      
-      // Debug modunu aç (watermark'ı göster)
-      const { debugCanvas } = await import('../utils/downloadHelpers');
-      await debugCanvas(signatureElement, true);
-      
-      showToast('Debug mode: Canvas displayed on screen', 'info');
-    } catch (error) {
-      console.error('Debug error:', error);
-      showToast('Debug failed: ' + error.message, 'error');
-    }
-  };
-
   const handleDownloadPDF = async () => {
     // Check if user is authenticated
     if (!currentUser || !isFullyAuthenticated()) {
@@ -1055,15 +1028,6 @@ function SignatureBuilder() {
                     : '📄 Download PDF (Upgrade to remove watermark)'}
               </button>
             )}
-
-            {/* DEBUG BUTTON */}
-            <button 
-              onClick={handleDebug}
-              className="btn btn-secondary"
-              style={{ backgroundColor: '#ff6b6b', color: 'white' }}
-            >
-              🐛 Debug Canvas
-            </button>
           </div>
         </div>
 
