@@ -167,7 +167,7 @@ function SignatureBuilder() {
   const [downloading, setDownloading] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authAction, setAuthAction] = useState('save');
+  const [authAction, setAuthAction] = useState(null);
   const [signatureCount, setSignatureCount] = useState(0);
   const [toast, setToast] = useState({ message: '', type: 'info', isVisible: false });
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
@@ -403,6 +403,12 @@ function SignatureBuilder() {
       return;
     }
 
+    // Check if signature data is valid (at least name or email should be filled)
+    if (!signatureData.name && !signatureData.email) {
+      showToast('Please fill in at least your name or email before saving.', 'warning');
+      return;
+    }
+
     try {
       // Check signature count limit
       const currentSignatureCount = await getSignatureCount(currentUser.uid);
@@ -437,16 +443,30 @@ function SignatureBuilder() {
       setTimeout(() => setSaved(false), 2000);
     } catch (error) {
       console.error('Error saving signature:', error);
-      showToast('Failed to save signature. Please try again.', 'error');
+      // Don't show error if signature data is empty (user just logged in without filling form)
+      if (signatureData.name || signatureData.email) {
+        showToast('Failed to save signature. Please try again.', 'error');
+      }
     }
   };
 
   const handleAuthSuccess = () => {
-    // After successful auth, retry the action
+    // After successful auth, retry the action ONLY if user actually clicked a button
+    // Don't do anything if user just logged in without clicking anything
+    if (!authAction) {
+      // User just logged in, no action needed
+      return;
+    }
+    
+    // Only execute action if user actually clicked a button before login
     if (authAction === 'copy') {
       handleCopy();
     } else if (authAction === 'save') {
-      handleSave();
+      // Only try to save if signature has at least name or email
+      if (signatureData.name || signatureData.email) {
+        handleSave();
+      }
+      // If no data, just silently do nothing - user can click save button again
     } else if (authAction === 'download') {
       handleDownload();
     } else if (authAction === 'upgrade') {
@@ -455,6 +475,8 @@ function SignatureBuilder() {
         window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
       }
     }
+    // Reset auth action after handling
+    setAuthAction(null);
   };
 
   const handleUpgradeClick = () => {
@@ -1086,12 +1108,12 @@ function SignatureBuilder() {
       )}
 
       {/* Auth Modal */}
-      <AuthModal 
-        isOpen={showAuthModal} 
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={handleAuthSuccess}
-        requiredAction={authAction}
-      />
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={handleAuthSuccess}
+          requiredAction={authAction || 'continue'}
+        />
       
       {/* Toast Notification */}
       <Toast
