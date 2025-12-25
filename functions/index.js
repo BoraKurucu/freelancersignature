@@ -380,12 +380,26 @@ exports.getSignatureHTMLForDownload = functions.https.onRequest(async (req, res)
 });
 
 /**
- * Webhook endpoint that receives Gumroad webhooks
- * This runs in freelancersignature project, so it has permissions
+ * NOTE: This webhook is NOT USED anymore.
+ * All Gumroad webhooks are handled by the gamerlinks project webhook:
+ * https://us-central1-gamerlinks-844c5.cloudfunctions.net/gumroadWebhook
+ * 
+ * This function is kept for backward compatibility but will not be called.
+ * If you want to remove it, uncomment the code below and deploy.
  */
-exports.gumroadWebhook = functions.https.onRequest(async (req, res) => {
-  // Webhook should only accept POST from Gumroad
-  // Note: In production, verify Gumroad webhook signature
+// exports.gumroadWebhook = functions.https.onRequest(async (req, res) => {
+//   res.status(200).json({ 
+//     message: 'This webhook is deprecated. Use gamerlinks webhook instead.',
+//     redirect: 'https://us-central1-gamerlinks-844c5.cloudfunctions.net/gumroadWebhook'
+//   });
+// });
+
+/**
+ * Manual premium update endpoint (for testing/fixing)
+ * Usage: POST to /updatePremium with { userId: "documentId" } or { email: "email@example.com" }
+ */
+exports.updatePremium = functions.https.onRequest(async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -398,111 +412,47 @@ exports.gumroadWebhook = functions.https.onRequest(async (req, res) => {
     return res.status(405).send('Method Not Allowed');
   }
 
-  // Rate limiting for webhooks (more lenient)
-  const clientIP = getClientIP(req);
-  if (!checkRateLimit(clientIP + '_webhook')) {
-    console.warn('Rate limit exceeded for webhook from:', clientIP);
-    return res.status(429).send('Too many requests');
-  }
-
   try {
-    const webhookData = req.body;
+    const { userId, email } = req.body;
     
-    // Basic validation
-    if (!webhookData || typeof webhookData !== 'object') {
-      console.error('Invalid webhook payload');
-      return res.status(400).send('Invalid payload');
+    if (!userId && !email) {
+      return res.status(400).send('Missing userId or email');
     }
 
-    console.log('Received Gumroad webhook:', JSON.stringify(webhookData, null, 2));
-
-    const email = webhookData.email || webhookData.sale?.email;
-    if (!email || !isValidEmail(email)) {
-      console.error('Invalid or missing email in webhook payload');
-      return res.status(400).send('Invalid or missing email');
-    }
-    
-    const sanitizedEmail = email.toLowerCase().trim();
-
-    // Extract and validate product ID
-    const productId = webhookData.short_product_id || webhookData.permalink;
-    console.log('Product ID:', productId);
-
-    // Only process freelancersignature product
-    if (productId !== 'pddxf') {
-      console.log('Ignoring webhook for product:', productId);
-      return res.status(200).send('OK - Product not handled');
+    let userRef;
+    if (userId) {
+      userRef = db.collection('users').doc(userId);
+      const userDoc = await userRef.get();
+      if (!userDoc.exists) {
+        return res.status(404).send('User not found');
+      }
+    } else {
+      const sanitizedEmail = email.toLowerCase().trim();
+      const snapshot = await db.collection('users').where('email', '==', sanitizedEmail).get();
+      if (snapshot.empty) {
+        return res.status(404).send('User not found');
+      }
+      userRef = snapshot.docs[0].ref;
     }
 
-    // Sanitize webhook data
-    const subscriptionId = webhookData.subscription_id ? sanitizeString(webhookData.subscription_id) : null;
-    const saleId = webhookData.sale_id ? sanitizeString(webhookData.sale_id) : null;
-    const refunded = webhookData.refunded === 'true' || webhookData.refunded === true;
-    const eventType = sanitizeString(webhookData.event_type || 'sale');
-    
-    // Validate event type
-    const validEventTypes = ['sale', 'subscription_activated', 'subscription_cancelled', 'subscription_ended'];
-    if (!validEventTypes.includes(eventType)) {
-      console.warn('Invalid event type:', eventType);
-      return res.status(400).send('Invalid event type');
-    }
-
-    // Find user by email
-    const usersRef = db.collection('users');
-    const snapshot = await usersRef.where('email', '==', sanitizedEmail).get();
-
-    if (snapshot.empty) {
-      console.warn('User not found:', sanitizedEmail);
-      return res.status(200).send('OK - User not found (will be created on next login)');
-    }
+    const expiryDate = new Date();
+    expiryDate.setMonth(expiryDate.getMonth() + 1);
 
     const updates = {
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      subscriptionStatus: 'premium',
+      planType: 'premium',
       gumroadProductId: 'pddxf',
+      subscriptionStartedAt: admin.firestore.FieldValue.serverTimestamp(),
+      subscriptionExpiry: expiryDate,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
 
-    // Handle different event types
-    if (refunded || eventType === 'subscription_ended') {
-      updates.subscriptionStatus = 'free';
-      updates.planType = null;
-      updates.subscriptionExpiry = null;
-      if (refunded) {
-        updates.subscriptionEndedAt = admin.firestore.FieldValue.serverTimestamp();
-      }
-    } else if (eventType === 'sale' || eventType === 'subscription_activated') {
-      updates.subscriptionStatus = 'premium';
-      updates.planType = 'premium';
-      if (subscriptionId) {
-        updates.gumroadSubscriptionId = subscriptionId;
-      }
-      if (saleId) {
-        updates.gumroadPurchaseId = saleId;
-      }
-      updates.subscriptionStartedAt = admin.firestore.FieldValue.serverTimestamp();
-      
-      // Calculate expiry date (monthly subscription)
-      if (subscriptionId) {
-        const expiryDate = new Date();
-        expiryDate.setMonth(expiryDate.getMonth() + 1);
-        updates.subscriptionExpiry = expiryDate;
-      }
-    } else if (eventType === 'subscription_cancelled') {
-      updates.subscriptionStatus = 'premium';
-      updates.gumroadSubscriptionCancelled = true;
-      updates.subscriptionCancelledAt = admin.firestore.FieldValue.serverTimestamp();
-    }
+    await userRef.update(updates);
 
-    // Update all matching users
-    const batch = db.batch();
-    snapshot.forEach(doc => {
-      batch.update(doc.ref, updates);
-    });
-    await batch.commit();
-
-    console.log('Subscription updated via webhook:', sanitizedEmail, updates.subscriptionStatus);
-    return res.status(200).send('OK');
+    console.log('✅ Premium updated manually:', userId || email);
+    return res.status(200).json({ success: true, message: 'Premium status updated' });
   } catch (error) {
-    console.error('Webhook error:', error);
+    console.error('Update premium error:', error);
     return res.status(500).send('Internal Server Error');
   }
 });

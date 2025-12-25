@@ -1,17 +1,21 @@
 /**
- * Test webhook manually
+ * Directly update user premium status by UID
  */
 const https = require('https');
 
+// Kullanıcının UID'sini console'dan alacağız
+// Ama önce email ile bulalım
+const email = 'borakurucu11@gmail.com';
+
 const webhookUrl = 'https://us-central1-freelancersignature.cloudfunctions.net/gumroadWebhook';
 
-// Simulate Gumroad webhook payload
+// Simulate Gumroad webhook payload - but with proper email matching
 const webhookPayload = {
-  email: 'borakurucu11@gmail.com',
+  email: email.toLowerCase().trim(), // Ensure lowercase
   event_type: 'sale',
   short_product_id: 'pddxf',
-  sale_id: 'test_' + Date.now(),
-  subscription_id: 'test_sub_' + Date.now(),
+  sale_id: 'manual_fix_' + Date.now(),
+  subscription_id: 'manual_sub_' + Date.now(),
   refunded: false
 };
 
@@ -25,12 +29,13 @@ const options = {
   }
 };
 
-console.log('🚀 Sending test webhook...');
+console.log('🚀 Sending webhook to FIX premium status...');
+console.log('Email:', email.toLowerCase().trim());
+console.log('URL:', webhookUrl);
 console.log('Payload:', JSON.stringify(webhookPayload, null, 2));
 
 const req = https.request(webhookUrl, options, (res) => {
   console.log(`\n📥 Response Status: ${res.statusCode}`);
-  console.log('Headers:', res.headers);
   
   let data = '';
   res.on('data', (chunk) => {
@@ -38,10 +43,10 @@ const req = https.request(webhookUrl, options, (res) => {
   });
   
   res.on('end', () => {
-    console.log('\n📄 Response Body:', data);
+    console.log('📄 Response Body:', data);
     if (res.statusCode === 200) {
-      console.log('\n✅ Webhook processed successfully!');
-      console.log('🔄 Refresh your website to see premium features!');
+      console.log('\n✅ Webhook sent!');
+      console.log('🔄 Wait 2-3 seconds, then refresh your website!');
     } else {
       console.log('\n❌ Webhook failed!');
     }
@@ -54,3 +59,4 @@ req.on('error', (error) => {
 
 req.write(postData);
 req.end();
+
