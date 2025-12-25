@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './context/AuthContext';
 import Home from './components/Home';
@@ -11,6 +11,24 @@ import CookiePolicy from './components/CookiePolicy';
 import CookieConsent from './components/CookieConsent';
 import './App.css';
 
+// Track page views for Google Ads conversion
+function PageViewTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Track page view conversion
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'conversion', {
+        'send_to': 'AW-708514143/7rzLCMn2nNYbEN-i7NEC',
+        'value': 1.0,
+        'currency': 'TRY'
+      });
+    }
+  }, [location.pathname]);
+
+  return null;
+}
+
 function App() {
   return (
     <HelmetProvider>
@@ -18,6 +36,7 @@ function App() {
         <Router>
           <div className="App">
             <CookieConsent />
+            <PageViewTracker />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/builder" element={<SignatureBuilder />} />
