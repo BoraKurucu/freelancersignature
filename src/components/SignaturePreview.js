@@ -126,7 +126,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
     
     return (
       <div className="freelancer-cta">
-        {hourlyRate && <div className="rate-badge" style={{ color: accentColor }}>💰 {hourlyRate}</div>}
+        {hourlyRate && <div className="rate-badge" style={{ color: accentColor }}>{hourlyRate}</div>}
         {availability && <div className="availability-badge">✅ {availability}</div>}
         {bookingUrl && (
           <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className="booking-btn" style={{ backgroundColor: accentColor }}>
@@ -135,7 +135,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
         )}
         {portfolioUrl && (
           <a href={portfolioUrl} target="_blank" rel="noopener noreferrer" className="portfolio-link" style={{ color: accentColor }}>
-            🎨 View Portfolio →
+            🎨 View Portfolio
           </a>
         )}
         {renderServicePackages()}
@@ -511,16 +511,16 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
             <div className="sig-title-dark">{specialty || 'Your Title'}</div>
             {company && <div className="sig-company-dark">{company}</div>}
             <div className="sig-contact-dark">
-              {phone && <div>📞 {phone}</div>}
-              {mobile && <div>📱 {mobile}</div>}
-              {email && <div>✉️ {email}</div>}
-              {website && <div>🌐 {website}</div>}
-              {address && <div>📍 {address.replace(/\n/g, ', ')}</div>}
+              {phone && <div><img src={socialIcons.phone} alt="phone" width="14" /> {phone}</div>}
+              {mobile && <div><img src={socialIcons.mobile} alt="mobile" width="14" /> {mobile}</div>}
+              {email && <div><img src={socialIcons.email} alt="email" width="14" /> {email}</div>}
+              {website && <div><img src={socialIcons.websiteGlobe} alt="website" width="14" /> {website}</div>}
+              {address && <div><img src={socialIcons.locationPin} alt="location" width="14" /> {address.replace(/\n/g, ', ')}</div>}
             </div>
             {renderFreelancerCTA()}
           </div>
         </div>
-        <div className="sig-dark-footer" style={{ backgroundColor: accentColor }}>
+        <div className="sig-dark-footer">
           <div className="sig-footer-content">
             <div className="sig-follow-text">Follow me</div>
             {renderSocialIcons('dark', 24)}
