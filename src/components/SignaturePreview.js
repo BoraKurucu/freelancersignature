@@ -1,5 +1,9 @@
 import React from 'react';
 import { templates, socialIcons } from '../utils/templates';
+import { 
+  FaLinkedin, FaTwitter, FaInstagram, FaGithub, FaGlobe, 
+  FaPhoneAlt, FaEnvelope, FaCalendarAlt, FaBriefcase, FaMapMarkerAlt
+} from 'react-icons/fa';
 import './SignaturePreview.css';
 
 function SignaturePreview({ signatureData, isPremium = false }) {
@@ -28,12 +32,12 @@ function SignaturePreview({ signatureData, isPremium = false }) {
   // Watermark overlay component (diagonal watermark)
   const renderWatermarkOverlay = () => {
     if (isPremium) return null;
-    // Filigran metinlerini çoğaltmak için bir dizi (12 adet)
-    const watermarkCount = Array(12).fill('freelancersignature.com');
+    // Filigran metinlerini çoğaltmak için bir dizi (24 adet - daha iyi kapsama için)
+    const watermarkCount = Array(24).fill('freelancersignature.com');
     return (
-      <div className="watermark-overlay">
+      <div className="watermark-grid">
         {watermarkCount.map((text, index) => (
-          <span key={index} className="watermark-text">
+          <span key={index} className="watermark-item">
             {text}
           </span>
         ))}
@@ -168,28 +172,86 @@ function SignaturePreview({ signatureData, isPremium = false }) {
     );
   };
 
-  // Layout 1: Gradient Sidebar (Jasmine Williams style)
-  if (layout === 'gradientSidebar') {
+  // Layout 1: Modern Minimalist (Modernized Gradient Sidebar) - YENİ DİKEY LAYOUT
+  if (layout === 'gradientSidebar' || layout === 'modern') {
     return wrapWithContainer(
-      <div className="signature-preview gradient-sidebar">
-        <div className="sig-row">
-          <div className="sig-gradient-left" style={{ background: `linear-gradient(180deg, ${accentColor} 0%, ${accentColor}99 100%)` }}>
-            {photoUrl && <img src={photoUrl} alt={name} className="sig-photo-gradient" />}
-          </div>
-          <div className="sig-content-right">
-            <div className="sig-name-bold" style={{ color: accentColor }}>{name || 'Your Name'}</div>
-            <div className="sig-title-italic">{specialty || 'Your Title'}</div>
-            {company && <div className="sig-company-italic">{company}</div>}
-            <div className="sig-contact-list">
-              {mobile && <div className="contact-item"><strong>Mobile</strong> {mobile}</div>}
-              {phone && <div className="contact-item"><strong>Office</strong> {phone}</div>}
-              {address && <div className="contact-item"><strong>Address</strong> {address.replace(/\n/g, ', ')}</div>}
-            </div>
-            {renderSocialIcons('gradient', 24)}
-            {renderFreelancerCTA()}
-            {renderWatermark()}
+      <div className="signature-preview tpl-modern-vertical">
+        <div className="tpl-vertical-header">
+          {photoUrl && <img src={photoUrl} alt={name} className="tpl-vertical-avatar" />}
+          <div className="tpl-vertical-name-section">
+            <h2 className="tpl-vertical-name">{name || 'Your Name'}</h2>
+            <p className="tpl-vertical-specialty" style={{ color: accentColor }}>{specialty || 'Your Title'}</p>
+            {company && <p className="tpl-vertical-company">{company}</p>}
           </div>
         </div>
+        
+        <div className="tpl-vertical-content">
+          <div className="tpl-vertical-contact">
+            {email && (
+              <div className="tpl-vertical-contact-item">
+                <FaEnvelope style={{ color: accentColor, fontSize: '14px' }} /> 
+                <span>{email}</span>
+              </div>
+            )}
+            {phone && (
+              <div className="tpl-vertical-contact-item">
+                <FaPhoneAlt style={{ color: accentColor, fontSize: '14px' }} /> 
+                <span>{phone}</span>
+              </div>
+            )}
+            {mobile && (
+              <div className="tpl-vertical-contact-item">
+                <FaPhoneAlt style={{ color: accentColor, fontSize: '14px' }} /> 
+                <span>{mobile}</span>
+              </div>
+            )}
+            {website && (
+              <div className="tpl-vertical-contact-item">
+                <FaGlobe style={{ color: accentColor, fontSize: '14px' }} /> 
+                <span>{website}</span>
+              </div>
+            )}
+            {address && (
+              <div className="tpl-vertical-contact-item">
+                <FaMapMarkerAlt style={{ color: accentColor, fontSize: '14px' }} /> 
+                <span>{address.replace(/\n/g, ', ')}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Freelancer Badges */}
+          <div className="tpl-vertical-badges">
+            {hourlyRate && (
+              <div className="tpl-vertical-badge">
+                <FaBriefcase style={{ fontSize: '12px' }} /> 
+                <span>{hourlyRate}</span>
+              </div>
+            )}
+            {availability && (
+              <div className="tpl-vertical-badge tpl-vertical-availability">
+                <div className="tpl-vertical-dot"></div> 
+                <span>{availability}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className="tpl-vertical-footer">
+          {renderSocialIcons('gradient', 24)}
+          <div className="tpl-vertical-actions">
+            {bookingUrl && (
+              <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className="tpl-vertical-booking-btn" style={{ backgroundColor: accentColor }}>
+                <FaCalendarAlt /> Book a Call
+              </a>
+            )}
+            {portfolioUrl && (
+              <a href={portfolioUrl} target="_blank" rel="noopener noreferrer" className="tpl-vertical-portfolio-link" style={{ color: accentColor }}>
+                View Portfolio →
+              </a>
+            )}
+          </div>
+        </div>
+        {renderWatermark()}
       </div>
     );
   }

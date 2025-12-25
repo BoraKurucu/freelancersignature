@@ -7,11 +7,14 @@
   background: #ffffff;
   padding: 16px;
   border-radius: 4px;
-  max-width: 100%;
   font-size: 13px;
   line-height: 1.5;
   color: #333333;
-  overflow-x: auto;
+  overflow: visible !important; /* Kesilmeyi engelle */
+  width: max-content !important;
+  min-width: max-content !important;
+  max-width: none !important;
+  display: inline-block !important;
 }
 
 /* Ensure all text is visible on white background */
@@ -202,14 +205,52 @@
   transform: translateX(4px);
 }
 
-/* Watermark Container */
+/* Scroll Container - Artık scroll yok, içerik genişleyebilir */
 .signature-preview-container {
   position: relative;
-  overflow: hidden;
-  background-color: #ffffff; /* Arka planın beyaz olması şart */
+  width: max-content !important;
+  min-width: max-content !important;
+  overflow: visible !important; /* Scroll kaldırıldı - içerik genişleyebilir */
+  padding: 10px;
+  border-radius: 12px;
+  background: transparent; /* Arka plan şeffaf */
+  display: inline-block !important;
+  max-width: none !important; /* Maksimum genişlik kısıtlaması yok */
 }
 
-/* Diagonal Watermark Overlay */
+/* Scrollbar kaldırıldı - artık gerekli değil */
+
+/* Filigran: Siyah Çıkma Sorunu İçin RGBA Fix - Grid Sistemi */
+.watermark-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); /* 6 sütun - 24 adet için */
+  grid-template-rows: repeat(4, 1fr);
+  pointer-events: none;
+  z-index: 5; /* Daha düşük z-index - içerik üstte */
+  padding: 20px;
+  overflow: hidden;
+}
+
+.watermark-item {
+  color: rgba(0, 0, 0, 0.03); /* Çok hafif, arkası gözükür */
+  font-size: 9px;
+  font-weight: 900; /* Daha kalın */
+  text-transform: uppercase;
+  transform: rotate(-35deg); /* Daha fazla açı */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 1px;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* Legacy watermark-overlay (backward compatibility) */
 .watermark-overlay {
   position: absolute;
   top: 0;
@@ -217,34 +258,33 @@
   width: 100%;
   height: 100%;
   display: flex;
-  flex-wrap: wrap; /* Metinlerin birden fazla satıra yayılması için */
-  justify-content: center; /* Metinlerin merkeze hizalanması */
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
-  gap: 20px; /* Metinler arası boşluk */
-  pointer-events: none; /* Kullanıcının imza içeriğiyle etkileşimini engellemez */
-  z-index: 999; /* İmzanın üzerine gelmesini sağlar */
-  /* Overlay seviyesinde opacity kullanmıyoruz - rgba ile rengin kendisinde saydamlık var */
+  gap: 20px;
+  pointer-events: none;
+  z-index: 999;
 }
 
 .watermark-text {
-  /* Opacity yerine RGBA kullanarak siyah çıkma sorununu çözüyoruz */
   color: rgba(0, 0, 0, 0.08); 
   font-size: 14px;
   font-weight: bold;
   font-family: sans-serif;
-  transform: rotate(-30deg); /* Her metni kendi içinde döndür */
+  transform: rotate(-30deg);
   white-space: nowrap;
   user-select: none;
   text-transform: uppercase;
-  flex: 0 0 30%; /* Sayfaya yayılması için genişlik payı */
+  flex: 0 0 30%;
   text-align: center;
   letter-spacing: 1px;
 }
 
 /* Çıktı alındığında (PNG/PDF) filigranın kaybolmaması için 
    indirme kütüphanesine (html2canvas vb.) görünür olduğundan emin olunur. */
+.show-watermark .watermark-grid,
 .show-watermark .watermark-overlay {
-  display: flex !important; /* Premium olmayan kullanıcılar için göster */
+  display: grid !important; /* Premium olmayan kullanıcılar için göster */
 }
 
 /* Legacy Watermark (bottom text) */
@@ -281,8 +321,412 @@
 }
 
 /* ===========================================
-   LAYOUT: Gradient Sidebar (Modern Gradient)
+   LAYOUT: Modern Minimalist (Ultra-Professional) - YENİ DİKEY LAYOUT
    =========================================== */
+.tpl-modern-vertical {
+  position: relative;
+  padding: 25px;
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  width: max-content !important;
+  min-width: max-content !important;
+  max-width: none !important;
+  display: inline-block !important;
+  overflow: visible !important;
+  border: 1px solid #f0f0f0;
+  box-sizing: border-box;
+}
+
+.tpl-vertical-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  overflow: visible !important;
+  width: max-content !important;
+  min-width: max-content !important;
+}
+
+.tpl-vertical-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 3px solid #f0f0f0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  flex-shrink: 0 !important;
+}
+
+.tpl-vertical-name-section {
+  overflow: visible !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  flex-shrink: 0 !important;
+}
+
+.tpl-vertical-name {
+  margin: 0 0 6px 0;
+  font-size: 28px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  width: max-content !important;
+}
+
+.tpl-vertical-specialty {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  line-height: 1.4;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  width: max-content !important;
+}
+
+.tpl-vertical-company {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: #888888;
+  font-style: italic;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  width: max-content !important;
+}
+
+.tpl-vertical-content {
+  margin-bottom: 20px;
+  overflow: visible !important;
+  width: max-content !important;
+  min-width: max-content !important;
+}
+
+.tpl-vertical-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 15px;
+  overflow: visible !important;
+  width: max-content !important;
+  min-width: max-content !important;
+}
+
+.tpl-vertical-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #444;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  width: max-content !important;
+}
+
+.tpl-vertical-badges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  overflow: visible !important;
+}
+
+.tpl-vertical-badge {
+  background: #f8f9fa;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #eee;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  width: max-content !important;
+}
+
+.tpl-vertical-availability {
+  background: #e6fcf5;
+  color: #087f5b;
+  border-color: #c3fae8;
+}
+
+.tpl-vertical-dot {
+  width: 8px;
+  height: 8px;
+  background: #2ecc71;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tpl-vertical-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+  flex-wrap: wrap;
+  gap: 15px;
+  overflow: visible !important;
+  width: max-content !important;
+  min-width: max-content !important;
+}
+
+.tpl-vertical-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  overflow: visible !important;
+}
+
+.tpl-vertical-booking-btn {
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  white-space: nowrap !important;
+  overflow: visible !important;
+}
+
+.tpl-vertical-portfolio-link {
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: #222;
+  transition: all 0.2s ease;
+  white-space: nowrap !important;
+  overflow: visible !important;
+}
+
+/* Eski tpl-modern class'ı geriye dönük uyumluluk için korunuyor */
+.tpl-modern {
+  position: relative;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  width: fit-content !important;
+  min-width: 500px !important;
+  height: auto !important;
+  border: 1px solid #f0f0f0;
+  box-sizing: border-box;
+  display: inline-block !important;
+  transition: all 0.3s ease;
+  overflow: visible !important;
+  max-width: none !important;
+}
+
+.tpl-modern .side-border {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  border-radius: 8px 0 0 8px;
+}
+
+.tpl-modern .main-info {
+  display: flex;
+  align-items: flex-start; /* Üstten hizalama uzun unvanlarda daha iyi durur */
+  gap: 30px;
+  margin-bottom: 20px;
+  overflow: visible !important; /* İçerik kesilmesini engelle */
+  width: max-content !important; /* İçeriğe göre genişlik */
+  min-width: max-content !important;
+}
+
+.tpl-modern .tpl-avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 3px solid #f0f0f0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  flex-shrink: 0; /* Fotoğrafın küçülmesini engelle */
+}
+
+.tpl-modern .text-group {
+  display: flex;
+  flex-direction: column;
+  overflow: visible !important; /* Metinlerin kesilmesini engelle - zorunlu */
+  width: max-content !important; /* İçerik ne kadar genişse o kadar uzasın - zorunlu */
+  min-width: max-content !important; /* Minimum genişlik içeriğe göre */
+  flex-shrink: 0 !important; /* Küçülmesin */
+}
+
+.tpl-modern .name {
+  margin: 0 0 4px 0;
+  font-size: 26px; /* Sabit font boyutu */
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  white-space: nowrap !important; /* Asla alt satıra geçme, yana uzasın - KRİTİK */
+  overflow: visible !important; /* Kesilmeyi engelle */
+  width: max-content !important; /* İçeriğe göre genişlik */
+}
+
+.tpl-modern .specialty {
+  margin: 5px 0 15px 0;
+  font-size: 15px; /* Biraz büyütüldü - okunabilirlik için */
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px; /* Biraz artırıldı */
+  line-height: 1.4;
+  display: block;
+  white-space: nowrap !important; /* Asla kesilme, yana uzasın - KRİTİK */
+  overflow: visible !important; /* Kesilmeyi engelle */
+  width: max-content !important; /* İçeriğe göre genişlik */
+}
+
+.tpl-modern .company-name {
+  margin: 4px 0 12px 0;
+  font-size: 13px;
+  color: #888888;
+  font-style: italic;
+  white-space: nowrap; /* Kesilmeyi önle */
+  overflow: visible;
+}
+
+.tpl-modern .contact-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px; /* Dikey ve yatay boşluk */
+  font-size: 13px;
+  color: #444;
+  margin-top: 12px;
+  margin-bottom: 20px;
+}
+
+.tpl-modern .contact-item-modern {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #444;
+  white-space: nowrap; /* Tek satırda kalır, kesilmesin */
+  overflow: visible; /* Kesilmeyi engelle */
+}
+
+.tpl-modern .contact-item-modern.full-width {
+  width: 100%; /* Tam genişlik */
+  white-space: normal; /* Address için alt satıra geçebilir */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  overflow: visible; /* Address için overflow gizlenmemeli */
+}
+
+.tpl-modern .contact-item-modern span {
+  color: #444;
+  white-space: nowrap; /* Tek satırda kalır */
+  overflow: visible; /* Kesilmeyi engelle */
+}
+
+/* Freelancer Badge Tasarımları */
+.tpl-modern .freelancer-badges {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.tpl-modern .badge {
+  background: #f8f9fa;
+  padding: 6px 12px;
+  border-radius: 6px; /* Daha az yuvarlak - resimdeki gibi */
+  font-size: 12px;
+  font-weight: 700; /* Daha kalın */
+  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #eee;
+  transition: all 0.2s ease;
+}
+
+.tpl-modern .badge:hover {
+  background: #f0f0f0;
+  transform: translateY(-1px);
+}
+
+.tpl-modern .availability {
+  background: #e6fcf5; /* Yeşil arka plan - resimdeki gibi */
+  color: #087f5b;
+  border-color: #c3fae8;
+}
+
+.tpl-modern .availability .dot {
+  width: 8px;
+  height: 8px;
+  background: #2ecc71;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Footer ve İkonlar */
+.tpl-modern .social-footer {
+  display: flex;
+  justify-content: space-between; /* Sosyal ikonlar solda, portfolio link sağda */
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+  flex-wrap: wrap;
+}
+
+.tpl-modern .social-footer .social-icons-row {
+  margin: 0;
+}
+
+.tpl-modern .booking-btn {
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.tpl-modern .booking-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.tpl-modern .portfolio-link-modern {
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: #222;
+  transition: all 0.2s ease;
+}
+
+.tpl-modern .portfolio-link-modern:hover {
+  text-decoration: underline;
+  transform: translateX(2px);
+}
+
+/* Legacy Gradient Sidebar (backward compatibility) */
 .gradient-sidebar {
   padding: 0;
   overflow: hidden;
@@ -323,19 +767,25 @@
 }
 
 .gradient-sidebar .sig-name-bold {
-  font-size: 18px;
+  font-size: clamp(16px, 3vw, 18px);
   font-weight: 800;
   margin-bottom: 6px;
   letter-spacing: 0.5px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .gradient-sidebar .sig-title-italic {
-  font-size: 12px;
+  font-size: clamp(10px, 2vw, 11px); /* Daha küçük font */
   color: #666666;
   font-weight: 600;
   margin-bottom: 4px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px; /* Letter-spacing azaltıldı */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4; /* Biraz daha fazla line-height */
+  hyphens: auto; /* Otomatik tireleme */
 }
 
 .gradient-sidebar .sig-company-italic {
@@ -405,19 +855,25 @@
 }
 
 .script-elegant .sig-name-script {
-  font-size: 32px;
+  font-size: clamp(24px, 5vw, 32px);
   line-height: 1.2;
   margin-bottom: 8px;
   font-weight: 600;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .script-elegant .sig-title-spaced {
-  font-size: 11px;
-  letter-spacing: 2.5px;
+  font-size: clamp(9px, 1.8vw, 10px); /* Daha küçük font */
+  letter-spacing: 1.5px; /* Letter-spacing azaltıldı */
   color: #888888;
   margin-bottom: 14px;
   text-transform: uppercase;
   font-weight: 600;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4; /* Biraz daha fazla line-height */
+  hyphens: auto; /* Otomatik tireleme */
 }
 
 .script-elegant .sig-contact-icons {
@@ -509,12 +965,16 @@
 }
 
 .red-circle .sig-title-company {
-  font-size: 12px;
+  font-size: clamp(10px, 2vw, 11px); /* Daha küçük font */
   color: #666666;
   font-weight: 600;
   margin-bottom: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px; /* Letter-spacing azaltıldı */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+  hyphens: auto;
 }
 
 .red-circle .sig-contact-labeled {
@@ -558,20 +1018,26 @@
 }
 
 .simple-photo .sig-name-simple {
-  font-size: 18px;
+  font-size: clamp(16px, 3vw, 18px);
   font-weight: 700;
   color: #1a1a1a;
   margin-bottom: 6px;
   letter-spacing: 0.3px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .simple-photo .sig-title-simple {
-  font-size: 12px;
+  font-size: clamp(10px, 2vw, 11px); /* Daha küçük font */
   color: #666666;
   font-weight: 600;
   margin-bottom: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px; /* Letter-spacing azaltıldı */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4; /* Biraz daha fazla line-height */
+  hyphens: auto; /* Otomatik tireleme */
 }
 
 .simple-photo .sig-contact-labeled {
@@ -644,12 +1110,16 @@
 }
 
 .orange-banner .sig-title {
-  font-size: 13px;
+  font-size: clamp(11px, 2vw, 12px); /* Daha küçük font */
   color: #666666;
   font-weight: 600;
   margin-bottom: 4px;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px; /* Letter-spacing azaltıldı */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+  hyphens: auto;
 }
 
 .orange-banner .sig-company {
@@ -696,10 +1166,14 @@
 }
 
 .yellow-hexagon .sig-title-hex {
-  font-size: 11px;
+  font-size: clamp(9px, 1.8vw, 10px); /* Daha küçük font */
   opacity: 0.95;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.8px; /* Letter-spacing azaltıldı */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+  hyphens: auto;
 }
 
 .yellow-hexagon .sig-hex-content {
@@ -792,10 +1266,14 @@
 }
 
 .blue-modern .sig-title-blue {
-  font-size: 12px;
+  font-size: clamp(10px, 2vw, 11px); /* Daha küçük font */
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px; /* Letter-spacing azaltıldı */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+  hyphens: auto;
 }
 
 .blue-modern .sig-blue-body {
@@ -888,12 +1366,16 @@
 }
 
 .black-footer .sig-title-dark {
-  font-size: 13px;
+  font-size: clamp(11px, 2vw, 12px); /* Daha küçük font */
   color: #666666;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.8px; /* Letter-spacing azaltıldı */
   margin-bottom: 8px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+  hyphens: auto;
 }
 
 .black-footer .sig-company-dark {
@@ -1093,11 +1575,15 @@
 }
 
 .elegant-minimal .sig-title-spaced {
-  font-size: 9px;
-  letter-spacing: 3px;
+  font-size: clamp(8px, 1.5vw, 9px); /* Daha küçük font */
+  letter-spacing: 2px; /* Letter-spacing azaltıldı */
   color: #888888;
   text-transform: uppercase;
   font-weight: 600;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+  hyphens: auto;
 }
 
 .elegant-minimal .sig-info-section {
@@ -1164,10 +1650,14 @@
 }
 
 .corporate-simple .sig-header-simple .sig-title {
-  font-size: 12px;
+  font-size: clamp(10px, 2vw, 11px); /* Daha küçük font */
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px; /* Letter-spacing azaltıldı */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+  hyphens: auto;
 }
 
 .corporate-simple .sig-two-col {
@@ -1227,11 +1717,15 @@
 }
 
 .creative-writer .sig-writer-title {
-  font-size: 13px;
+  font-size: clamp(11px, 2vw, 12px); /* Daha küçük font */
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px; /* Letter-spacing azaltıldı */
   margin-bottom: 4px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+  hyphens: auto;
 }
 
 .creative-writer .sig-writer-company {
@@ -1444,6 +1938,80 @@
   }
 
   .social-icons-row {
+    justify-content: center;
+  }
+
+  /* Modern Template Mobile */
+  .tpl-modern {
+    padding: 16px;
+    width: 100%; /* Mobile'da tam genişlik */
+    min-width: auto; /* Mobile'da min-width kaldırıldı */
+    max-width: 100%; /* Mobile'da max-width kaldırıldı */
+  }
+
+  .tpl-modern .text-group {
+    width: 100%; /* Mobile'da tam genişlik */
+  }
+
+  .tpl-modern .name,
+  .tpl-modern .specialty,
+  .tpl-modern .company-name {
+    white-space: normal; /* Mobile'da alt satıra geçebilsin */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .tpl-modern .main-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .tpl-modern .text-group {
+    min-width: 0;
+    width: 100%;
+    text-align: center;
+    white-space: normal; /* Mobile'da alt satıra geçebilir */
+  }
+
+  .tpl-modern .contact-grid {
+    grid-template-columns: 1fr; /* Mobile'da tek sütun */
+    gap: 8px;
+    align-items: center;
+  }
+
+  .tpl-modern .name {
+    font-size: clamp(16px, 4vw, 20px);
+    text-align: center;
+    white-space: normal; /* Mobile'da alt satıra geçebilir */
+  }
+
+  .tpl-modern .specialty {
+    font-size: clamp(11px, 2.5vw, 13px);
+    max-width: 100%;
+    text-align: center;
+    white-space: normal; /* Mobile'da alt satıra geçebilir */
+  }
+
+  .tpl-modern .contact-item-modern {
+    white-space: normal; /* Mobile'da alt satıra geçebilir */
+  }
+
+  .tpl-modern .tpl-avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .tpl-modern .social-footer {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .tpl-modern .booking-btn {
+    margin-left: 0;
+    width: 100%;
     justify-content: center;
   }
 }
