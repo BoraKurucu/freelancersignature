@@ -10,7 +10,7 @@ import {
   signOut,
   fetchSignInMethodsForEmail
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../firebase/config';
 
 const AuthContext = createContext();
@@ -80,6 +80,12 @@ export function AuthProvider({ children }) {
 
     if (userSnap.exists()) {
       const profile = userSnap.data();
+      console.log('📋 User profile loaded:', {
+        email: profile.email,
+        subscriptionStatus: profile.subscriptionStatus,
+        planType: profile.planType,
+        subscriptionExpiry: profile.subscriptionExpiry
+      });
       setUserProfile(profile);
       return profile;
     }
@@ -238,7 +244,24 @@ export function AuthProvider({ children }) {
 
   // Check if user can use premium features
   function isPremium() {
-    if (!userProfile || userProfile.subscriptionStatus !== 'premium') {
+    const status = userProfile?.subscriptionStatus;
+    const plan = userProfile?.planType;
+    console.log('🔍 Checking premium status:');
+    console.log('   hasUserProfile:', !!userProfile);
+    console.log('   subscriptionStatus:', status, typeof status);
+    console.log('   planType:', plan, typeof plan);
+    console.log('   statusCheck (=== "premium"):', status === 'premium');
+    console.log('   planCheck (=== "premium"):', plan === 'premium');
+    console.log('   FULL PROFILE:', JSON.stringify(userProfile, null, 2));
+
+    if (!userProfile) {
+      console.log('❌ No user profile');
+      return false;
+    }
+
+    // ÖNEMLİ: Hem subscriptionStatus hem de planType kontrolü
+    if (userProfile.subscriptionStatus !== 'premium' || userProfile.planType !== 'premium') {
+      console.log('❌ Not premium - status or planType mismatch');
       return false;
     }
     
@@ -250,11 +273,13 @@ export function AuthProvider({ children }) {
       const now = new Date();
       
       if (expiryDate < now) {
+        console.log('❌ Subscription expired');
         // Subscription expired - update status (webhook should handle this, but this is a fallback)
         return false;
       }
     }
     
+    console.log('✅ User is premium!');
     return true;
   }
 
@@ -287,6 +312,41 @@ export function AuthProvider({ children }) {
     return errorMessages[errorCode] || 'An error occurred. Please try again.';
   }
 
+  // Real-time listener for user profile changes (for premium updates)
+  useEffect(() => {
+    if (!currentUser) {
+      setUserProfile(null);
+      return;
+    }
+
+    console.log('👂 Setting up real-time listener for user profile...');
+    const userRef = doc(db, 'users', currentUser.uid);
+    
+    const unsubscribe = onSnapshot(userRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const profile = docSnap.data();
+        console.log('🔄 User profile updated (real-time):');
+        console.log('   Document ID:', docSnap.id);
+        console.log('   email:', profile.email);
+        console.log('   subscriptionStatus:', profile.subscriptionStatus, typeof profile.subscriptionStatus);
+        console.log('   planType:', profile.planType, typeof profile.planType);
+        console.log('   subscriptionExpiry:', profile.subscriptionExpiry);
+        console.log('   FULL PROFILE:', JSON.stringify(profile, null, 2));
+        setUserProfile(profile);
+      } else {
+        console.log('⚠️ User profile document does not exist');
+        setUserProfile(null);
+      }
+    }, (error) => {
+      console.error('❌ Real-time listener error:', error);
+    });
+
+    return () => {
+      console.log('🔇 Unsubscribing from real-time listener');
+      unsubscribe();
+    };
+  }, [currentUser]);
+
   // Listen to auth state changes and check for redirect result
   useEffect(() => {
     // Check for redirect result first
@@ -295,6 +355,7 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
+        // İlk yüklemede profile'ı yükle (real-time listener da var ama ilk yükleme için)
         await loadUserProfile(user);
       } else {
         setUserProfile(null);
