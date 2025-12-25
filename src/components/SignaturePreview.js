@@ -2,12 +2,14 @@ import React from 'react';
 import { templates, socialIcons } from '../utils/templates';
 import './SignaturePreview.css';
 
-function SignaturePreview({ signatureData, showWatermark = true }) {
+function SignaturePreview({ signatureData, isPremium = false }) {
   // Safety check - if no signatureData, return empty div to prevent blank screen
   if (!signatureData || typeof signatureData !== 'object') {
     return (
-      <div className="signature-preview default-layout" style={{ padding: '20px', color: '#666' }}>
-        <div>No signature data available</div>
+      <div className="signature-preview-container">
+        <div className="signature-preview default-layout" style={{ padding: '20px', color: '#666' }}>
+          <div>No signature data available</div>
+        </div>
       </div>
     );
   }
@@ -23,12 +25,34 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
     publishedArticles, certifications, yearsExperience
   } = signatureData;
   
-  // Watermark component
-  const renderWatermark = () => {
-    if (!showWatermark) return null;
+  // Watermark overlay component (diagonal watermark)
+  const renderWatermarkOverlay = () => {
+    if (isPremium) return null;
+    // Filigran metinlerini çoğaltmak için bir dizi (12 adet)
+    const watermarkCount = Array(12).fill('freelancersignature.com');
     return (
-      <div className="signature-watermark">
-        ✨ Created with <a href="https://freelancersignature.com" target="_blank" rel="noopener noreferrer">freelancersignature.com</a>
+      <div className="watermark-overlay">
+        {watermarkCount.map((text, index) => (
+          <span key={index} className="watermark-text">
+            {text}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
+  // Legacy watermark component (for bottom text watermark - kept for compatibility)
+  const renderWatermark = () => {
+    // Don't show bottom watermark if we're using overlay
+    return null;
+  };
+
+  // Helper function to wrap signature content with container and watermark
+  const wrapWithContainer = (content) => {
+    return (
+      <div className={`signature-preview-container ${!isPremium ? 'show-watermark' : ''}`}>
+        {renderWatermarkOverlay()}
+        {content}
       </div>
     );
   };
@@ -146,7 +170,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
 
   // Layout 1: Gradient Sidebar (Jasmine Williams style)
   if (layout === 'gradientSidebar') {
-    return (
+    return wrapWithContainer(
       <div className="signature-preview gradient-sidebar">
         <div className="sig-row">
           <div className="sig-gradient-left" style={{ background: `linear-gradient(180deg, ${accentColor} 0%, ${accentColor}99 100%)` }}>
@@ -172,7 +196,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
 
   // Layout 2: Script Elegant (Melissa Johnson style)
   if (layout === 'scriptElegant') {
-    return (
+    return wrapWithContainer(
       <div className="signature-preview script-elegant">
         <div className="sig-row">
           {photoUrl && (
@@ -205,7 +229,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
 
   // Layout 3: Red Circle (Jenny McBride style)
   if (layout === 'redCircle') {
-    return (
+    return wrapWithContainer(
       <div className="signature-preview red-circle">
         <div className="sig-row">
           <div className="sig-photo-col">
@@ -232,7 +256,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
 
   // Layout 4: Simple Photo (Kelly Richardson style)
   if (layout === 'simplePhoto') {
-    return (
+    return wrapWithContainer(
       <div className="signature-preview simple-photo">
         <div className="sig-row">
           {photoUrl && <img src={photoUrl} alt={name} className="sig-photo-simple" />}
@@ -258,7 +282,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
   
   // Layout: Corporate Two-Column with Logo
   if (layout === 'twoColumnWithLogo') {
-    return (
+    return wrapWithContainer(
       <div className="signature-preview corporate-two-column" style={{ borderTop: `3px solid ${accentColor}` }}>
         <div className="sig-main-row">
           <div className="sig-left-col">
@@ -285,7 +309,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
 
   // Layout: Elegant Minimal with Large Photo
   if (layout === 'photoSidebar') {
-    return (
+    return wrapWithContainer(
       <div className="signature-preview elegant-minimal">
         <div className="sig-main-row elegant">
           <div className="sig-photo-section">
@@ -314,7 +338,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
 
   // Layout: Two-Column Simple with Social
   if (layout === 'twoColumnSimple') {
-    return (
+    return wrapWithContainer(
       <div className="signature-preview corporate-simple" style={{ borderTop: `3px solid ${accentColor}` }}>
         <div className="sig-header-simple">
           <div className="sig-name">{name || 'Your Name'}</div>
@@ -343,7 +367,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
 
   // Layout: Creative Writer (Word-focused design)
   if (layout === 'creativeWriter') {
-    return (
+    return wrapWithContainer(
       <div className="signature-preview creative-writer">
         <div className="sig-writer-header" style={{ borderLeft: `5px solid ${accentColor}` }}>
           <div className="sig-writer-name">{name || 'Your Name'}</div>
@@ -384,7 +408,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
 
   // Layout: Script Personal with Photo
   if (layout === 'photoWithScript') {
-    return (
+    return wrapWithContainer(
       <div className="signature-preview script-personal">
         <div className="sig-main-row script">
           {photoUrl && <img src={photoUrl} alt={name} className="sig-photo-circle" />}
@@ -406,7 +430,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
 
   // Layout: Orange Banner (Bold Colorful Banner)
   if (layout === 'orangeBanner') {
-    return (
+    return wrapWithContainer(
       <div className="signature-preview orange-banner">
         <div className="sig-banner-top" style={{ backgroundColor: accentColor }}></div>
         <div className="sig-row">
@@ -436,7 +460,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
 
   // Layout: Yellow Hexagon (Creative Grid)
   if (layout === 'yellowHexagon') {
-    return (
+    return wrapWithContainer(
       <div className="signature-preview yellow-hexagon">
         <div className="sig-hex-header" style={{ backgroundColor: accentColor }}>
           <div className="sig-name-hex">{name || 'Your Name'}</div>
@@ -466,7 +490,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
 
   // Layout: Blue Modern (Corporate Blue)
   if (layout === 'blueModern') {
-    return (
+    return wrapWithContainer(
       <div className="signature-preview blue-modern">
         <div className="sig-blue-header">
           {company && <div className="sig-company-blue" style={{ color: accentColor }}>{company}</div>}
@@ -498,7 +522,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
 
   // Layout: Black Footer (Dark Elegant)
   if (layout === 'blackFooter') {
-    return (
+    return wrapWithContainer(
       <div className="signature-preview black-footer">
         <div className="sig-dark-main">
           {photoUrl && (
@@ -532,7 +556,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
   }
 
   // Default fallback
-  return (
+  return wrapWithContainer(
     <div className="signature-preview default-layout">
       <div className="sig-name" style={{ color: accentColor }}>{name || 'Your Name'}</div>
       {specialty && <div className="sig-specialty">{specialty}</div>}

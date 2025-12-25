@@ -202,7 +202,52 @@
   transform: translateX(4px);
 }
 
-/* Watermark */
+/* Watermark Container */
+.signature-preview-container {
+  position: relative;
+  overflow: hidden;
+  background-color: #ffffff; /* Arka planın beyaz olması şart */
+}
+
+/* Diagonal Watermark Overlay */
+.watermark-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap; /* Metinlerin birden fazla satıra yayılması için */
+  justify-content: center; /* Metinlerin merkeze hizalanması */
+  align-items: center;
+  gap: 20px; /* Metinler arası boşluk */
+  pointer-events: none; /* Kullanıcının imza içeriğiyle etkileşimini engellemez */
+  z-index: 999; /* İmzanın üzerine gelmesini sağlar */
+  /* Overlay seviyesinde opacity kullanmıyoruz - rgba ile rengin kendisinde saydamlık var */
+}
+
+.watermark-text {
+  /* Opacity yerine RGBA kullanarak siyah çıkma sorununu çözüyoruz */
+  color: rgba(0, 0, 0, 0.08); 
+  font-size: 14px;
+  font-weight: bold;
+  font-family: sans-serif;
+  transform: rotate(-30deg); /* Her metni kendi içinde döndür */
+  white-space: nowrap;
+  user-select: none;
+  text-transform: uppercase;
+  flex: 0 0 30%; /* Sayfaya yayılması için genişlik payı */
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+/* Çıktı alındığında (PNG/PDF) filigranın kaybolmaması için 
+   indirme kütüphanesine (html2canvas vb.) görünür olduğundan emin olunur. */
+.show-watermark .watermark-overlay {
+  display: flex !important; /* Premium olmayan kullanıcılar için göster */
+}
+
+/* Legacy Watermark (bottom text) */
 .signature-watermark {
   width: 100%;
   margin-top: 12px;

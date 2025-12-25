@@ -491,9 +491,18 @@ function SignatureBuilder() {
         throw new Error('Preview container not found');
       }
       
-      const signatureElement = previewContainer.querySelector('.signature-preview');
+      // Select the container that includes the watermark overlay
+      const signatureElement = previewContainer.querySelector('.signature-preview-container');
       if (!signatureElement) {
-        throw new Error('Signature preview element not found');
+        // Fallback to .signature-preview if container not found
+        const fallbackElement = previewContainer.querySelector('.signature-preview');
+        if (!fallbackElement) {
+          throw new Error('Signature preview element not found');
+        }
+        const filename = `${signatureData?.name || 'signature'}.png`;
+        const isPremiumUser = !isCheckingStatus && userProfile && isPremium();
+        await downloadSignaturePNG(fallbackElement, filename, isPremiumUser);
+        return;
       }
       
       const filename = `${signatureData?.name || 'signature'}.png`;
@@ -526,14 +535,26 @@ function SignatureBuilder() {
       const filename = `${signatureData?.name || 'signature'}.pdf`;
       const isPremiumUser = !isCheckingStatus && userProfile && isPremium();
 
-      // Always find the preview element (same as PNG download)
+      // Select the container that includes the watermark overlay
       const previewContainer = previewRef.current;
       if (!previewContainer) {
         throw new Error('Preview container not found');
       }
-      const signatureElement = previewContainer.querySelector('.signature-preview');
+      const signatureElement = previewContainer.querySelector('.signature-preview-container');
       if (!signatureElement) {
-        throw new Error('Signature preview element not found');
+        // Fallback to .signature-preview if container not found
+        const fallbackElement = previewContainer.querySelector('.signature-preview');
+        if (!fallbackElement) {
+          throw new Error('Signature preview element not found');
+        }
+        await downloadSignaturePDF(
+          fallbackElement, 
+          filename, 
+          isPremiumUser, 
+          null, 
+          null
+        );
+        return;
       }
 
       // Use element directly for both premium and free (same as PNG)
@@ -1042,7 +1063,7 @@ function SignatureBuilder() {
                 <SignaturePreview 
                   key={`${selectedProfile || 'default'}-${selectedTemplate}-${Date.now()}`}
                   signatureData={signatureData} 
-                  showWatermark={shouldShowFreeLimits} 
+                  isPremium={!isCheckingStatus && userProfile && isPremium()} 
                 />
               </ErrorBoundary>
             )}
