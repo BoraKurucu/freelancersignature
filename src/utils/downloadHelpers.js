@@ -19,22 +19,22 @@ const drawSimpleWatermark = (canvas) => {
     ctx.globalCompositeOperation = 'source-over'; // Normal çizim
     
     const text = 'freelancersignature.com';
-    const fontSize = 14; // Daha küçük font
+    const fontSize = 38; // Daha büyük font
     ctx.font = `normal ${fontSize}px Arial, sans-serif`;
-    ctx.fillStyle = 'rgba(128, 128, 128, 0.3)'; // Gri renk, daha görünür
+    ctx.fillStyle = 'rgba(128, 128, 128, 0.15)'; // Gri renk, daha şeffaf
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
-    // Canvas boyutlarına göre grid oluştur
-    const cols = Math.ceil(canvas.width / 150); // Her 150 pikselde bir
-    const rows = Math.ceil(canvas.height / 100); // Her 100 pikselde bir
+    // Canvas boyutlarına göre grid oluştur - DAHA DA SEYREK
+    const cols = Math.ceil(canvas.width / 320); // Her 320 pikselde bir (daha seyrek)
+    const rows = Math.ceil(canvas.height / 240); // Her 240 pikselde bir (daha seyrek)
     
     console.log(`Watermark çiziliyor: ${cols}x${rows} grid, Font: ${fontSize}px`);
     
     for (let i = 0; i < cols; i++) {
       for (let j = 0; j < rows; j++) {
-        const x = (i * 150) + 75;
-        const y = (j * 100) + 50;
+        const x = (i * 320) + 160;
+        const y = (j * 240) + 120;
         
         ctx.save();
         ctx.translate(x, y);
@@ -99,13 +99,13 @@ const getCanvasFromElement = async (element, addWatermark = false) => {
   await new Promise(resolve => setTimeout(resolve, 200));
   
   try {
-    // html2canvas ile canvas oluştur
+    // html2canvas ile canvas oluştur - YÜKSEK KALİTE için scale artırıldı
     const canvas = await html2canvas(clone, {
-      scale: 1, // Daha düşük scale
+      scale: 3, // Yüksek kalite için 3x scale
       useCORS: true,
       allowTaint: false,
       backgroundColor: '#ffffff',
-      logging: true, // Log'ları aç
+      logging: false, // Log'ları kapat
       width: clone.offsetWidth,
       height: clone.offsetHeight,
     });
@@ -141,7 +141,7 @@ const getCanvasFromElement = async (element, addWatermark = false) => {
       console.log('✅ Watermark canvas\'a eklendi');
     }
     
-    return { canvas, container };
+    return { canvas, container, clone };
   } catch (error) {
     console.error('Canvas oluşturma hatası:', error);
     if (container.parentNode) {
@@ -212,14 +212,18 @@ export const downloadSignaturePDF = async (element, filename, isPremiumUser = fa
   // Premium kullanıcı için watermark YOK, free için watermark VAR
   const addWatermark = !isPremiumUser;
   
-  const { canvas, container } = await getCanvasFromElement(element, addWatermark);
+  const { canvas, container, clone } = await getCanvasFromElement(element, addWatermark);
   
   try {
     const imgData = canvas.toDataURL('image/png', 1.0);
     
     // PDF boyutlarını hesapla (mm cinsinden)
-    const mmWidth = (canvas.width * 0.264583); // px to mm
-    const mmHeight = (canvas.height * 0.264583);
+    // Scale 3 kullandığımız için canvas.width gerçek boyutun 3 katı
+    // PDF'te gerçek boyutu kullanmak için scale'e bölüyoruz
+    const actualWidth = canvas.width / 3;
+    const actualHeight = canvas.height / 3;
+    const mmWidth = (actualWidth * 0.264583); // px to mm
+    const mmHeight = (actualHeight * 0.264583);
     
     const pdf = new jsPDF({
       orientation: mmWidth > mmHeight ? 'l' : 'p',
@@ -228,6 +232,39 @@ export const downloadSignaturePDF = async (element, filename, isPremiumUser = fa
     });
     
     pdf.addImage(imgData, 'PNG', 0, 0, mmWidth, mmHeight);
+    
+    // ÖNEMLİ: Linkleri PDF'e ekle
+    if (clone) {
+      const ratio = mmWidth / clone.offsetWidth;
+      const cloneRect = clone.getBoundingClientRect();
+      
+      // Tüm linkleri bul ve ekle (duplicate'leri önlemek için Set kullan)
+      const processedLinks = new Set();
+      const links = clone.querySelectorAll('a[href]');
+      
+      links.forEach((link) => {
+        const href = link.getAttribute('href');
+        if (!href || href.startsWith('#') || processedLinks.has(link)) return;
+        
+        processedLinks.add(link);
+        
+        const rect = link.getBoundingClientRect();
+        const x = (rect.left - cloneRect.left) * ratio;
+        const y = (rect.top - cloneRect.top) * ratio;
+        const w = rect.width * ratio;
+        const h = rect.height * ratio;
+        
+        // jsPDF link ekleme
+        try {
+          pdf.link(x, y, w, h, { url: href });
+        } catch (linkError) {
+          console.warn('Link eklenemedi:', href, linkError);
+        }
+      });
+      
+      console.log(`✅ ${processedLinks.size} link PDF'e eklendi`);
+    }
+    
     pdf.save(filename || 'signature.pdf');
     
     console.log('PDF indirildi');
