@@ -115,6 +115,8 @@ export function sanitizeSignatureData(data) {
   if (data.website) sanitized.website = sanitizeUrl(data.website);
   if (data.portfolioUrl) sanitized.portfolioUrl = sanitizeUrl(data.portfolioUrl);
   if (data.bookingUrl) sanitized.bookingUrl = sanitizeUrl(data.bookingUrl);
+  if (data.photoUrl) sanitized.photoUrl = sanitizeUrl(data.photoUrl);
+  if (data.logoUrl) sanitized.logoUrl = sanitizeUrl(data.logoUrl);
   
   // Sanitize social links
   if (data.socialLinks && typeof data.socialLinks === 'object') {
@@ -143,6 +145,28 @@ export function sanitizeSignatureData(data) {
   // Sanitize other text fields
   if (data.hourlyRate) sanitized.hourlyRate = sanitizeString(data.hourlyRate);
   if (data.availability) sanitized.availability = sanitizeString(data.availability);
+  
+  // Sanitize industry-specific fields
+  if (data.industry) sanitized.industry = sanitizeString(data.industry);
+  if (data.githubStats) sanitized.githubStats = sanitizeString(data.githubStats);
+  if (data.techStack) sanitized.techStack = sanitizeString(data.techStack);
+  if (data.dribbbleShots) sanitized.dribbbleShots = sanitizeString(data.dribbbleShots);
+  if (data.designTools) sanitized.designTools = sanitizeString(data.designTools);
+  if (data.publishedArticles) sanitized.publishedArticles = sanitizeString(data.publishedArticles);
+  if (data.certifications) sanitized.certifications = sanitizeString(data.certifications);
+  if (data.yearsExperience) sanitized.yearsExperience = sanitizeString(data.yearsExperience);
+  
+  // Sanitize service packages (array of objects)
+  if (data.servicePackages && Array.isArray(data.servicePackages)) {
+    sanitized.servicePackages = data.servicePackages
+      .filter(pkg => pkg && typeof pkg === 'object')
+      .map(pkg => ({
+        name: pkg.name ? sanitizeString(pkg.name) : '',
+        price: pkg.price ? sanitizeString(pkg.price) : '',
+        description: pkg.description ? sanitizeString(pkg.description) : ''
+      }))
+      .filter(pkg => pkg.name || pkg.price); // Only keep packages with at least name or price
+  }
   
   return sanitized;
 }
@@ -205,6 +229,7 @@ export const rateLimiter = new RateLimiter();
 if (typeof window !== 'undefined') {
   setInterval(() => rateLimiter.cleanup(), 5 * 60 * 1000);
 }
+
 
 
 

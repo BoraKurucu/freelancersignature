@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getSignatures, deleteSignature } from '../services/signatureService';
-import { getSignatureHTML, getSignatureHTMLForDownload } from '../services/signatureApiService';
-import { downloadSignatureAsPNG, downloadSignatureWithWatermark } from '../utils/signatureDownloader';
+import { getSignatureHTML } from '../services/signatureApiService';
+import { downloadSignaturePNG, downloadSignaturePDF } from '../utils/downloadHelpers';
 import SignaturePreview from './SignaturePreview';
 import { useAuth } from '../context/AuthContext';
 import './MySignatures.css';
+import './SignatureBuilder.css';
 
 function MySignatures() {
   const { currentUser, isFullyAuthenticated, isPremium, loading: authLoading, userProfile } = useAuth();
@@ -18,6 +19,7 @@ function MySignatures() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(null);
   const [downloading, setDownloading] = useState(null);
+  const [downloadingPDF, setDownloadingPDF] = useState(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -89,35 +91,54 @@ function MySignatures() {
   const handleDownload = async (signatureId, signatureData) => {
     setDownloading(signatureId);
     try {
-      // Get HTML from server-side (validates premium status and adds watermark if needed)
-      const { html, isPremium: serverIsPremium } = await getSignatureHTMLForDownload(signatureId);
+      const isPremiumUser = !authLoading && userProfile && isPremium();
       
-      // Create a temporary container to render the HTML
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.width = '600px';
-      tempContainer.innerHTML = html;
-      document.body.appendChild(tempContainer);
-      
-      const signatureElement = tempContainer.querySelector('table') || tempContainer;
-      const filename = `${signatureData?.name || 'signature'}.png`;
-
-      if (serverIsPremium) {
-        // Premium users: download PNG without watermark (server validated)
-        await downloadSignatureAsPNG(signatureElement, filename);
-      } else {
-        // Free users: download PNG with watermark (server validated)
-        await downloadSignatureWithWatermark(signatureElement, filename);
+      // Find the preview container for this signature
+      const previewWrapper = document.querySelector(`[data-signature-id="${signatureId}"]`);
+      if (!previewWrapper) {
+        throw new Error('Preview container not found');
       }
       
-      // Clean up
-      document.body.removeChild(tempContainer);
+      const signatureElement = previewWrapper.querySelector('.signature-preview');
+      if (!signatureElement) {
+        throw new Error('Signature preview element not found');
+      }
+      
+      const filename = `${signatureData?.name || 'signature'}.png`;
+      await downloadSignaturePNG(signatureElement, filename, isPremiumUser);
     } catch (error) {
       console.error('Error downloading signature:', error);
       alert('Failed to download signature. Please try again.');
     } finally {
       setDownloading(null);
+    }
+  };
+
+  const handleDownloadPDF = async (signatureId, signatureData) => {
+    setDownloadingPDF(signatureId);
+    try {
+      const isPremiumUser = !authLoading && userProfile && isPremium();
+      const filename = `${signatureData?.name || 'signature'}.pdf`;
+
+      let signatureElement = null;
+      if (isPremiumUser) {
+        // Premium users: use client-side preview
+        const previewWrapper = document.querySelector(`[data-signature-id="${signatureId}"]`);
+        if (!previewWrapper) {
+          throw new Error('Preview container not found');
+        }
+        signatureElement = previewWrapper.querySelector('.signature-preview');
+        if (!signatureElement) {
+          throw new Error('Signature preview element not found');
+        }
+      }
+
+      await downloadSignaturePDF(signatureElement, filename, isPremiumUser, null, signatureId);
+    } catch (error) {
+      console.error('Error downloading signature as PDF:', error);
+      alert('Failed to download signature as PDF. Please try again.');
+    } finally {
+      setDownloadingPDF(null);
     }
   };
 
@@ -163,7 +184,7 @@ function MySignatures() {
                 </span>
               </div>
               <div 
-                className="signature-preview-wrapper"
+                className="preview-container"
                 data-signature-id={signature.id}
               >
                 <SignaturePreview 
@@ -198,6 +219,17 @@ function MySignatures() {
                     : (!authLoading && userProfile && isPremium())
                       ? '📥 Download PNG' 
                       : '📥 Download PNG (Premium to remove watermark)'}
+                </button>
+                <button
+                  onClick={() => handleDownloadPDF(signature.id, signature.data)}
+                  className="btn-action btn-download-pdf"
+                  disabled={downloadingPDF === signature.id}
+                >
+                  {downloadingPDF === signature.id 
+                    ? '⏳ Downloading...' 
+                    : (!authLoading && userProfile && isPremium())
+                      ? '📄 Download PDF' 
+                      : '📄 Download PDF (Premium to remove watermark)'}
                 </button>
                 <button
                   onClick={() => handleEdit(signature.data)}

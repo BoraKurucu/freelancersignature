@@ -145,21 +145,8 @@
   color: #999;
 }
 
-.signature-preview-wrapper {
-  background: #f9f9f9;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  overflow-x: auto;
-  /* Match builder preview container styling */
-}
-
-/* Ensure signature preview maintains its styling within the wrapper */
-.signature-preview-wrapper .signature-preview {
-  margin: 0;
-  /* Let individual layouts control their own padding */
-  box-shadow: none;
-}
+/* Using SignatureBuilder.css preview-container class instead */
+/* Removed signature-preview-wrapper - now using same CSS as builder */
 
 .signature-card-actions {
   display: flex;
@@ -214,6 +201,20 @@
 }
 
 .btn-download:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-download-pdf {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-download-pdf:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.btn-download-pdf:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
