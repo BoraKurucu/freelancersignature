@@ -1,4 +1,4 @@
-const functions = require('firebase-functions');
+const functions = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 const { generateHTMLSignature } = require('./signatureGenerator');
 
@@ -139,8 +139,7 @@ async function verifyAuth(req) {
  * Validate signature creation - enforces limits server-side
  * This is triggered when a new signature is created
  */
-exports.validateSignatureCreate = functions.firestore
-  .document('signatures/{signatureId}')
+exports.validateSignatureCreate = functions.firestore.document('signatures/{signatureId}')
   .onCreate(async (snap, context) => {
     const signatureData = snap.data();
     const userId = signatureData.userId;

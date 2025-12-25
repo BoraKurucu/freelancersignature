@@ -12,12 +12,18 @@ function MySignatures() {
   const { currentUser, isFullyAuthenticated, isPremium, loading: authLoading, userProfile } = useAuth();
   const navigate = useNavigate();
   
-  // Helper: Only show free plan limitations when loading is done, user profile is loaded, and user is not premium
-  const shouldShowFreeLimits = !authLoading && userProfile && !isPremium();
+  // --- FLASH FIX START ---
+  // 1. Define a specific state for "We don't know who you are yet"
+  const isCheckingStatus = authLoading || (currentUser && !userProfile);
+
+  // 2. Strict check for showing limits: Only show if we are DONE loading AND user is NOT premium
+  const shouldShowFreeLimits = !isCheckingStatus && !isPremium();
+  // --- FLASH FIX END ---
   
   const [signatures, setSignatures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(null);
+  const [copying, setCopying] = useState(null);
   const [downloading, setDownloading] = useState(null);
   const [downloadingPDF, setDownloadingPDF] = useState(null);
 
@@ -59,6 +65,13 @@ function MySignatures() {
   };
 
   const handleCopy = async (signatureData, signatureId) => {
+    // Check if we're still checking status
+    if (isCheckingStatus) {
+      alert('Please wait while we verify your account status...');
+      return;
+    }
+
+    setCopying(signatureId);
     try {
       // Get HTML from server-side (validates premium status)
       const { html } = await getSignatureHTML(signatureId);
@@ -80,6 +93,8 @@ function MySignatures() {
     } catch (error) {
       console.error('Error copying signature:', error);
       alert('Failed to copy signature. Please try again.');
+    } finally {
+      setCopying(null);
     }
   };
 
@@ -89,9 +104,15 @@ function MySignatures() {
   };
 
   const handleDownload = async (signatureId, signatureData) => {
+    // Check if we're still checking status
+    if (isCheckingStatus) {
+      alert('Please wait while we verify your account status...');
+      return;
+    }
+
     setDownloading(signatureId);
     try {
-      const isPremiumUser = !authLoading && userProfile && isPremium();
+      const isPremiumUser = !isCheckingStatus && userProfile && isPremium();
       
       // Find the preview container for this signature
       const previewWrapper = document.querySelector(`[data-signature-id="${signatureId}"]`);
@@ -115,25 +136,28 @@ function MySignatures() {
   };
 
   const handleDownloadPDF = async (signatureId, signatureData) => {
+    // Check if we're still checking status
+    if (isCheckingStatus) {
+      alert('Please wait while we verify your account status...');
+      return;
+    }
+
     setDownloadingPDF(signatureId);
     try {
-      const isPremiumUser = !authLoading && userProfile && isPremium();
+      const isPremiumUser = !isCheckingStatus && userProfile && isPremium();
       const filename = `${signatureData?.name || 'signature'}.pdf`;
 
-      let signatureElement = null;
-      if (isPremiumUser) {
-        // Premium users: use client-side preview
-        const previewWrapper = document.querySelector(`[data-signature-id="${signatureId}"]`);
-        if (!previewWrapper) {
-          throw new Error('Preview container not found');
-        }
-        signatureElement = previewWrapper.querySelector('.signature-preview');
-        if (!signatureElement) {
-          throw new Error('Signature preview element not found');
-        }
+      // Use client-side preview for both premium and free (same as PNG)
+      const previewWrapper = document.querySelector(`[data-signature-id="${signatureId}"]`);
+      if (!previewWrapper) {
+        throw new Error('Preview container not found');
+      }
+      const signatureElement = previewWrapper.querySelector('.signature-preview');
+      if (!signatureElement) {
+        throw new Error('Signature preview element not found');
       }
 
-      await downloadSignaturePDF(signatureElement, filename, isPremiumUser, null, signatureId);
+      await downloadSignaturePDF(signatureElement, filename, isPremiumUser, null, null);
     } catch (error) {
       console.error('Error downloading signature as PDF:', error);
       alert('Failed to download signature as PDF. Please try again.');
@@ -193,12 +217,21 @@ function MySignatures() {
                 />
               </div>
               <div className="signature-card-actions">
-                {(!authLoading && userProfile && isPremium()) ? (
+                {isCheckingStatus ? (
+                  <button disabled className="btn-action btn-copy">
+                    Checking...
+                  </button>
+                ) : (!isCheckingStatus && userProfile && isPremium()) ? (
                   <button
                     onClick={() => handleCopy(signature.data, signature.id)}
                     className="btn-action btn-copy"
+                    disabled={copying === signature.id}
                   >
-                    {copied === signature.id ? '✓ Copied!' : '📋 Copy HTML'}
+                    {copying === signature.id 
+                      ? '⏳ Copying...' 
+                      : copied === signature.id 
+                        ? '✓ Copied!' 
+                        : '📋 Copy HTML'}
                   </button>
                 ) : (
                   <button
@@ -215,10 +248,10 @@ function MySignatures() {
                   disabled={downloading === signature.id}
                 >
                   {downloading === signature.id 
-                    ? '⏳ Downloading...' 
-                    : (!authLoading && userProfile && isPremium())
+                    ? '⏳ Downloading...'
+                    : (!isCheckingStatus && userProfile && isPremium())
                       ? '📥 Download PNG' 
-                      : '📥 Download PNG (Premium to remove watermark)'}
+                      : '📥 Download PNG (Upgrade to remove watermark)'}
                 </button>
                 <button
                   onClick={() => handleDownloadPDF(signature.id, signature.data)}
@@ -226,10 +259,10 @@ function MySignatures() {
                   disabled={downloadingPDF === signature.id}
                 >
                   {downloadingPDF === signature.id 
-                    ? '⏳ Downloading...' 
-                    : (!authLoading && userProfile && isPremium())
+                    ? '⏳ Downloading...'
+                    : (!isCheckingStatus && userProfile && isPremium())
                       ? '📄 Download PDF' 
-                      : '📄 Download PDF (Premium to remove watermark)'}
+                      : '📄 Download PDF (Upgrade to remove watermark)'}
                 </button>
                 <button
                   onClick={() => handleEdit(signature.data)}
