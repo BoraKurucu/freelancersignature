@@ -111,11 +111,13 @@ const getSignatureCanvas = async (element, addWatermark) => {
 
   try {
     const canvas = await html2canvas(clone, {
-      backgroundColor: '#ffffff',
-      scale: 3,
-      useCORS: true,
+      backgroundColor: '#ffffff', /* Şeffaf yerine beyaz zorla (Siyah ekranı engeller) */
+      scale: 2, /* Yüksek kalite (3'ten 2'ye düşürdük performans için) */
+      useCORS: true, /* Resimlerin yüklenmesi için */
       allowTaint: true,
       logging: false,
+      windowWidth: clone.scrollWidth,
+      windowHeight: clone.scrollHeight,
     });
 
     if (addWatermark) {
