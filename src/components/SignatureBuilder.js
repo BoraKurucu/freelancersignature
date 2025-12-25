@@ -162,6 +162,7 @@ function SignatureBuilder() {
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [signatureData, setSignatureData] = useState(defaultSignatureData);
   const [copied, setCopied] = useState(false);
+  const [copying, setCopying] = useState(false);
   const [saved, setSaved] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
@@ -185,8 +186,13 @@ function SignatureBuilder() {
   // Get enabled fields for current template
   const enabledFields = getTemplateFields(selectedTemplate);
   
-  // Helper: Only show free plan limitations when loading is done, user profile is loaded, and user is not premium
-  const shouldShowFreeLimits = !authLoading && userProfile && !isPremium();
+  // --- FLASH FIX START ---
+  // 1. Define a specific state for "We don't know who you are yet"
+  const isCheckingStatus = authLoading || (currentUser && !userProfile);
+
+  // 2. Strict check for showing limits: Only show if we are DONE loading AND user is NOT premium
+  const shouldShowFreeLimits = !isCheckingStatus && !isPremium();
+  // --- FLASH FIX END ---
   
   // Load signature count when user changes
   useEffect(() => {
@@ -350,6 +356,13 @@ function SignatureBuilder() {
       return;
     }
 
+    // Check if we're still checking status
+    if (isCheckingStatus) {
+      showToast('Please wait while we verify your account status...', 'info');
+      return;
+    }
+
+    setCopying(true);
     try {
       // Get HTML from server-side (validates premium status)
       const { html } = await getSignatureHTMLFromData(signatureData);
@@ -371,6 +384,8 @@ function SignatureBuilder() {
     } catch (error) {
       console.error('Error copying signature:', error);
       showToast('Failed to copy signature. Please try again.', 'error');
+    } finally {
+      setCopying(false);
     }
   };
 
@@ -382,42 +397,33 @@ function SignatureBuilder() {
       return;
     }
 
-    // Wait for auth and user profile to finish loading to ensure premium status is accurate
-    // This prevents showing the wrong message for premium users
-    if (authLoading || (currentUser && !userProfile)) {
-      // Poll until auth and profile are loaded (max 1 second)
-      let attempts = 0;
-      while ((authLoading || (currentUser && !userProfile)) && attempts < 10) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        attempts++;
-      }
+    // Check if we're still checking status
+    if (isCheckingStatus) {
+      showToast('Please wait while we verify your account status...', 'info');
+      return;
     }
 
     try {
       // Check signature count limit
-      const signatureCount = await getSignatureCount(currentUser.uid);
-      // Double-check premium status after waiting for profile to load
-      // Only check if loading is done and user profile is loaded
-      if (!authLoading && userProfile) {
-        const premiumStatus = isPremium();
-        const maxSignatures = premiumStatus ? 10 : 2;
-        
-        if (signatureCount >= maxSignatures) {
-          // Only show limit message if user is actually at limit
-          if (premiumStatus) {
-            showToast(`You've reached your Premium plan limit of ${maxSignatures} saved signatures. Please delete an existing signature to save a new one.`, 'warning');
-          } else {
-            showToast(`You've reached your Free plan limit of ${maxSignatures} saved signatures. Upgrade to Premium to save up to 10 signatures!`, 'warning');
-          }
-          return;
+      const currentSignatureCount = await getSignatureCount(currentUser.uid);
+      
+      // Double-check premium status - should be loaded by now
+      if (!userProfile) {
+        showToast('Please wait while we verify your account status...', 'info');
+        return;
+      }
+
+      const premiumStatus = isPremium();
+      const maxSignatures = premiumStatus ? 10 : 2;
+      
+      if (currentSignatureCount >= maxSignatures) {
+        // Only show limit message if user is actually at limit
+        if (premiumStatus) {
+          showToast(`You've reached your Premium plan limit of ${maxSignatures} saved signatures. Please delete an existing signature to save a new one.`, 'warning');
+        } else {
+          showToast(`You've reached your Free plan limit of ${maxSignatures} saved signatures. Upgrade to Premium to save up to 10 signatures!`, 'warning');
         }
-      } else {
-        // If still loading, wait a bit and retry
-        await new Promise(resolve => setTimeout(resolve, 500));
-        if (authLoading || (currentUser && !userProfile)) {
-          showToast('Please wait while we verify your account status...', 'info');
-          return;
-        }
+        return;
       }
 
       await saveSignature({
@@ -472,6 +478,12 @@ function SignatureBuilder() {
       return;
     }
 
+    // Check if we're still checking status
+    if (isCheckingStatus) {
+      showToast('Please wait while we verify your account status...', 'info');
+      return;
+    }
+
     setDownloading(true);
     try {
       const previewContainer = previewRef.current;
@@ -485,7 +497,7 @@ function SignatureBuilder() {
       }
       
       const filename = `${signatureData?.name || 'signature'}.png`;
-      const isPremiumUser = !authLoading && userProfile && isPremium();
+      const isPremiumUser = !isCheckingStatus && userProfile && isPremium();
       await downloadSignaturePNG(signatureElement, filename, isPremiumUser);
     } catch (error) {
       console.error('Error downloading signature:', error);
@@ -503,10 +515,16 @@ function SignatureBuilder() {
       return;
     }
 
+    // Check if we're still checking status
+    if (isCheckingStatus) {
+      showToast('Please wait while we verify your account status...', 'info');
+      return;
+    }
+
     setDownloadingPDF(true);
     try {
       const filename = `${signatureData?.name || 'signature'}.pdf`;
-      const isPremiumUser = !authLoading && userProfile && isPremium();
+      const isPremiumUser = !isCheckingStatus && userProfile && isPremium();
 
       // Always find the preview element (same as PNG download)
       const previewContainer = previewRef.current;
@@ -518,12 +536,12 @@ function SignatureBuilder() {
         throw new Error('Signature preview element not found');
       }
 
-      // For premium users, use element directly. For free users, pass signatureData for server-side HTML
+      // Use element directly for both premium and free (same as PNG)
       await downloadSignaturePDF(
-        isPremiumUser ? signatureElement : null, 
+        signatureElement, 
         filename, 
         isPremiumUser, 
-        signatureData, 
+        null, 
         null
       );
     } catch (error) {
@@ -922,11 +940,20 @@ function SignatureBuilder() {
 
           {/* Actions */}
           <div className="form-actions">
-            {(!authLoading && userProfile && isPremium()) ? (
-              <button onClick={handleCopy} className="btn btn-primary">
-                {copied ? '✓ Copied!' : '📋 Copy HTML'}
+            
+            {/* COPY HTML BUTTON */}
+            {isCheckingStatus ? (
+              // STATE 1: LOADING
+              <button disabled className="btn btn-secondary">
+                Checking...
+              </button>
+            ) : (!isCheckingStatus && userProfile && isPremium()) ? (
+              // STATE 2: PREMIUM
+              <button onClick={handleCopy} className="btn btn-primary" disabled={copying}>
+                {copying ? '⏳ Copying...' : copied ? '✓ Copied!' : '📋 Copy HTML'}
               </button>
             ) : (
+              // STATE 3: FREE / GUEST
               <button 
                 disabled 
                 className="btn btn-primary btn-locked"
@@ -935,10 +962,14 @@ function SignatureBuilder() {
                 🔒 Copy HTML (Premium Only)
               </button>
             )}
-            <button onClick={handleSave} className="btn btn-secondary">
+
+            {/* SAVE BUTTON */}
+            <button onClick={handleSave} className="btn btn-secondary" disabled={isCheckingStatus}>
               {saved ? '✓ Saved!' : '💾 Save'}
             </button>
-            {currentUser && isFullyAuthenticated() && !authLoading && userProfile && (
+
+            {/* SIGNATURE COUNT INFO */}
+            {!isCheckingStatus && currentUser && isFullyAuthenticated() && userProfile && (
               <div className="signature-count-info">
                 <small>
                   {signatureCount} / {isPremium() ? 10 : 2} signatures saved
@@ -951,28 +982,40 @@ function SignatureBuilder() {
                 </small>
               </div>
             )}
-            <button 
-              onClick={handleDownload} 
-              className="btn btn-secondary"
-              disabled={downloading}
-            >
-              {downloading 
-                ? '⏳ Downloading...' 
-                : (!authLoading && userProfile && isPremium())
-                  ? '📥 Download PNG' 
-                  : '📥 Download PNG (Premium to remove watermark)'}
-            </button>
-            <button 
-              onClick={handleDownloadPDF} 
-              className="btn btn-secondary"
-              disabled={downloadingPDF}
-            >
-              {downloadingPDF 
-                ? '⏳ Downloading...' 
-                : (!authLoading && userProfile && isPremium())
-                  ? '📄 Download PDF' 
-                  : '📄 Download PDF (Premium to remove watermark)'}
-            </button>
+
+            {/* DOWNLOAD PNG BUTTON */}
+            {isCheckingStatus ? (
+              <button disabled className="btn btn-secondary">Checking...</button>
+            ) : (
+              <button 
+                onClick={handleDownload} 
+                className="btn btn-secondary"
+                disabled={downloading}
+              >
+                {downloading 
+                  ? '⏳ Downloading...' 
+                  : (!isCheckingStatus && userProfile && isPremium())
+                    ? '📥 Download PNG' 
+                    : '📥 Download PNG (Upgrade to remove watermark)'}
+              </button>
+            )}
+
+            {/* DOWNLOAD PDF BUTTON */}
+            {isCheckingStatus ? (
+              <button disabled className="btn btn-secondary">Checking...</button>
+            ) : (
+              <button 
+                onClick={handleDownloadPDF} 
+                className="btn btn-secondary"
+                disabled={downloadingPDF}
+              >
+                {downloadingPDF 
+                  ? '⏳ Downloading...' 
+                  : (!isCheckingStatus && userProfile && isPremium())
+                    ? '📄 Download PDF' 
+                    : '📄 Download PDF (Upgrade to remove watermark)'}
+              </button>
+            )}
           </div>
         </div>
 
