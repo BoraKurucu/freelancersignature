@@ -65,9 +65,8 @@ function MySignatures() {
   };
 
   const handleCopy = async (signatureData, signatureId) => {
-    // Check if we're still checking status
+    // Check if we're still checking status - silently return
     if (isCheckingStatus) {
-      alert('Please wait while we verify your account status...');
       return;
     }
 
@@ -104,9 +103,8 @@ function MySignatures() {
   };
 
   const handleDownload = async (signatureId, signatureData) => {
-    // Check if we're still checking status
+    // Check if we're still checking status - silently return
     if (isCheckingStatus) {
-      alert('Please wait while we verify your account status...');
       return;
     }
 
@@ -136,9 +134,8 @@ function MySignatures() {
   };
 
   const handleDownloadPDF = async (signatureId, signatureData) => {
-    // Check if we're still checking status
+    // Check if we're still checking status - silently return
     if (isCheckingStatus) {
-      alert('Please wait while we verify your account status...');
       return;
     }
 

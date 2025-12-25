@@ -637,9 +637,10 @@
   min-height: 200px; /* Prevent blank screen during transitions */
   position: relative; /* Ensure content stays visible */
   will-change: contents; /* Optimize for transitions */
-  max-width: none !important; /* Maksimum genişlik kısıtlaması yok */
-  width: max-content !important; /* Genişlik signature'a göre */
-  min-width: max-content !important;
+  max-width: 100% !important; /* Container genişliğini aşmasın */
+  width: 100% !important; /* Container'ı tam genişlik yap */
+  min-width: 100% !important; /* Minimum genişlik tam genişlik */
+  box-sizing: border-box; /* Padding dahil hesapla */
 }
 
 /* ===========================================
