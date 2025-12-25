@@ -1,44 +1,72 @@
 import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+
+/**
+ * Helper to clone element and prepare it for rendering
+ * This prevents "Unable to find element" errors by isolating the render target
+ */
+const prepareCloneForRender = async (originalElement) => {
+  const clone = originalElement.cloneNode(true);
+  
+  // Create a wrapper to hold the clone off-screen but visible to the browser engine
+  const container = document.createElement('div');
+  container.style.position = 'fixed';
+  container.style.top = '-10000px';
+  container.style.left = '-10000px';
+  container.style.width = originalElement.offsetWidth + 'px'; // Maintain width
+  container.style.zIndex = '99999';
+  
+  // Ensure the clone is visible
+  clone.style.display = 'block';
+  clone.style.visibility = 'visible';
+  clone.style.opacity = '1';
+  clone.style.transform = 'none'; // Remove transforms that might crop content
+  
+  container.appendChild(clone);
+  document.body.appendChild(container);
+
+  // Small delay to ensure the DOM updates and images inside clone load
+  const images = clone.querySelectorAll('img');
+  await Promise.all(
+    Array.from(images).map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve; // Don't block if image fails
+        setTimeout(resolve, 2000); // 2s timeout
+      });
+    })
+  );
+
+  return { clone, container };
+};
 
 /**
  * Downloads a signature as PNG image WITHOUT watermark
- * This function is for PREMIUM users only - no watermark is ever added
- * @param {HTMLElement} element - The signature element to convert
- * @param {string} filename - The filename for the downloaded image
+ * PREMIUM users only
  */
 export const downloadSignatureAsPNG = async (element, filename = 'signature.png') => {
-  try {
-    // Wait for all images to load
-    const images = element.querySelectorAll('img');
-    await Promise.all(
-      Array.from(images).map(
-        (img) =>
-          new Promise((resolve, reject) => {
-            if (img.complete) {
-              resolve();
-            } else {
-              img.onload = resolve;
-              img.onerror = reject;
-              // Timeout after 5 seconds
-              setTimeout(() => reject(new Error('Image load timeout')), 5000);
-            }
-          })
-      )
-    );
+  let renderContext = null;
 
-    // Configure html2canvas options
-    const canvas = await html2canvas(element, {
-      backgroundColor: '#ffffff',
-      scale: 2, // Higher quality
+  try {
+    if (!element) throw new Error('Element not found');
+
+    // 1. Prepare the clone
+    renderContext = await prepareCloneForRender(element);
+    const { clone } = renderContext;
+
+    // 2. Render the CLONE, not the original
+    const canvas = await html2canvas(clone, {
+      backgroundColor: null, // Transparent background if possible
+      scale: 2,
       logging: false,
       useCORS: true,
       allowTaint: true,
     });
 
-    // Convert canvas to blob
+    // 3. Download
     canvas.toBlob((blob) => {
       if (blob) {
-        // Create download link
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -47,173 +75,94 @@ export const downloadSignatureAsPNG = async (element, filename = 'signature.png'
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-      } else {
-        throw new Error('Failed to create image blob');
       }
-    }, 'image/png', 0.95); // High quality
+    }, 'image/png');
+
   } catch (error) {
-    console.error('Error downloading signature:', error);
+    console.error('Error downloading PNG:', error);
     throw error;
+  } finally {
+    // 4. Clean up
+    if (renderContext && renderContext.container) {
+      document.body.removeChild(renderContext.container);
+    }
   }
 };
 
 /**
  * Adds a visible centered watermark overlay on the canvas
- * Dynamically calculates font size to fit within canvas bounds
- * @param {HTMLCanvasElement} canvas - The canvas to add watermark to
  */
 export const addDiagonalWatermark = (canvas) => {
   try {
     const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      console.error('Failed to get canvas context');
-      return;
-    }
-
     const width = canvas.width;
     const height = canvas.height;
-
-    if (!width || !height || width === 0 || height === 0) {
-      console.warn('Canvas has invalid dimensions:', { width, height });
-      return;
-    }
-
     const text = 'freelancersignature.com';
     
-    // Start with a reasonable base font size
     let fontSize = Math.min(width, height) * 0.15;
-    const minFontSize = 16;
-    const maxFontSize = 48;
+    fontSize = Math.max(16, Math.min(48, fontSize));
     
-    // Ensure font size is within bounds
-    fontSize = Math.max(minFontSize, Math.min(maxFontSize, fontSize));
-    
-    // Set context properties for measurement
     ctx.save();
     ctx.font = `bold ${fontSize}px Arial, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
-    // Measure text width
-    const textMetrics = ctx.measureText(text);
-    const textWidth = textMetrics.width;
-    const textHeight = fontSize * 1.2; // Approximate text height
-    
-    // Calculate available space (leave margins)
-    const marginX = width * 0.1; // 10% margin on each side
-    const marginY = height * 0.1; // 10% margin on top and bottom
-    const availableWidth = width - (marginX * 2);
-    const availableHeight = height - (marginY * 2);
-    
-    // Adjust font size if text is too wide
-    if (textWidth > availableWidth) {
-      fontSize = (availableWidth / textWidth) * fontSize;
-      fontSize = Math.max(minFontSize, fontSize);
-      ctx.font = `bold ${fontSize}px Arial, sans-serif`;
-    }
-    
-    // Adjust font size if text is too tall
-    if (textHeight > availableHeight) {
-      fontSize = (availableHeight / textHeight) * fontSize;
-      fontSize = Math.max(minFontSize, fontSize);
-      ctx.font = `bold ${fontSize}px Arial, sans-serif`;
-    }
-    
-    // Draw watermark at the center
     const centerX = width / 2;
     const centerY = height / 2;
     
-    // Set drawing properties with opacity
-    ctx.globalAlpha = 0.15; // 15% opacity
+    ctx.globalAlpha = 0.15;
     ctx.fillStyle = '#666666';
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2; // Thinner stroke
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    ctx.lineWidth = 2;
     
-    // Draw stroke first (white outline), then fill (gray text)
     ctx.strokeText(text, centerX, centerY);
     ctx.fillText(text, centerX, centerY);
-    
     ctx.restore();
-    
-    console.log('Watermark drawn:', { centerX, centerY, fontSize, width, height, textWidth });
   } catch (error) {
     console.error('Error adding watermark:', error);
   }
 };
 
 /**
- * Downloads signature with watermark for free users
- * @param {HTMLElement} element - The signature element to convert
- * @param {string} filename - The filename for the downloaded image
+ * Downloads signature with watermark for free users (PNG)
  */
 export const downloadSignatureWithWatermark = async (element, filename = 'signature.png') => {
+  let renderContext = null;
+
   try {
-    // Small delay to ensure element is fully rendered
-    await new Promise(resolve => setTimeout(resolve, 100));
+    if (!element) throw new Error('Element not found');
 
-    // Wait for all images to load
-    const images = element.querySelectorAll('img');
-    if (images.length > 0) {
-      await Promise.all(
-        Array.from(images).map(
-          (img) =>
-            new Promise((resolve, reject) => {
-              if (img.complete && img.naturalHeight !== 0) {
-                resolve();
-              } else {
-                img.onload = () => resolve();
-                img.onerror = () => resolve(); // Continue even if image fails
-                // Timeout after 5 seconds
-                setTimeout(() => resolve(), 5000);
-              }
-            })
-        )
-      );
-    }
+    // 1. Prepare clone
+    renderContext = await prepareCloneForRender(element);
+    const { clone } = renderContext;
 
-    // Ensure watermark is visible in the element
-    const watermark = element.querySelector('.signature-watermark');
+    // Ensure watermark is visible in clone
+    const watermark = clone.querySelector('.signature-watermark');
     if (watermark) {
       watermark.style.display = 'block';
       watermark.style.visibility = 'visible';
       watermark.style.opacity = '1';
     }
 
-    // Capture the signature (watermark is already in the HTML at the bottom)
-    const originalCanvas = await html2canvas(element, {
+    // 2. Render
+    const originalCanvas = await html2canvas(clone, {
       backgroundColor: '#ffffff',
-      scale: 2, // Higher quality
+      scale: 2,
       logging: false,
       useCORS: true,
       allowTaint: true,
-      onclone: (clonedDoc, element) => {
-        // Ensure watermark is visible in cloned document
-        const clonedWatermark = element.querySelector('.signature-watermark');
-        if (clonedWatermark) {
-          clonedWatermark.style.display = 'block';
-          clonedWatermark.style.visibility = 'visible';
-          clonedWatermark.style.opacity = '1';
-        }
-      },
     });
 
-    // Create a new canvas and copy the original image, then add watermark
+    // 3. Process Canvas (Add overlay watermark)
     const canvas = document.createElement('canvas');
     canvas.width = originalCanvas.width;
     canvas.height = originalCanvas.height;
     const ctx = canvas.getContext('2d');
-    
-    // Draw the original canvas onto the new canvas
     ctx.drawImage(originalCanvas, 0, 0);
     
-    // Add watermark overlay to make it harder to remove/crop
-    console.log('Adding watermark to canvas:', { width: canvas.width, height: canvas.height });
     addDiagonalWatermark(canvas);
-    console.log('Watermark added');
 
-    // Convert to blob and download
+    // 4. Download
     canvas.toBlob((blob) => {
       if (blob) {
         const url = URL.createObjectURL(blob);
@@ -224,12 +173,169 @@ export const downloadSignatureWithWatermark = async (element, filename = 'signat
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-      } else {
-        throw new Error('Failed to create image blob');
       }
-    }, 'image/png', 0.95); // High quality
+    }, 'image/png');
+
   } catch (error) {
-    console.error('Error downloading signature with watermark:', error);
+    console.error('Error downloading Watermarked PNG:', error);
     throw error;
+  } finally {
+    if (renderContext && renderContext.container) {
+      document.body.removeChild(renderContext.container);
+    }
+  }
+};
+
+/**
+ * Downloads a signature as PDF WITHOUT watermark
+ * PREMIUM users only
+ */
+export const downloadSignatureAsPDF = async (element, filename = 'signature.pdf') => {
+  let renderContext = null;
+
+  try {
+    if (!element) throw new Error('Element not found');
+
+    // 1. Prepare clone
+    renderContext = await prepareCloneForRender(element);
+    const { clone } = renderContext;
+
+    // 2. Render
+    const canvas = await html2canvas(clone, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      logging: false,
+      useCORS: true,
+      allowTaint: true,
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+    // Convert px to mm (approx 96 DPI)
+    const pdfWidth = imgWidth * 0.264583; 
+    const pdfHeight = imgHeight * 0.264583;
+
+    // 3. Create PDF
+    const pdf = new jsPDF({
+      orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
+      unit: 'mm',
+      format: [pdfWidth, pdfHeight]
+    });
+
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+    // 4. Add Links (Calculated from CLONE)
+    const links = clone.querySelectorAll('a[href]');
+    const cloneRect = clone.getBoundingClientRect(); // Get rect of the cloned element
+
+    links.forEach((link) => {
+      try {
+        const href = link.getAttribute('href');
+        if (!href || href.startsWith('#')) return;
+
+        const rect = link.getBoundingClientRect();
+        
+        const x = (rect.left - cloneRect.left) * 0.264583;
+        const y = (rect.top - cloneRect.top) * 0.264583;
+        const w = rect.width * 0.264583;
+        const h = rect.height * 0.264583;
+
+        pdf.link(x, y, w, h, { url: href });
+      } catch (err) {
+        // ignore link errors
+      }
+    });
+
+    pdf.save(filename);
+
+  } catch (error) {
+    console.error('Error downloading PDF:', error);
+    throw error;
+  } finally {
+    if (renderContext && renderContext.container) {
+      document.body.removeChild(renderContext.container);
+    }
+  }
+};
+
+/**
+ * Downloads signature as PDF with watermark for free users
+ */
+export const downloadSignatureAsPDFWithWatermark = async (element, filename = 'signature.pdf') => {
+  let renderContext = null;
+
+  try {
+    console.log('[PDF Download] Starting...');
+    if (!element) throw new Error('Element not found');
+
+    // 1. Prepare clone
+    renderContext = await prepareCloneForRender(element);
+    const { clone } = renderContext;
+
+    // Ensure server-side watermark is visible in the clone
+    const watermark = clone.querySelector('.signature-watermark');
+    if (watermark) {
+      watermark.style.display = 'block';
+      watermark.style.visibility = 'visible';
+      watermark.style.opacity = '1';
+    }
+
+    // 2. Render
+    const canvas = await html2canvas(clone, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      logging: false,
+      useCORS: true,
+      allowTaint: true,
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+    const pdfWidth = imgWidth * 0.264583;
+    const pdfHeight = imgHeight * 0.264583;
+
+    // 3. Create PDF
+    const pdf = new jsPDF({
+      orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
+      unit: 'mm',
+      format: [pdfWidth, pdfHeight]
+    });
+
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+    // 4. Add Links
+    const links = clone.querySelectorAll('a[href]');
+    const cloneRect = clone.getBoundingClientRect();
+
+    links.forEach((link) => {
+      try {
+        const href = link.getAttribute('href');
+        if (!href || href.startsWith('#')) return;
+
+        const rect = link.getBoundingClientRect();
+        
+        const x = (rect.left - cloneRect.left) * 0.264583;
+        const y = (rect.top - cloneRect.top) * 0.264583;
+        const w = rect.width * 0.264583;
+        const h = rect.height * 0.264583;
+
+        pdf.link(x, y, w, h, { url: href });
+      } catch (err) {
+        console.warn('Link add error', err);
+      }
+    });
+
+    pdf.save(filename);
+    console.log('[PDF Download] Success');
+
+  } catch (error) {
+    console.error('[PDF Download] Error:', error);
+    throw error;
+  } finally {
+    if (renderContext && renderContext.container) {
+      document.body.removeChild(renderContext.container);
+    }
   }
 };
