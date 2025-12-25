@@ -356,9 +356,8 @@ function SignatureBuilder() {
       return;
     }
 
-    // Check if we're still checking status
+    // Check if we're still checking status - silently return
     if (isCheckingStatus) {
-      showToast('Please wait while we verify your account status...', 'info');
       return;
     }
 
@@ -397,9 +396,8 @@ function SignatureBuilder() {
       return;
     }
 
-    // Check if we're still checking status
+    // Check if we're still checking status - silently return
     if (isCheckingStatus) {
-      showToast('Please wait while we verify your account status...', 'info');
       return;
     }
 
@@ -415,7 +413,6 @@ function SignatureBuilder() {
       
       // Double-check premium status - should be loaded by now
       if (!userProfile) {
-        showToast('Please wait while we verify your account status...', 'info');
         return;
       }
 
@@ -500,9 +497,8 @@ function SignatureBuilder() {
       return;
     }
 
-    // Check if we're still checking status
+    // Check if we're still checking status - silently return
     if (isCheckingStatus) {
-      showToast('Please wait while we verify your account status...', 'info');
       return;
     }
 
@@ -547,9 +543,8 @@ function SignatureBuilder() {
       return;
     }
 
-    // Check if we're still checking status
+    // Check if we're still checking status - silently return
     if (isCheckingStatus) {
-      showToast('Please wait while we verify your account status...', 'info');
       return;
     }
 

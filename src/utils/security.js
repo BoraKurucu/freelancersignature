@@ -115,8 +115,25 @@ export function sanitizeSignatureData(data) {
   if (data.website) sanitized.website = sanitizeUrl(data.website);
   if (data.portfolioUrl) sanitized.portfolioUrl = sanitizeUrl(data.portfolioUrl);
   if (data.bookingUrl) sanitized.bookingUrl = sanitizeUrl(data.bookingUrl);
-  if (data.photoUrl) sanitized.photoUrl = sanitizeUrl(data.photoUrl);
-  if (data.logoUrl) sanitized.logoUrl = sanitizeUrl(data.logoUrl);
+  
+  // Handle photo and logo URLs - can be regular URLs or base64 data URLs
+  if (data.photoUrl) {
+    if (data.photoUrl.startsWith('data:image/')) {
+      // Base64 data URL - keep as is (but limit length to prevent abuse)
+      sanitized.photoUrl = data.photoUrl.slice(0, 5000000); // 5MB limit
+    } else {
+      sanitized.photoUrl = sanitizeUrl(data.photoUrl);
+    }
+  }
+  
+  if (data.logoUrl) {
+    if (data.logoUrl.startsWith('data:image/')) {
+      // Base64 data URL - keep as is (but limit length to prevent abuse)
+      sanitized.logoUrl = data.logoUrl.slice(0, 5000000); // 5MB limit
+    } else {
+      sanitized.logoUrl = sanitizeUrl(data.logoUrl);
+    }
+  }
   
   // Sanitize social links
   if (data.socialLinks && typeof data.socialLinks === 'object') {

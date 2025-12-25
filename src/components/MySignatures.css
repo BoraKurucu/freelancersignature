@@ -103,10 +103,10 @@
 }
 
 .signatures-grid {
-  max-width: 1200px;
+  max-width: 1600px; /* Grid genişliğini daha da artırdık */
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(700px, 1fr)); /* Min genişliği 700px yaptık */
   gap: 24px;
 }
 
@@ -117,6 +117,10 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   border: 1px solid #e0e0e0;
   transition: all 0.2s;
+  overflow: visible !important; /* İçerik taşmasını engelle */
+  min-width: 0; /* Grid item için gerekli */
+  width: 100%; /* Tam genişlik */
+  position: relative; /* Position context */
 }
 
 .signature-card:hover {
@@ -147,6 +151,52 @@
 
 /* Using SignatureBuilder.css preview-container class instead */
 /* Removed signature-preview-wrapper - now using same CSS as builder */
+
+/* MySignatures için özel preview-container stili */
+.my-signatures-container .preview-container {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px !important; /* Daha fazla padding */
+  overflow-x: auto !important; /* Yatay scroll gerekirse */
+  overflow-y: visible !important;
+  min-height: 200px;
+  position: relative;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* Signature preview'ın container içinde kalmasını sağla - AGGRESIF OVERRIDE */
+.my-signatures-container .preview-container .signature-preview {
+  max-width: 100% !important; /* Container genişliğini aşmasın */
+  width: 100% !important; /* Tam genişlik kullan */
+  min-width: 0 !important; /* Min-width'i kaldır */
+  box-sizing: border-box !important;
+  display: block !important; /* Block element yap */
+  overflow-wrap: break-word !important; /* Uzun kelimeleri kır */
+  word-wrap: break-word !important;
+  overflow: visible !important; /* İçerik görünür olsun */
+}
+
+/* Signature preview içindeki tüm elementlerin de container içinde kalmasını sağla */
+.my-signatures-container .preview-container .signature-preview * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Table elementleri için özel kontrol */
+.my-signatures-container .preview-container .signature-preview table {
+  max-width: 100% !important;
+  width: 100% !important;
+  table-layout: auto !important;
+}
+
+/* Tüm div'ler için */
+.my-signatures-container .preview-container .signature-preview div {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
 
 .signature-card-actions {
   display: flex;
