@@ -29,33 +29,20 @@ function SignaturePreview({ signatureData, isPremium = false }) {
     publishedArticles, certifications, yearsExperience
   } = signatureData;
   
-  // Watermark overlay component (diagonal watermark)
+  // Watermark overlay component - Canvas üzerine çizilecek, CSS kullanma
   const renderWatermarkOverlay = () => {
-    if (isPremium) return null;
-    // Filigran metinlerini çoğaltmak için bir dizi (24 adet - daha iyi kapsama için)
-    const watermarkCount = Array(24).fill('freelancersignature.com');
-    return (
-      <div className="watermark-grid">
-        {watermarkCount.map((text, index) => (
-          <span key={index} className="watermark-item">
-            {text}
-          </span>
-        ))}
-      </div>
-    );
+    return null; // Canvas üzerine çizilecek, CSS kullanma
   };
 
-  // Legacy watermark component (for bottom text watermark - kept for compatibility)
+  // Legacy watermark component - Canvas üzerine çizilecek, CSS kullanma
   const renderWatermark = () => {
-    // Don't show bottom watermark if we're using overlay
-    return null;
+    return null; // Canvas üzerine çizilecek, CSS kullanma
   };
 
-  // Helper function to wrap signature content with container and watermark
+  // Helper function to wrap signature content with container
   const wrapWithContainer = (content) => {
     return (
-      <div className={`signature-preview-container ${!isPremium ? 'show-watermark' : ''}`}>
-        {renderWatermarkOverlay()}
+      <div className="signature-preview-container">
         {content}
       </div>
     );

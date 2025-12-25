@@ -2,140 +2,219 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 /**
- * 1. GÜNCEL WATERMARK: Taşma ve merkezleme sorunu düzeltildi.
+ * 1. WATERMARK: CSS'deki gibi ince ve şık görünsün
  */
 const drawProfessionalWatermark = (canvas) => {
-  const ctx = canvas.getContext('2d');
-  const text = 'freelancersignature.com';
-  
-  const fontSize = Math.max(12, canvas.width * 0.025); 
-  ctx.font = `600 ${fontSize}px 'Inter', sans-serif`;
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.12)'; 
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  
-  const textWidth = ctx.measureText(text).width;
-  const spacingX = textWidth * 2.2; 
-  const spacingY = fontSize * 6;    
-
-  ctx.save();
-  // Merkeze odakla ve çevir
-  ctx.translate(canvas.width / 2, canvas.height / 2);
-  ctx.rotate(-Math.PI / 12); 
-
-  const coverage = Math.sqrt(canvas.width**2 + canvas.height**2);
-  
-  for (let y = -coverage / 2; y < coverage / 2; y += spacingY) {
-    const shiftX = (Math.round(y / spacingY) % 2 === 0) ? 0 : spacingX / 2;
-    for (let x = -coverage / 2; x < coverage / 2; x += spacingX) {
-      ctx.fillText(text, x + shiftX, y);
-    }
-  }
-  ctx.restore();
-};
-
-/**
- * 2. GELİŞMİŞ KOPYALAMA: E-posta istemcilerinde bozulmayı önler.
- */
-export const copySignatureToClipboard = async (element) => {
-  if (!element) return { success: false, message: "Element bulunamadı." };
-
   try {
-    const htmlContent = element.innerHTML;
-    const textContent = element.innerText;
-
-    const blobHtml = new Blob([htmlContent], { type: "text/html" });
-    const blobText = new Blob([textContent], { type: "text/plain" });
-
-    const data = [
-      new ClipboardItem({
-        "text/html": blobHtml,
-        "text/plain": blobText,
-      }),
-    ];
-
-    await navigator.clipboard.write(data);
-    return { success: true, message: "İmza başarıyla kopyalandı!" };
-  } catch (err) {
-    // Fallback logic
-    try {
-      const range = document.createRange();
-      range.selectNode(element);
-      window.getSelection().removeAllRanges();
-      window.getSelection().addRange(range);
-      document.execCommand('copy');
-      window.getSelection().removeAllRanges();
-      return { success: true, message: "Kopyalandı (Tarayıcı kısıtlaması nedeniyle düz kopyalama yapıldı)." };
-    } catch (fallbackErr) {
-      return { success: false, message: "Kopyalama başarısız." };
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('❌ Canvas context alınamadı');
+      return;
     }
+    
+    const text = 'freelancersignature.com';
+    
+    // Canvas boyutlarını kontrol et
+    if (!canvas.width || !canvas.height) {
+      console.error('❌ Canvas boyutları geçersiz:', canvas.width, canvas.height);
+      return;
+    }
+    
+    console.log('✅ Watermark çiziliyor - Canvas:', canvas.width, 'x', canvas.height);
+    
+    // CSS'DEKİ GİBİ KÜÇÜK VE İNCE OLSUN
+    // ÖNEMLİ: CSS'de font-size: 10px, scale:2 olduğu için 20px yapıyoruz
+    const fontSize = 20; // CSS'deki 10px * 2 (scale)
+    ctx.font = `normal ${fontSize}px Arial, sans-serif`; // bold değil normal
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'; // ÇOK DAHA AÇIK RENK - CSS'deki gibi
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // CSS'DEKİ GİBİ 4x6 GRID OLSUN
+    const cols = 4;
+    const rows = 6;
+    
+    // Her bir hücrenin boyutları
+    const cellWidth = canvas.width / cols;
+    const cellHeight = canvas.height / rows;
+    
+    // Rotasyon açısı: CSS'de -45 derece
+    const angle = -45 * Math.PI / 180;
+    
+    // Her hücreye watermark çiz
+    for (let col = 0; col < cols; col++) {
+      for (let row = 0; row < rows; row++) {
+        const x = col * cellWidth + cellWidth / 2;
+        const y = row * cellHeight + cellHeight / 2;
+        
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        
+        // CSS'deki gibi opak ve ince
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+        ctx.fillText(text, 0, 0);
+        
+        ctx.restore();
+      }
+    }
+    
+    console.log('✅ CSS gibi watermark çizildi - Grid:', cols, 'x', rows, 'Font:', fontSize, 'px');
+  } catch (error) {
+    console.error('❌ Watermark çizim hatası:', error);
   }
 };
 
 /**
- * RENDER YARDIMCISI: Login gerektirmez, doğrudan DOM'dan çeker.
+ * RENDER YARDIMCISI: Sadece canvas üzerine çiz, CSS'den karmaşıklığı kaldır
  */
 const getSignatureCanvas = async (element, addWatermark) => {
-  const clone = element.cloneNode(true);
+  const signatureElement = element.querySelector('.tpl-modern-vertical') || 
+                           element.querySelector('.signature-preview-container') ||
+                           element.querySelector('.signature-preview') ||
+                           element;
+  
+  const clone = signatureElement.cloneNode(true);
+  
+  // ÖNEMLİ: CSS watermark elementlerini KALDIR
+  const watermarkElements = clone.querySelectorAll('.watermark-grid, .watermark-item');
+  watermarkElements.forEach(el => {
+    if (el.parentNode) {
+      el.parentNode.removeChild(el);
+    }
+  });
+  
   const container = document.createElement('div');
   
   Object.assign(container.style, {
     position: 'fixed',
+    left: '-9999px',
     top: '0',
-    left: '0',
-    width: element.offsetWidth + 'px',
-    zIndex: '-9999',
-    pointerEvents: 'none',
-    background: 'white'
+    width: signatureElement.offsetWidth + 'px',
+    margin: '0',
+    padding: '0',
+    background: '#ffffff',
+    overflow: 'hidden'
   });
   
-  clone.style.display = 'block';
-  clone.style.visibility = 'visible';
-  clone.style.transform = 'none';
+  clone.style.margin = '0';
+  clone.style.padding = '0';
+  clone.style.display = 'inline-block';
   
   container.appendChild(clone);
   document.body.appendChild(container);
 
-  // Resim bekleme süresini 5 saniyeye çıkardık (Daha güvenli)
-  const images = clone.querySelectorAll('img');
+  // Resimlerin yüklendiğinden emin ol
+  const images = Array.from(clone.querySelectorAll('img'));
   await Promise.all(
-    Array.from(images).map(img => {
+    images.map(img => {
+      img.setAttribute('crossOrigin', 'anonymous');
       if (img.complete) return Promise.resolve();
       return new Promise(resolve => {
         img.onload = resolve;
         img.onerror = resolve;
-        setTimeout(resolve, 5000); 
       });
     })
   );
 
+  await new Promise(r => setTimeout(r, 200));
+
   try {
     const canvas = await html2canvas(clone, {
-      backgroundColor: '#ffffff', /* Şeffaf yerine beyaz zorla (Siyah ekranı engeller) */
-      scale: 2, /* Yüksek kalite (3'ten 2'ye düşürdük performans için) */
-      useCORS: true, /* Resimlerin yüklenmesi için */
-      allowTaint: true,
+      scale: 2, // 2x kalite
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#ffffff',
       logging: false,
-      windowWidth: clone.scrollWidth,
-      windowHeight: clone.scrollHeight,
+      width: clone.offsetWidth,
+      height: clone.offsetHeight,
     });
 
+    // SADECE canvas üzerine watermark çiz - CSS yok
     if (addWatermark) {
+      console.log('Canvas üzerine ince watermark çiziliyor...');
       drawProfessionalWatermark(canvas);
     }
 
     return { canvas, clone, container };
   } catch (error) {
-    document.body.removeChild(container);
+    console.error('Canvas oluşturma hatası:', error);
+    if (container.parentNode) document.body.removeChild(container);
     throw error;
   }
 };
 
-// ================= DIŞA AKTARILAN API =================
+/**
+ * PDF İNDİR: Watermark'ı dahil ederek çıktı alır.
+ */
+export const downloadSignatureAsPDF = async (element, filename = 'signature.pdf', hasWatermark = false) => {
+  const { canvas, clone, container } = await getSignatureCanvas(element, hasWatermark);
+  
+  try {
+    // ÖNEMLİ: Watermark çizildikten SONRA dataURL alıyoruz
+    const imgData = canvas.toDataURL('image/png', 1.0);
+    
+    const widthPx = canvas.width / 2;
+    const heightPx = canvas.height / 2;
+    const mmWidth = widthPx * 0.264583;
+    const mmHeight = heightPx * 0.264583;
+
+    const pdf = new jsPDF({
+      orientation: mmWidth > mmHeight ? 'l' : 'p',
+      unit: 'mm',
+      format: [mmWidth, mmHeight]
+    });
+
+    pdf.addImage(imgData, 'PNG', 0, 0, mmWidth, mmHeight);
+
+    // Linkler
+    const ratio = mmWidth / clone.offsetWidth;
+    clone.querySelectorAll('a[href]').forEach((link) => {
+      const href = link.getAttribute('href');
+      if (!href || href.startsWith('#')) return;
+      const rect = link.getBoundingClientRect();
+      const cloneRect = clone.getBoundingClientRect();
+      pdf.link((rect.left - cloneRect.left) * ratio, (rect.top - cloneRect.top) * ratio, rect.width * ratio, rect.height * ratio, { url: href });
+    });
+
+    pdf.save(filename);
+  } finally {
+    if (container.parentNode) document.body.removeChild(container);
+  }
+};
 
 /**
- * PNG İNDİR (Watermark yok, login gerektirmez)
+ * PNG İNDİR: Watermark'ı dahil ederek çıktı alır.
  */
+export const downloadSignatureWithWatermark = async (element, filename = 'signature_protected.png') => {
+  const { canvas, container } = await getSignatureCanvas(element, true);
+  try {
+    // Watermark'ın çizildiğinden emin ol - canvas'ı kontrol et
+    console.log('PNG indirme - Canvas boyutları:', canvas.width, 'x', canvas.height);
+    
+    const dataUrl = canvas.toDataURL('image/png', 1.0);
+    
+    // DataURL'in boş olmadığını kontrol et
+    if (!dataUrl || dataUrl === 'data:,') {
+      console.error('Canvas dataURL boş!');
+      throw new Error('Canvas dataURL alınamadı');
+    }
+    
+    console.log('DataURL alındı, uzunluk:', dataUrl.length);
+    
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = dataUrl;
+    link.click();
+  } catch (error) {
+    console.error('PNG indirme hatası:', error);
+    throw error;
+  } finally {
+    if (container.parentNode) document.body.removeChild(container);
+  }
+};
+
+// Diğer fonksiyonlar (Standart)
 export const downloadSignatureAsPNG = async (element, filename = 'signature.png') => {
   const { canvas, container } = await getSignatureCanvas(element, false);
   try {
@@ -144,70 +223,23 @@ export const downloadSignatureAsPNG = async (element, filename = 'signature.png'
     link.href = canvas.toDataURL('image/png', 1.0);
     link.click();
   } finally {
-    document.body.removeChild(container);
+    if (container.parentNode) document.body.removeChild(container);
   }
 };
 
-/**
- * WATERMARKLI PNG İNDİR (Login gerektirmez)
- */
-export const downloadSignatureWithWatermark = async (element, filename = 'signature_protected.png') => {
-  const { canvas, container } = await getSignatureCanvas(element, true);
-  try {
-    const link = document.createElement('a');
-    link.download = filename;
-    link.href = canvas.toDataURL('image/png', 1.0);
-    link.click();
-  } finally {
-    document.body.removeChild(container);
-  }
-};
-
-/**
- * PDF İNDİR: Link kayma sorunları giderildi.
- */
-export const downloadSignatureAsPDF = async (element, filename = 'signature.pdf', hasWatermark = false) => {
-  const { canvas, clone, container } = await getSignatureCanvas(element, hasWatermark);
-  
-  try {
-    const imgData = canvas.toDataURL('image/png', 1.0);
-    const pxToMm = 0.264583;
-    
-    const pdfWidth = (canvas.width / 3) * pxToMm;
-    const pdfHeight = (canvas.height / 3) * pxToMm;
-
-    const pdf = new jsPDF({
-      orientation: pdfWidth > pdfHeight ? 'l' : 'p',
-      unit: 'mm',
-      format: [pdfWidth, pdfHeight]
-    });
-
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-    // Link koordinatlarını hassas hesapla
-    const cloneRect = clone.getBoundingClientRect();
-    const ratio = pdfWidth / cloneRect.width;
-
-    clone.querySelectorAll('a[href]').forEach((link) => {
-      const href = link.getAttribute('href');
-      if (!href || href.startsWith('#')) return;
-
-      const linkRect = link.getBoundingClientRect();
-      const x = (linkRect.left - cloneRect.left) * ratio;
-      const y = (linkRect.top - cloneRect.top) * ratio;
-      const w = linkRect.width * ratio;
-      const h = linkRect.height * ratio;
-
-      pdf.link(x, y, w, h, { url: href });
-    });
-
-    pdf.save(filename);
-  } finally {
-    document.body.removeChild(container);
-  }
-};
-
-// Watermarklı PDF için kısa yol
 export const downloadSignatureAsPDFWithWatermark = (element, filename = 'signature_protected.pdf') => {
   return downloadSignatureAsPDF(element, filename, true);
+};
+
+export const copySignatureToClipboard = async (element) => {
+  if (!element) return { success: false, message: "Element bulunamadı." };
+  try {
+    const blobHtml = new Blob([element.innerHTML], { type: "text/html" });
+    const blobText = new Blob([element.innerText], { type: "text/plain" });
+    const data = [new ClipboardItem({ "text/html": blobHtml, "text/plain": blobText })];
+    await navigator.clipboard.write(data);
+    return { success: true, message: "İmza kopyalandı!" };
+  } catch (err) {
+    return { success: false, message: "Kopyalama başarısız." };
+  }
 };

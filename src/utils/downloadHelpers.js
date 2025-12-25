@@ -1,49 +1,266 @@
-/**
- * Helper functions for downloading signatures
- * Used by both SignatureBuilder and MySignatures components
- */
-
-import { 
-  downloadSignatureAsPNG, 
-  downloadSignatureWithWatermark, 
-  downloadSignatureAsPDF, 
-  downloadSignatureAsPDFWithWatermark 
-} from './signatureDownloader';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 /**
- * Downloads signature as PNG
- * @param {HTMLElement} signatureElement - The signature element to download
- * @param {string} filename - The filename for the downloaded image
- * @param {boolean} isPremiumUser - Whether the user is premium
+ * Basit ve etkili watermark çizimi
  */
-export const downloadSignaturePNG = async (signatureElement, filename, isPremiumUser) => {
-  if (isPremiumUser) {
-    await downloadSignatureAsPNG(signatureElement, filename);
-  } else {
-    await downloadSignatureWithWatermark(signatureElement, filename);
+const drawSimpleWatermark = (canvas) => {
+  try {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Canvas context alınamadı');
+      return;
+    }
+    
+    console.log('Watermark çizimi başlıyor - Canvas:', canvas.width, 'x', canvas.height);
+    
+    // Asıl watermark'ı çiz
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over'; // Normal çizim
+    
+    const text = 'freelancersignature.com';
+    const fontSize = 14; // Daha küçük font
+    ctx.font = `normal ${fontSize}px Arial, sans-serif`;
+    ctx.fillStyle = 'rgba(128, 128, 128, 0.3)'; // Gri renk, daha görünür
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Canvas boyutlarına göre grid oluştur
+    const cols = Math.ceil(canvas.width / 150); // Her 150 pikselde bir
+    const rows = Math.ceil(canvas.height / 100); // Her 100 pikselde bir
+    
+    console.log(`Watermark çiziliyor: ${cols}x${rows} grid, Font: ${fontSize}px`);
+    
+    for (let i = 0; i < cols; i++) {
+      for (let j = 0; j < rows; j++) {
+        const x = (i * 150) + 75;
+        const y = (j * 100) + 50;
+        
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(-0.785); // -45 derece = -π/4 ≈ -0.785 radyan
+        ctx.fillText(text, 0, 0);
+        ctx.restore();
+      }
+    }
+    
+    ctx.restore();
+    
+    console.log('✅ Watermark çizildi');
+  } catch (error) {
+    console.error('Watermark çizim hatası:', error);
   }
 };
 
 /**
- * Downloads signature as PDF
- * Same logic as PNG: uses client-side element for both premium and free users
- * Watermark is added on canvas for free users (same as PNG)
- * @param {HTMLElement} signatureElement - The signature element to download
- * @param {string} filename - The filename for the downloaded PDF
- * @param {boolean} isPremiumUser - Whether the user is premium
- * @param {object|null} signatureData - Signature data (unused, kept for compatibility)
- * @param {string|null} signatureId - Signature ID (unused, kept for compatibility)
+ * Element'ten canvas oluşturma (basitleştirilmiş)
  */
-export const downloadSignaturePDF = async (signatureElement, filename, isPremiumUser, signatureData = null, signatureId = null) => {
-  if (!signatureElement) {
-    throw new Error('Signature element is required');
+const getCanvasFromElement = async (element, addWatermark = false) => {
+  console.log('Canvas oluşturuluyor...');
+  
+  // Element'i clone'la
+  const clone = element.cloneNode(true);
+  
+  // ÖNEMLİ: Tüm resimlere crossOrigin ekle - Canvas tainted olmasını önle
+  const images = clone.querySelectorAll('img');
+  images.forEach(img => {
+    if (img.src && !img.src.startsWith('data:')) {
+      img.setAttribute('crossOrigin', 'anonymous');
+      img.crossOrigin = 'anonymous';
+    }
+  });
+  
+  const container = document.createElement('div');
+  
+  // Container stilini ayarla
+  container.style.position = 'fixed';
+  container.style.left = '-9999px';
+  container.style.top = '0';
+  container.style.background = '#ffffff';
+  container.style.padding = '20px';
+  container.style.zIndex = '9999';
+  
+  container.appendChild(clone);
+  document.body.appendChild(container);
+  
+  // Resimlerin yüklenmesini bekle
+  await Promise.all(
+    Array.from(clone.querySelectorAll('img')).map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve;
+        setTimeout(resolve, 2000); // 2 saniye timeout
+      });
+    })
+  );
+  
+  // Kısa bekleme - render için
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  try {
+    // html2canvas ile canvas oluştur
+    const canvas = await html2canvas(clone, {
+      scale: 1, // Daha düşük scale
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#ffffff',
+      logging: true, // Log'ları aç
+      width: clone.offsetWidth,
+      height: clone.offsetHeight,
+    });
+    
+    console.log(`Canvas oluşturuldu: ${canvas.width}x${canvas.height}`);
+    
+    // Watermark ekle - ÖNEMLİ: Canvas render edildikten SONRA
+    if (addWatermark) {
+      console.log('Watermark ekleniyor...');
+      
+      // Kısa bir bekleme - canvas'ın tam render olması için
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // ÖNEMLİ: Yeni bir canvas oluştur, orijinal canvas'ı kopyala, sonra watermark ekle
+      // Bu şekilde watermark kesinlikle en üstte olacak
+      const newCanvas = document.createElement('canvas');
+      newCanvas.width = canvas.width;
+      newCanvas.height = canvas.height;
+      const newCtx = newCanvas.getContext('2d');
+      
+      // Orijinal canvas'ı yeni canvas'a kopyala
+      newCtx.drawImage(canvas, 0, 0);
+      
+      // Watermark'ı yeni canvas'a çiz
+      drawSimpleWatermark(newCanvas);
+      
+      // Orijinal canvas'ı yeni canvas ile değiştir
+      canvas.width = newCanvas.width;
+      canvas.height = newCanvas.height;
+      const finalCtx = canvas.getContext('2d');
+      finalCtx.drawImage(newCanvas, 0, 0);
+      
+      console.log('✅ Watermark canvas\'a eklendi');
+    }
+    
+    return { canvas, container };
+  } catch (error) {
+    console.error('Canvas oluşturma hatası:', error);
+    if (container.parentNode) {
+      document.body.removeChild(container);
+    }
+    throw error;
   }
+};
 
-  // Same logic as PNG: use client-side element for both premium and free
-  // Watermark is added on canvas for free users (same as PNG)
-  if (isPremiumUser) {
-    await downloadSignatureAsPDF(signatureElement, filename);
-  } else {
-    await downloadSignatureAsPDFWithWatermark(signatureElement, filename);
+/**
+ * PNG İndirme (watermark ile)
+ */
+export const downloadSignaturePNG = async (element, filename, isPremiumUser = false) => {
+  console.log(`PNG indirme başlatıldı. Premium: ${isPremiumUser}`);
+  
+  // Premium kullanıcı için watermark YOK, free için watermark VAR
+  const addWatermark = !isPremiumUser;
+  
+  const { canvas, container } = await getCanvasFromElement(element, addWatermark);
+  
+  try {
+    // Watermark zaten getCanvasFromElement içinde çizildi
+    
+    // toDataURL'i try-catch ile dene - tainted canvas hatası yakalamak için
+    let dataUrl;
+    try {
+      dataUrl = canvas.toDataURL('image/png', 1.0);
+    } catch (taintedError) {
+      console.error('❌ Canvas tainted hatası!', taintedError);
+      throw new Error('Canvas tainted - CORS sorunu. Resimler crossOrigin ile yüklenmeli.');
+    }
+    
+    if (!dataUrl || dataUrl === 'data:,') {
+      console.error('❌ Canvas dataURL boş!');
+      throw new Error('Canvas dataURL alınamadı');
+    }
+    
+    console.log('✅ DataURL alındı, uzunluk:', dataUrl.length, 'İlk 100 karakter:', dataUrl.substring(0, 100));
+    
+    const link = document.createElement('a');
+    link.download = filename || 'signature.png';
+    link.href = dataUrl;
+    link.click();
+    
+    console.log('PNG indirildi');
+  } catch (error) {
+    console.error('PNG indirme hatası:', error);
+    
+    // Canvas tainted hatası ise kullanıcıya bilgi ver
+    if (error.message && error.message.includes('tainted')) {
+      console.error('❌ Canvas tainted - CORS sorunu olabilir');
+    }
+    
+    throw error;
+  } finally {
+    if (container && container.parentNode) {
+      document.body.removeChild(container);
+    }
   }
+};
+
+/**
+ * PDF İndirme (watermark ile)
+ */
+export const downloadSignaturePDF = async (element, filename, isPremiumUser = false) => {
+  console.log(`PDF indirme başlatıldı. Premium: ${isPremiumUser}`);
+  
+  // Premium kullanıcı için watermark YOK, free için watermark VAR
+  const addWatermark = !isPremiumUser;
+  
+  const { canvas, container } = await getCanvasFromElement(element, addWatermark);
+  
+  try {
+    const imgData = canvas.toDataURL('image/png', 1.0);
+    
+    // PDF boyutlarını hesapla (mm cinsinden)
+    const mmWidth = (canvas.width * 0.264583); // px to mm
+    const mmHeight = (canvas.height * 0.264583);
+    
+    const pdf = new jsPDF({
+      orientation: mmWidth > mmHeight ? 'l' : 'p',
+      unit: 'mm',
+      format: [mmWidth, mmHeight]
+    });
+    
+    pdf.addImage(imgData, 'PNG', 0, 0, mmWidth, mmHeight);
+    pdf.save(filename || 'signature.pdf');
+    
+    console.log('PDF indirildi');
+  } catch (error) {
+    console.error('PDF indirme hatası:', error);
+    throw error;
+  } finally {
+    if (container && container.parentNode) {
+      document.body.removeChild(container);
+    }
+  }
+};
+
+/**
+ * Debug için: Canvas'ı ekranda göster
+ */
+export const debugCanvas = async (element, addWatermark = false) => {
+  const { canvas, container } = await getCanvasFromElement(element, addWatermark);
+  
+  // Canvas'ı ekranda göster
+  canvas.style.position = 'fixed';
+  canvas.style.top = '50px';
+  canvas.style.left = '50px';
+  canvas.style.border = '2px solid red';
+  canvas.style.zIndex = '10000';
+  canvas.style.boxShadow = '0 0 20px rgba(0,0,0,0.5)';
+  document.body.appendChild(canvas);
+  
+  // 10 saniye sonra kaldır
+  setTimeout(() => {
+    if (canvas.parentNode) document.body.removeChild(canvas);
+    if (container.parentNode) document.body.removeChild(container);
+  }, 10000);
+  
+  return canvas;
 };
