@@ -1,14 +1,14 @@
-// Social media icon URLs (using reliable CDN)
+// Social media icon URLs (using reliable CDN - PNG format for email compatibility)
 export const socialIcons = {
   facebook: 'https://cdn-icons-png.flaticon.com/32/733/733547.png',
   facebookCircle: 'https://cdn-icons-png.flaticon.com/32/145/145802.png',
-  twitter: 'https://cdn-icons-png.flaticon.com/32/733/733579.png',
-  x: 'https://cdn-icons-png.flaticon.com/32/5968/5968958.png',
+  twitter: 'https://cdn-icons-png.flaticon.com/32/733/733579.png', // Old Twitter logo (kept for compatibility)
+  x: '/icons/download.png', // Official X logo - local file
   linkedin: 'https://cdn-icons-png.flaticon.com/32/733/733561.png',
   linkedinCircle: 'https://cdn-icons-png.flaticon.com/32/174/174857.png',
-  instagram: 'https://cdn-icons-png.flaticon.com/32/733/733558.png',
-  instagramCircle: 'https://cdn-icons-png.flaticon.com/32/174/174855.png',
-  youtube: 'https://cdn-icons-png.flaticon.com/32/733/733646.png',
+  instagram: 'https://cdn-icons-png.flaticon.com/32/2111/2111463.png', // Clean Instagram logo (gradient preserved)
+  instagramCircle: 'https://cdn-icons-png.flaticon.com/32/2111/2111463.png', // Same clean logo for circle
+  youtube: 'https://cdn-icons-png.flaticon.com/32/1384/1384060.png', // Red YouTube logo (proper red color)
   pinterest: 'https://cdn-icons-png.flaticon.com/32/145/145808.png',
   github: 'https://cdn-icons-png.flaticon.com/32/733/733553.png',
   dribbble: 'https://cdn-icons-png.flaticon.com/32/733/733544.png',

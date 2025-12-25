@@ -45,7 +45,7 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
     const iconList = [];
     
     if (links.facebook) iconList.push({ key: 'facebook', url: links.facebook, icon: socialIcons.facebookCircle });
-    if (links.twitter) iconList.push({ key: 'twitter', url: links.twitter, icon: socialIcons.twitter });
+    if (links.twitter) iconList.push({ key: 'twitter', url: links.twitter, icon: socialIcons.x }); // Use new X logo
     if (links.youtube) iconList.push({ key: 'youtube', url: links.youtube, icon: socialIcons.youtube });
     if (links.linkedin) iconList.push({ key: 'linkedin', url: links.linkedin, icon: socialIcons.linkedinCircle });
     if (links.instagram) iconList.push({ key: 'instagram', url: links.instagram, icon: socialIcons.instagramCircle });
@@ -125,17 +125,17 @@ function SignaturePreview({ signatureData, showWatermark = true }) {
     if (!hasCTAs) return null;
     
     return (
-      <div className="freelancer-cta">
-        {hourlyRate && <div className="rate-badge" style={{ color: accentColor }}>{hourlyRate}</div>}
-        {availability && <div className="availability-badge">✅ {availability}</div>}
+      <div className="freelancer-cta" style={{ '--accent-color': accentColor }}>
+        {hourlyRate && <div className="rate-badge">{hourlyRate}</div>}
+        {availability && <div className="availability-badge">{availability}</div>}
         {bookingUrl && (
-          <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className="booking-btn" style={{ backgroundColor: accentColor }}>
-            📅 Book a Call
+          <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className="booking-btn">
+            Book a Call
           </a>
         )}
         {portfolioUrl && (
-          <a href={portfolioUrl} target="_blank" rel="noopener noreferrer" className="portfolio-link" style={{ color: accentColor }}>
-            🎨 View Portfolio
+          <a href={portfolioUrl} target="_blank" rel="noopener noreferrer" className="portfolio-link">
+            View Portfolio
           </a>
         )}
         {renderServicePackages()}
