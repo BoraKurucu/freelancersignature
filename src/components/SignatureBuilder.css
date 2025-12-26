@@ -629,6 +629,48 @@
   box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
 }
 
+.referral-builder-encouragement {
+  margin-bottom: 20px;
+}
+
+.referral-builder-link {
+  display: block;
+  padding: 12px 20px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.referral-builder-link.free {
+  background: #fdf4ff;
+  border: 1px solid #f5d0fe;
+  color: #86198f;
+}
+
+.referral-builder-link.free:hover {
+  background: #fae8ff;
+  transform: translateY(-1px);
+}
+
+.referral-builder-link.premium {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+.referral-builder-link.premium:hover {
+  background: #d1fae5;
+  transform: translateY(-1px);
+}
+
+.referral-builder-link span {
+  font-weight: 700;
+  margin-left: 8px;
+  text-decoration: underline;
+}
+
 .preview-container {
   background: #f9f9f9;
   border-radius: 8px;

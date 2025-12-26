@@ -86,19 +86,21 @@ async function isUserPremium(userId) {
     if (!userDoc.exists) return false;
     
     const userData = userDoc.data();
-    const isPremium = userData.subscriptionStatus === 'premium' && 
-                      userData.planType === 'premium';
     
-    // Check expiry if exists
-    if (isPremium && userData.subscriptionExpiry) {
+    // Check if subscription has not expired
+    if (userData.subscriptionExpiry) {
       const expiryDate = userData.subscriptionExpiry.toDate 
         ? userData.subscriptionExpiry.toDate() 
         : new Date(userData.subscriptionExpiry);
       const now = new Date();
-      if (expiryDate < now) {
-        return false;
+      if (expiryDate > now) {
+        return true;
       }
     }
+    
+    // Legacy fallback
+    const isPremium = userData.subscriptionStatus === 'premium' && 
+                      userData.planType === 'premium';
     
     return isPremium;
   } catch (error) {
@@ -183,6 +185,24 @@ exports.validateSignatureCreate = functions.firestore.document('signatures/{sign
       console.error('Error validating signature creation:', error);
       // Don't delete on error - let the signature exist but log the issue
     }
+  });
+
+/**
+ * Handle referral records when a new user is created
+ * Reward logic moved to client-side for immediate feedback and local testing
+ */
+exports.onUserCreate = functions.firestore.document('users/{userId}')
+  .onCreate(async (snap, context) => {
+    const userData = snap.data();
+    const referredBy = userData.referredBy;
+    const userId = context.params.userId;
+
+    if (!referredBy || referredBy === userId) {
+      return null;
+    }
+
+    console.log(`👤 New user ${userId} referred by ${referredBy} record created.`);
+    return null;
   });
 
 /**
@@ -420,12 +440,14 @@ exports.updatePremium = functions.https.onRequest(async (req, res) => {
     }
 
     let userRef;
+    let userData;
     if (userId) {
       userRef = db.collection('users').doc(userId);
       const userDoc = await userRef.get();
       if (!userDoc.exists) {
         return res.status(404).send('User not found');
       }
+      userData = userDoc.data();
     } else {
       const sanitizedEmail = email.toLowerCase().trim();
       const snapshot = await db.collection('users').where('email', '==', sanitizedEmail).get();
@@ -433,10 +455,19 @@ exports.updatePremium = functions.https.onRequest(async (req, res) => {
         return res.status(404).send('User not found');
       }
       userRef = snapshot.docs[0].ref;
+      userData = snapshot.docs[0].data();
     }
 
-    const expiryDate = new Date();
-    expiryDate.setMonth(expiryDate.getMonth() + 1);
+    let currentExpiry = userData.subscriptionExpiry 
+      ? (userData.subscriptionExpiry.toDate ? userData.subscriptionExpiry.toDate() : new Date(userData.subscriptionExpiry))
+      : new Date();
+      
+    const now = new Date();
+    // If current premium is expired, start from now
+    const baseDate = (currentExpiry && currentExpiry > now) ? currentExpiry : now;
+    
+    const expiryDate = new Date(baseDate);
+    expiryDate.setDate(expiryDate.getDate() + 30);
 
     const updates = {
       subscriptionStatus: 'premium',
