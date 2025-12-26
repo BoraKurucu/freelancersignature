@@ -199,6 +199,75 @@
 }
 
 /* Mobile styles */
+.plan-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.expiry-date {
+  font-size: 0.7rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.referral-section-link {
+  text-decoration: none;
+  display: block;
+}
+
+.referral-section {
+  padding: 16px;
+  background: #fdf4ff;
+  transition: background 0.2s;
+}
+
+.referral-section-link:hover .referral-section {
+  background: #fae8ff;
+}
+
+.referral-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #86198f;
+  margin-bottom: 12px;
+}
+
+.referral-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: #f5d0fe;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #d946ef;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #a21caf;
+  min-width: 30px;
+}
+
+.referral-hint {
+  font-size: 0.75rem;
+  color: #701a75;
+  margin-bottom: 0;
+}
+
+/* Mobile styles */
 @media (max-width: 640px) {
   .user-name {
     display: none;

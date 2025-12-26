@@ -5,7 +5,7 @@ import { getGumroadCheckoutUrl } from '../services/gumroadService';
 import './UserMenu.css';
 
 function UserMenu({ onSignInClick }) {
-  const { currentUser, logout, isFullyAuthenticated, isPremium } = useAuth();
+  const { currentUser, userProfile, logout, isFullyAuthenticated, isPremium } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -37,6 +37,23 @@ function UserMenu({ onSignInClick }) {
   const displayName = currentUser.displayName || currentUser.email?.split('@')[0] || 'User';
   const photoURL = currentUser.photoURL;
   const isVerified = isFullyAuthenticated();
+
+  const referralLink = `${window.location.origin}/?ref=${currentUser.uid}`;
+  const referralCount = userProfile?.referralCount || 0;
+  const nextMilestone = 3 - (referralCount % 3);
+
+  const getExpiryDate = () => {
+    if (!userProfile?.subscriptionExpiry) return null;
+    const date = userProfile.subscriptionExpiry.toDate 
+      ? userProfile.subscriptionExpiry.toDate() 
+      : new Date(userProfile.subscriptionExpiry);
+    return date.toLocaleDateString();
+  };
+
+  const copyReferralLink = () => {
+    navigator.clipboard.writeText(referralLink);
+    alert('Referral link copied to clipboard!');
+  };
 
   return (
     <div className="user-menu">
@@ -72,11 +89,40 @@ function UserMenu({ onSignInClick }) {
               {!isVerified && (
                 <span className="unverified-badge">Email not verified</span>
               )}
-              <span className={`plan-badge ${isPremium() ? 'premium' : 'free'}`}>
-                {isPremium() ? '⭐ Premium' : 'Free Plan'}
-              </span>
+              <div className="plan-info">
+                <span className={`plan-badge ${isPremium() ? 'premium' : 'free'}`}>
+                  {isPremium() ? '⭐ Premium' : 'Free Plan'}
+                </span>
+                {isPremium() && getExpiryDate() && (
+                  <span className="expiry-date">Expires: {getExpiryDate()}</span>
+                )}
+              </div>
             </div>
             
+            <div className="dropdown-divider" />
+            
+            <Link 
+              to="/referrals" 
+              className="referral-section-link"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              <div className="referral-section">
+                <p className="referral-title">🎁 Refer & Get +7 Days</p>
+                <div className="referral-progress">
+                  <div className="progress-bar">
+                    <div 
+                      className="progress-fill" 
+                      style={{ width: `${((referralCount % 3) / 3) * 100}%` }}
+                    />
+                  </div>
+                  <p className="progress-text">{referralCount % 3}/3</p>
+                </div>
+                <p className="referral-hint">
+                  Invite friends for free PRO access →
+                </p>
+              </div>
+            </Link>
+
             <div className="dropdown-divider" />
             
             <Link 

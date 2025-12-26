@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getGumroadCheckoutUrl } from '../services/gumroadService';
+import UserMenu from './UserMenu';
 import SEO from './SEO';
 import './PremiumUpgrade.css';
 
 function PremiumUpgrade() {
   const { currentUser, userProfile, isPremium } = useAuth();
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Scroll to top on mount
@@ -14,13 +17,12 @@ function PremiumUpgrade() {
     
     // If user is logged in and not premium, automatically open Gumroad checkout
     // Only open once when userProfile is loaded and user is not premium
-    const isUserPremium = userProfile?.subscriptionStatus === 'premium' && userProfile?.planType === 'premium';
-    if (currentUser && userProfile && !isUserPremium) {
+    if (currentUser && userProfile && !isPremium()) {
       const checkoutUrl = getGumroadCheckoutUrl(currentUser.email, true);
       window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser, userProfile?.subscriptionStatus, userProfile?.planType]);
+  }, [currentUser, userProfile, isPremium()]);
 
   const handleUpgrade = () => {
     if (!currentUser) {
@@ -72,6 +74,22 @@ function PremiumUpgrade() {
     }
   ];
 
+  const getExpiryDate = () => {
+    if (!userProfile?.subscriptionExpiry) return null;
+    const date = userProfile.subscriptionExpiry.toDate 
+      ? userProfile.subscriptionExpiry.toDate() 
+      : new Date(userProfile.subscriptionExpiry);
+    return date.toLocaleDateString();
+  };
+
+  const referralLink = currentUser ? `${window.location.origin}/?ref=${currentUser.uid}` : '';
+  const referralCount = userProfile?.referralCount || 0;
+
+  const copyReferralLink = () => {
+    navigator.clipboard.writeText(referralLink);
+    alert('Referral link copied to clipboard!');
+  };
+
   if (isPremium()) {
     return (
       <div className="premium-upgrade-page">
@@ -82,11 +100,38 @@ function PremiumUpgrade() {
           ogTitle="Premium Upgrade - FreelancerSignature"
           ogDescription="Upgrade to Premium and unlock watermark removal, HTML code copy, PNG downloads, and premium templates."
         />
+        
+        <nav className="premium-nav">
+          <div className="nav-container">
+            <Link to="/builder" className="nav-logo">
+              <span className="logo-icon">✒️</span>
+              <span className="logo-text">FreelancerSignature</span>
+            </Link>
+            <div className="nav-actions">
+              <Link to="/builder" className="nav-back-link">← Back to Builder</Link>
+              <UserMenu />
+            </div>
+          </div>
+        </nav>
+
         <div className="premium-container">
           <div className="premium-success">
             <div className="success-icon">⭐</div>
-            <h1>You're Already Premium!</h1>
-            <p>Thank you for being a Premium member. Enjoy all the premium features!</p>
+            <h1>You're a Premium Member!</h1>
+            {getExpiryDate() && (
+              <p className="premium-expiry">Your premium access is valid until <strong>{getExpiryDate()}</strong></p>
+            )}
+            <p>Thank you for your support. Enjoy all the professional features!</p>
+            
+            <div className="referral-reward-card">
+              <h3>🎁 Get More Premium Days for Free!</h3>
+              <p>For every 3 people you refer who sign up, we'll add <strong>7 more days</strong> to your premium subscription automatically!</p>
+              
+              <Link to="/referrals" className="btn-referral-page">
+                Manage Referrals & Progress →
+              </Link>
+            </div>
+
             <div className="premium-features-grid">
               {premiumFeatures.map((feature, index) => (
                 <div key={index} className="feature-card active">
@@ -111,6 +156,20 @@ function PremiumUpgrade() {
         ogTitle="Premium Upgrade - FreelancerSignature"
         ogDescription="Upgrade to Premium and unlock watermark removal, HTML code copy, PNG downloads, and premium templates."
       />
+
+      <nav className="premium-nav">
+        <div className="nav-container">
+          <Link to="/builder" className="nav-logo">
+            <span className="logo-icon">✒️</span>
+            <span className="logo-text">FreelancerSignature</span>
+          </Link>
+          <div className="nav-actions">
+            <Link to="/builder" className="nav-back-link">← Back to Builder</Link>
+            <UserMenu />
+          </div>
+        </div>
+      </nav>
+
       <div className="premium-container">
         {/* Hero Section */}
         <div className="premium-hero">
@@ -132,7 +191,7 @@ function PremiumUpgrade() {
               <span className="amount">2.99</span>
               <span className="period">/month</span>
             </div>
-            <p className="pricing-subtitle">Cancel anytime • No commitment</p>
+            <p className="pricing-subtitle">Adds 30 days of Premium • No commitment</p>
           </div>
 
           <button
@@ -149,6 +208,22 @@ function PremiumUpgrade() {
             </p>
           )}
         </div>
+
+        {/* Referral Section for Free Users */}
+        {currentUser && (
+          <div className="referral-card-free">
+            <div className="referral-badge">FREE PREMIUM</div>
+            <h2>Don't want to pay? Get it for FREE!</h2>
+            <p>
+              Invite 3 friends to sign up and get <strong>7 days of Premium</strong> for free.
+              You can do this as many times as you want!
+            </p>
+            
+            <Link to="/referrals" className="btn-referral-page">
+              Start Referring & Get Free PRO →
+            </Link>
+          </div>
+        )}
 
         {/* Features Grid */}
         <div className="features-section">

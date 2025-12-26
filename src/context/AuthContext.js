@@ -24,16 +24,26 @@ export function AuthProvider({ children }) {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
+  const [showReferralToast, setShowReferralToast] = useState(false);
 
   // Create or update user profile in Firestore
   async function createUserProfile(user, additionalData = {}) {
-    if (!user) return null;
+    if (!user) {
+      console.log('❌ [AuthContext] createUserProfile: No user provided');
+      return null;
+    }
 
     try {
       const userRef = doc(db, 'users', user.uid);
+      console.log(`🔍 [AuthContext] createUserProfile: Checking profile for UID: ${user.uid}`);
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
+        console.log('🆕 [AuthContext] createUserProfile: Creating NEW user profile');
+        // Capture referral ID from localStorage
+        const referralId = localStorage.getItem('referralId');
+        console.log(`🔗 [AuthContext] createUserProfile: Referral ID from localStorage: ${referralId}`);
+        
         // Create new user profile
         const userData = {
           email: user.email,
@@ -44,6 +54,8 @@ export function AuthProvider({ children }) {
           subscriptionStatus: 'free',
           planType: null,
           subscriptionExpiry: null,
+          referralCount: 0,
+          referredBy: (referralId && referralId !== user.uid) ? referralId : null,
           signaturesCreated: 0,
           signaturesCopied: 0,
           createdAt: serverTimestamp(),
@@ -51,9 +63,29 @@ export function AuthProvider({ children }) {
           ...additionalData
         };
 
+        console.log('📄 [AuthContext] createUserProfile: Data to be saved:', JSON.stringify(userData, null, 2));
         await setDoc(userRef, userData);
+        console.log('✅ [AuthContext] createUserProfile: User document created successfully');
+
+        // Process referral - Client-side fallback for immediate feedback
+        if (userData.referredBy) {
+          console.log(`🎁 [AuthContext] createUserProfile: Processing referral reward for referrer: ${userData.referredBy}`);
+          try {
+            await handleReferralReward(userData.referredBy);
+            console.log('✅ [AuthContext] createUserProfile: handleReferralReward completed');
+            localStorage.removeItem('referralId');
+            setShowReferralToast(true);
+            setTimeout(() => setShowReferralToast(false), 6000);
+          } catch (refError) {
+            console.error('❌ [AuthContext] createUserProfile: Error processing referral reward:', refError);
+            console.error('❌ Error details:', refError.code, refError.message);
+            localStorage.removeItem('referralId');
+          }
+        }
+
         return userData;
       } else {
+        console.log('♻️ [AuthContext] createUserProfile: Profile exists, updating last login');
         // Update last login
         await setDoc(userRef, { 
           lastLogin: serverTimestamp(),
@@ -62,9 +94,64 @@ export function AuthProvider({ children }) {
         return userSnap.data();
       }
     } catch (error) {
-      console.error('Error creating/updating user profile:', error);
+      console.error('❌ [AuthContext] createUserProfile: CRITICAL error:', error);
       // Don't throw - allow auth to succeed even if profile creation fails
       return null;
+    }
+  }
+
+  // Handle referral reward logic (Client-side implementation)
+  async function handleReferralReward(referrerUid) {
+    console.log(`🎯 [AuthContext] handleReferralReward: Starting for referrer UID: ${referrerUid}`);
+    const referrerRef = doc(db, 'users', referrerUid);
+    
+    try {
+      console.log(`🎯 [AuthContext] handleReferralReward: Attempting getDoc for referrer...`);
+      const referrerSnap = await getDoc(referrerRef);
+
+      if (referrerSnap.exists()) {
+        const referrerData = referrerSnap.data();
+        const newCount = (referrerData.referralCount || 0) + 1;
+        console.log(`🎯 [AuthContext] handleReferralReward: Referrer found. Current count: ${referrerData.referralCount || 0}, New count: ${newCount}`);
+        
+        const updates = {
+          referralCount: newCount,
+          updatedAt: serverTimestamp()
+        };
+
+        // Every 3 referrals = +7 days premium
+        if (newCount % 3 === 0) {
+          console.log(`🎯 [AuthContext] handleReferralReward: Milestone reached (3 referrals). Calculating reward...`);
+          let currentExpiry = null;
+          if (referrerData.subscriptionExpiry) {
+            currentExpiry = referrerData.subscriptionExpiry.toDate 
+              ? referrerData.subscriptionExpiry.toDate() 
+              : new Date(referrerData.subscriptionExpiry);
+          }
+
+          const now = new Date();
+          // If current premium is expired or user is free, start from now
+          const baseDate = (currentExpiry && currentExpiry > now) ? currentExpiry : now;
+          
+          const newExpiry = new Date(baseDate);
+          newExpiry.setDate(newExpiry.getDate() + 7);
+          
+          updates.subscriptionExpiry = newExpiry;
+          updates.subscriptionStatus = 'premium';
+          updates.planType = 'premium';
+          
+          console.log(`🎁 [AuthContext] handleReferralReward: REWARD! Adding 7 days. New expiry: ${newExpiry}`);
+        }
+
+        console.log(`🎯 [AuthContext] handleReferralReward: Attempting setDoc (merge) with updates:`, updates);
+        await setDoc(referrerRef, updates, { merge: true });
+        console.log(`✅ [AuthContext] handleReferralReward: Successfully updated referrer document.`);
+      } else {
+        console.warn(`⚠️ [AuthContext] handleReferralReward: Referrer document DOES NOT EXIST for UID: ${referrerUid}`);
+      }
+    } catch (error) {
+      console.error(`❌ [AuthContext] handleReferralReward: FAILED at some point:`, error);
+      throw error; // Re-throw to be caught by createUserProfile
     }
   }
 
@@ -244,43 +331,31 @@ export function AuthProvider({ children }) {
 
   // Check if user can use premium features
   function isPremium() {
-    const status = userProfile?.subscriptionStatus;
-    const plan = userProfile?.planType;
-    console.log('🔍 Checking premium status:');
-    console.log('   hasUserProfile:', !!userProfile);
-    console.log('   subscriptionStatus:', status, typeof status);
-    console.log('   planType:', plan, typeof plan);
-    console.log('   statusCheck (=== "premium"):', status === 'premium');
-    console.log('   planCheck (=== "premium"):', plan === 'premium');
-    console.log('   FULL PROFILE:', JSON.stringify(userProfile, null, 2));
-
     if (!userProfile) {
-      console.log('❌ No user profile');
       return false;
     }
 
-    // ÖNEMLİ: Hem subscriptionStatus hem de planType kontrolü
-    if (userProfile.subscriptionStatus !== 'premium' || userProfile.planType !== 'premium') {
-      console.log('❌ Not premium - status or planType mismatch');
-      return false;
-    }
-    
-    // Check if subscription has expired
+    // New logic: Check if subscription has not expired
     if (userProfile.subscriptionExpiry) {
       const expiryDate = userProfile.subscriptionExpiry.toDate 
         ? userProfile.subscriptionExpiry.toDate() 
         : new Date(userProfile.subscriptionExpiry);
       const now = new Date();
       
-      if (expiryDate < now) {
-        console.log('❌ Subscription expired');
-        // Subscription expired - update status (webhook should handle this, but this is a fallback)
-        return false;
+      if (expiryDate > now) {
+        return true;
       }
     }
     
-    console.log('✅ User is premium!');
-    return true;
+    // Legacy logic fallback: Check subscriptionStatus and planType
+    // This handles users who were premium before the duration-based system
+    if (userProfile.subscriptionStatus === 'premium' && userProfile.planType === 'premium') {
+      // If they have no expiry but are marked premium, we treat them as premium
+      // until they are migrated or their status changes.
+      return true;
+    }
+    
+    return false;
   }
 
   // Check if user is authenticated and verified
@@ -377,7 +452,9 @@ export function AuthProvider({ children }) {
     logout,
     isPremium,
     isFullyAuthenticated,
-    loadUserProfile
+    loadUserProfile,
+    showReferralToast,
+    setShowReferralToast
   };
 
   return (
@@ -386,4 +463,3 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
-

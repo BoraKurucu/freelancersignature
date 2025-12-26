@@ -672,6 +672,21 @@ function SignatureBuilder() {
             </div>
           )}
 
+          {/* Referral Encouragement Text */}
+          {currentUser && (
+            <div className="referral-builder-encouragement">
+              {isPremium() ? (
+                <Link to="/referrals" className="referral-builder-link premium">
+                  🎁 <strong>Extend your Premium for FREE!</strong> Invite friends and get +7 days for every 3 signups. <span>Refer friends →</span>
+                </Link>
+              ) : (
+                <Link to="/referrals" className="referral-builder-link free">
+                  🎁 <strong>Become Premium for FREE!</strong> Invite 3 friends and unlock all PRO features for 7 days. <span>Start here →</span>
+                </Link>
+              )}
+            </div>
+          )}
+
           {/* Step 1: Basic Info */}
           <div className="form-section">
             <div className="section-header">
