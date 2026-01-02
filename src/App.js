@@ -15,13 +15,13 @@ import Toast from './components/Toast';
 import { useAuth } from './context/AuthContext';
 import './App.css';
 
-// Track page views for Google Ads conversion
+// Track page views for Google Ads conversion (only on home page)
 function PageViewTracker() {
   const location = useLocation();
 
   useEffect(() => {
-    // Track page view conversion
-    if (typeof window !== 'undefined' && window.gtag) {
+    // Track page view conversion only on home page
+    if (location.pathname === '/' && typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'conversion', {
         'send_to': 'AW-708514143/7rzLCMn2nNYbEN-i7NEC',
         'value': 1.0,
