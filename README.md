@@ -11,6 +11,10 @@
 
 Create stunning, professional email signatures in minutes with our easy-to-use signature generator. Perfect for freelancers who want to make a great impression with every email.
 
+## 🌟 **🚀 [**Try Live Demo Now**](https://freelancersignature-prod.web.app)**
+
+No installation required - just sign in and start creating professional signatures instantly!
+
 [🚀 Live Demo](https://freelancersignature-prod.web.app) • [📖 Documentation](#documentation) • [🤝 Contributing](#contributing)
 
 </div>
