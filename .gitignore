@@ -38,3 +38,7 @@ firestore-debug.log
 *.swp
 *.swo
 *~
+
+# Third-party dependency security issues
+**/.coveralls.yml
+**/node_modules/**/.coveralls.yml
