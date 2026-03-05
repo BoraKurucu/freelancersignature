@@ -4,7 +4,7 @@
  */
 
 const admin = require('firebase-admin');
-const serviceAccount = require('../gamerlinks/gamerlinks-844c5-firebase-adminsdk-fbsvc-7e0459b856.json');
+const serviceAccount = require('../path-to-service-account-key.json');
 
 // Initialize with freelancersignature project ID
 // But use gamerlinks service account credentials
