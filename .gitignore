@@ -13,6 +13,7 @@
 
 # misc
 .DS_Store
+.env
 .env.local
 .env.development.local
 .env.test.local
@@ -26,6 +27,10 @@ yarn-error.log*
 .firebase/
 firebase-debug.log
 firestore-debug.log
+
+# Service accounts and private keys
+*service-account*.json
+*private-key*
 
 # IDE
 .vscode/

@@ -3,13 +3,13 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDZlMWTaWroS_ra1mT3gtcecq2S_yyfQ4c",
-  authDomain: "freelancersignature.firebaseapp.com",
-  projectId: "freelancersignature",
-  storageBucket: "freelancersignature.firebasestorage.app",
-  messagingSenderId: "164526525644",
-  appId: "1:164526525644:web:7fc7fb4facabeaa5044669",
-  measurementId: "G-FQ6T81D5HT"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "AIzaSyDZlMWTaWroS_ra1mT3gtcecq2S_yyfQ4c",
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "freelancersignature.firebaseapp.com",
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "freelancersignature",
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "freelancersignature.firebasestorage.app",
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "164526525644",
+  appId: process.env.REACT_APP_FIREBASE_APP_ID || "1:164526525644:web:7fc7fb4facabeaa5044669",
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID || "G-FQ6T81D5HT"
 };
 
 // Initialize Firebase
