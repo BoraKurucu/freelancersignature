@@ -11,7 +11,7 @@
 
 Create stunning, professional email signatures in minutes with our easy-to-use signature generator. Perfect for freelancers who want to make a great impression with every email.
 
-[🚀 Live Demo](https://freelancersignature.web.app) • [📖 Documentation](#documentation) • [🤝 Contributing](#contributing)
+[🚀 Live Demo](https://freelancersignature-app.web.app) • [📖 Documentation](#documentation) • [🤝 Contributing](#contributing)
 
 </div>
 
@@ -63,7 +63,7 @@ Freelancer Signature helps you create professional email signatures that:
 
 ### 🌐 Try It Now
 
-**Easiest option:** Use our live demo at [freelancersignature.web.app](https://freelancersignature.web.app)
+**Easiest option:** Use our live demo at [freelancersignature-app.web.app](https://freelancersignature-app.web.app)
 
 No installation required - just sign in and start creating!
 
@@ -192,7 +192,7 @@ const colors = {
 
 The easiest way to use Freelancer Signature is through our live demo:
 
-**[freelancersignature.web.app](https://freelancersignature.web.app)**
+**[freelancersignature-app.web.app](https://freelancersignature-app.web.app)**
 
 No setup required - just sign in with Google and start creating!
 
