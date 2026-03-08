@@ -15,10 +15,10 @@ const RATE_LIMIT_MAX_REQUESTS = 10; // 10 requests per minute
  * Get client IP address from request
  */
 function getClientIP(req) {
-  return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
-         req.headers['x-real-ip'] || 
-         req.connection?.remoteAddress || 
-         'unknown';
+  return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+    req.headers['x-real-ip'] ||
+    req.connection?.remoteAddress ||
+    'unknown';
 }
 
 /**
@@ -27,21 +27,21 @@ function getClientIP(req) {
 function checkRateLimit(ip) {
   const now = Date.now();
   const record = rateLimitMap.get(ip);
-  
+
   if (!record) {
     rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
     return true;
   }
-  
+
   if (now > record.resetTime) {
     rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
     return true;
   }
-  
+
   if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
     return false;
   }
-  
+
   record.count++;
   return true;
 }
@@ -80,28 +80,28 @@ function sanitizeString(input) {
  */
 async function isUserPremium(userId) {
   if (!userId) return false;
-  
+
   try {
     const userDoc = await db.collection('users').doc(userId).get();
     if (!userDoc.exists) return false;
-    
+
     const userData = userDoc.data();
-    
+
     // Check if subscription has not expired
     if (userData.subscriptionExpiry) {
-      const expiryDate = userData.subscriptionExpiry.toDate 
-        ? userData.subscriptionExpiry.toDate() 
+      const expiryDate = userData.subscriptionExpiry.toDate
+        ? userData.subscriptionExpiry.toDate()
         : new Date(userData.subscriptionExpiry);
       const now = new Date();
       if (expiryDate > now) {
         return true;
       }
     }
-    
+
     // Legacy fallback
-    const isPremium = userData.subscriptionStatus === 'premium' && 
-                      userData.planType === 'premium';
-    
+    const isPremium = userData.subscriptionStatus === 'premium' &&
+      userData.planType === 'premium';
+
     return isPremium;
   } catch (error) {
     console.error('Error checking premium status:', error);
@@ -117,7 +117,7 @@ async function verifyAuth(req) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return null;
   }
-  
+
   const idToken = authHeader.split('Bearer ')[1];
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
@@ -145,41 +145,41 @@ exports.validateSignatureCreate = functions.firestore.document('signatures/{sign
   .onCreate(async (snap, context) => {
     const signatureData = snap.data();
     const userId = signatureData.userId;
-    
+
     if (!userId) {
       console.error('Signature created without userId - deleting');
       await snap.ref.delete();
       return;
     }
-    
+
     try {
       // Get user's subscription status
       const userDoc = await db.collection('users').doc(userId).get();
-      
+
       if (!userDoc.exists) {
         console.error('User not found for signature - deleting signature');
         await snap.ref.delete();
         return;
       }
-      
+
       const userData = userDoc.data();
       const isPremium = userData.subscriptionStatus === 'premium' && userData.planType === 'premium';
       const maxSignatures = isPremium ? 10 : 2;
-      
+
       // Count existing signatures for this user
       const signaturesSnapshot = await db.collection('signatures')
         .where('userId', '==', userId)
         .get();
-      
+
       const signatureCount = signaturesSnapshot.size;
-      
+
       // If over limit, delete the newly created signature
       if (signatureCount > maxSignatures) {
         console.warn(`User ${userId} exceeded signature limit (${signatureCount}/${maxSignatures}) - deleting excess signature`);
         await snap.ref.delete();
         return;
       }
-      
+
       console.log(`Signature created for user ${userId} (${signatureCount}/${maxSignatures})`);
     } catch (error) {
       console.error('Error validating signature creation:', error);
@@ -248,7 +248,7 @@ exports.getSignatureHTML = functions.https.onRequest(async (req, res) => {
     }
 
     const signatureData = signatureDoc.data();
-    
+
     // Verify signature belongs to user
     if (signatureData.userId !== decodedToken.uid) {
       return res.status(403).json({ error: 'Forbidden' });
@@ -373,7 +373,7 @@ exports.getSignatureHTMLForDownload = functions.https.onRequest(async (req, res)
     }
 
     const signatureData = signatureDoc.data();
-    
+
     // Verify signature belongs to user
     if (signatureData.userId !== decodedToken.uid) {
       return res.status(403).json({ error: 'Forbidden' });
@@ -432,9 +432,18 @@ exports.updatePremium = functions.https.onRequest(async (req, res) => {
     return res.status(405).send('Method Not Allowed');
   }
 
+  // SECURITY: Require an admin key for this operation
+  const adminKey = req.headers['x-admin-key'];
+  const EXPECTED_ADMIN_KEY = functions.config().admin ? functions.config().admin.key : null;
+
+  if (!EXPECTED_ADMIN_KEY || adminKey !== EXPECTED_ADMIN_KEY) {
+    console.warn('Unauthorized access attempt to updatePremium');
+    return res.status(401).send('Unauthorized');
+  }
+
   try {
     const { userId, email } = req.body;
-    
+
     if (!userId && !email) {
       return res.status(400).send('Missing userId or email');
     }
@@ -458,14 +467,14 @@ exports.updatePremium = functions.https.onRequest(async (req, res) => {
       userData = snapshot.docs[0].data();
     }
 
-    let currentExpiry = userData.subscriptionExpiry 
+    let currentExpiry = userData.subscriptionExpiry
       ? (userData.subscriptionExpiry.toDate ? userData.subscriptionExpiry.toDate() : new Date(userData.subscriptionExpiry))
       : new Date();
-      
+
     const now = new Date();
     // If current premium is expired, start from now
     const baseDate = (currentExpiry && currentExpiry > now) ? currentExpiry : now;
-    
+
     const expiryDate = new Date(baseDate);
     expiryDate.setDate(expiryDate.getDate() + 30);
 
